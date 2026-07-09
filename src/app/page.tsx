@@ -10,6 +10,7 @@ import { JsonLd, organizationJsonLd } from "@/components/seo/JsonLd";
 import { fetchCryptoMarkets } from "@/lib/api/coingecko";
 import { getFeaturedArticles, getLatestArticles } from "@/lib/data/articles";
 import { getEducationTeasers } from "@/lib/data/education";
+import { getLatestForecasts } from "@/lib/data/forecasts";
 import { BookOpen } from "lucide-react";
 
 const EconomicCalendarWidget = dynamic(
@@ -36,6 +37,7 @@ export default async function HomePage() {
   const featured = getFeaturedArticles();
   const latest = getLatestArticles(8);
   const education = getEducationTeasers(4);
+  const todayForecasts = getLatestForecasts(5);
 
   return (
     <>
@@ -105,6 +107,26 @@ export default async function HomePage() {
           <GlassCard>
             <MarketDataTable cryptoData={cryptoData} />
           </GlassCard>
+        </section>
+
+        <section className="mt-14" aria-labelledby="forecasts-heading">
+          <SectionHeader
+            id="forecasts-heading"
+            title="Today's Market Forecasts"
+            subtitle="Scenario analysis on the instruments moving global markets — July 9, 2026"
+            eyebrow="Outlook"
+            href="/forecasts"
+            linkLabel="All forecasts"
+          />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {todayForecasts.map((forecast) => (
+              <FeaturedArticleCard
+                key={forecast.slug}
+                article={forecast}
+                href={`/news/${forecast.slug}`}
+              />
+            ))}
+          </div>
         </section>
 
         <section className="mt-14" aria-labelledby="education-heading">
