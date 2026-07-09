@@ -32,7 +32,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_URL` | No | Canonical site URL (default: https://trading100.com) |
 | `FINNHUB_API_KEY` | No | Wire headlines + S&P proxy quotes for auto-forecasts |
 | `CRON_SECRET` | Prod | Bearer token for `POST /api/cron/daily-forecasts` |
-| `MARKETAUX_API_KEY` | No | Optional news supplement |
+| `MARKETAUX_API_KEY` | Yes* | Primary source for auto-posted market news |
 | `FRED_API_KEY` | No | Optional economic indicator data |
 
 ## Deploy to Cloudflare Workers
@@ -44,6 +44,7 @@ npm run deploy
 Set secrets on the Worker (not plain vars):
 
 ```bash
+npx wrangler secret put MARKETAUX_API_KEY
 npx wrangler secret put FINNHUB_API_KEY
 npx wrangler secret put CRON_SECRET
 ```

@@ -1,7 +1,7 @@
 import type { Article } from "@/lib/data/articles";
 import { fetchCryptoMarkets } from "@/lib/api/coingecko";
 import { fetchLatestRates } from "@/lib/api/frankfurter";
-import { fetchFinnhubNews, fetchFinnhubQuote } from "@/lib/api/finnhub";
+import { fetchFinnhubQuote } from "@/lib/api/finnhub";
 
 const IMAGES = {
   crypto:
@@ -53,7 +53,8 @@ export async function generateDailyForecasts(): Promise<Article[]> {
   let topHeadline: string | undefined;
 
   try {
-    const news = await fetchFinnhubNews("general");
+    const { getWireHeadlines } = await import("@/lib/api/wire-news");
+    const news = await getWireHeadlines(1);
     topHeadline = news[0]?.headline;
   } catch {
     /* optional */

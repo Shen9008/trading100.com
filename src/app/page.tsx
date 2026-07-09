@@ -8,7 +8,10 @@ import { SectionHeader } from "@/components/layout/SectionHeader";
 import { GlassCard } from "@/components/layout/GlassCard";
 import { JsonLd, organizationJsonLd } from "@/components/seo/JsonLd";
 import { fetchCryptoMarkets } from "@/lib/api/coingecko";
-import { getFeaturedArticles, getLatestArticles } from "@/lib/data/articles";
+import {
+  getFeaturedArticles,
+  getMergedLatestArticles,
+} from "@/lib/data/articles";
 import { getEducationTeasers } from "@/lib/data/education";
 import { getLatestForecasts } from "@/lib/data/forecasts";
 import { getWireHeadlines } from "@/lib/api/wire-news";
@@ -37,12 +40,12 @@ export default async function HomePage() {
   }
 
   const featured = getFeaturedArticles();
-  const latest = getLatestArticles(8);
-  const education = getEducationTeasers(4);
-  const [todayForecasts, wireHeadlines] = await Promise.all([
+  const [latest, todayForecasts, wireHeadlines] = await Promise.all([
+    getMergedLatestArticles(8),
     getLatestForecasts(5),
     getWireHeadlines(8),
   ]);
+  const education = getEducationTeasers(4);
 
   return (
     <>

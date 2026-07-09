@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchFinnhubNews } from "@/lib/api/finnhub";
+import { getAutoPostedNews, getWireHeadlines } from "@/lib/api/wire-news";
 
 export async function GET(request: NextRequest) {
-  const category = (request.nextUrl.searchParams.get("category") ??
-    "general") as "general" | "forex" | "crypto" | "merger";
+  const format = request.nextUrl.searchParams.get("format");
 
   try {
-    const data = await fetchFinnhubNews(category);
+    if (format === "wire") {
+      const data = await getWireHeadlines(20);
+      return NextResponse.json(data, {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        },
+      });
+    }
+
+    const data = await getAutoPostedNews(20);
     return NextResponse.json(data, {
       headers: {
         "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",

@@ -1,6 +1,7 @@
 interface CloudflareEnv {
   FORECASTS_KV: KVNamespace;
   FINNHUB_API_KEY?: string;
+  MARKETAUX_API_KEY?: string;
   CRON_SECRET?: string;
   NEXT_PUBLIC_SITE_URL?: string;
 }

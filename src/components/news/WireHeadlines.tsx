@@ -1,11 +1,11 @@
 import Link from "next/link";
-import type { FinnhubNewsItem } from "@/lib/api/finnhub";
+import type { WireHeadline } from "@/lib/api/wire-types";
 import { GlassCard } from "@/components/layout/GlassCard";
 import { formatRelativeTime } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
 
 type WireHeadlinesProps = {
-  items: FinnhubNewsItem[];
+  items: WireHeadline[];
   limit?: number;
   compact?: boolean;
 };
@@ -23,7 +23,7 @@ export function WireHeadlines({
         <p className="text-sm text-muted-foreground">
           Market wire headlines appear here once{" "}
           <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-brand">
-            FINNHUB_API_KEY
+            MARKETAUX_API_KEY
           </code>{" "}
           is configured on Cloudflare.
         </p>

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { buildMetadata } from "@/lib/metadata";
+import { getAutoPostedNews, getWireHeadlines } from "@/lib/api/wire-news";
 import { getLatestArticles } from "@/lib/data/articles";
-import { getWireHeadlines } from "@/lib/api/wire-news";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { JsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd";
 import { PageShell } from "@/components/layout/PageShell";
@@ -26,8 +26,11 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
   const perPage = 10;
 
-  const originalArticles = getLatestArticles(50);
-  const externalNews = await getWireHeadlines(15);
+  const [autoNews, editorialArticles, wireHeadlines] = await Promise.all([
+    getAutoPostedNews(20),
+    Promise.resolve(getLatestArticles(50)),
+    getWireHeadlines(15),
+  ]);
 
   return (
     <>
@@ -40,24 +43,25 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
 
       <PageShell
         title="Financial News"
-        description="Original analysis from Trading 100 plus headlines from trusted sources."
+        description="Auto-syndicated market news plus original analysis from Trading 100."
         eyebrow="Newsroom"
       >
-        <section aria-labelledby="original-news">
+        <section aria-labelledby="auto-news">
           <SectionHeader
-            id="original-news"
-            title="Trading 100 Analysis"
-            eyebrow="Original"
+            id="auto-news"
+            title="Latest Market News"
+            subtitle="Auto-syndicated headlines refreshed every few minutes from Marketaux"
+            eyebrow="Live Wire"
           />
           <GlassCard padding={false} className="overflow-hidden px-4 sm:px-6">
-            {originalArticles
+            {autoNews
               .slice((page - 1) * perPage, page * perPage)
               .map((article) => (
                 <ArticleCard key={article.slug} article={article} />
               ))}
           </GlassCard>
 
-          {originalArticles.length > page * perPage && (
+          {autoNews.length > page * perPage && (
             <div className="mt-4 text-center">
               <Link
                 href={`/news?page=${page + 1}`}
@@ -69,16 +73,29 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
           )}
         </section>
 
-        {externalNews.length > 0 && (
+        <section className="mt-10" aria-labelledby="original-news">
+          <SectionHeader
+            id="original-news"
+            title="Trading 100 Analysis"
+            eyebrow="Original"
+          />
+          <GlassCard padding={false} className="overflow-hidden px-4 sm:px-6">
+            {editorialArticles.slice(0, perPage).map((article) => (
+              <ArticleCard key={article.slug} article={article} />
+            ))}
+          </GlassCard>
+        </section>
+
+        {wireHeadlines.length > 0 && (
           <section className="mt-10" aria-labelledby="external-headlines">
             <SectionHeader
               id="external-headlines"
-              title="Market Headlines"
-              subtitle="Headlines from third-party providers — click through to read at the original publisher."
+              title="More Headlines"
+              subtitle="Additional wire stories — click through to read at the original publisher."
               eyebrow="Wire"
             />
             <div className="space-y-3">
-              {externalNews.slice(0, 15).map((item) => (
+              {wireHeadlines.slice(0, 15).map((item) => (
                 <article
                   key={item.id}
                   className="glass-panel-hover cursor-pointer p-4"
@@ -109,9 +126,9 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
           </section>
         )}
 
-        {!process.env.FINNHUB_API_KEY && externalNews.length === 0 && (
+        {!process.env.MARKETAUX_API_KEY && autoNews.length === 0 && (
           <p className="mt-6 rounded-xl border border-dashed border-white/10 p-4 text-sm text-muted-foreground">
-            Add <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-brand">FINNHUB_API_KEY</code> to enable external market headlines.
+            Add <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-brand">MARKETAUX_API_KEY</code> to enable auto-posted market news.
           </p>
         )}
       </PageShell>

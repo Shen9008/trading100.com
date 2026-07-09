@@ -2,17 +2,24 @@ import type { Article } from "@/lib/data/articles";
 
 const KV_KEY_LATEST = "forecasts:latest";
 const KV_KEY_WIRE = "news:wire-cache";
+const KV_KEY_AUTO_NEWS = "news:auto-posts";
 
 export type WireCache = {
   fetchedAt: string;
   items: {
-    id: number;
+    id: string;
     headline: string;
     summary: string;
     source: string;
     url: string;
     datetime: number;
+    image?: string;
   }[];
+};
+
+export type AutoNewsCache = {
+  fetchedAt: string;
+  articles: Article[];
 };
 
 type KVBinding = KVNamespace | undefined;
@@ -73,6 +80,28 @@ export async function loadWireCache(): Promise<WireCache | null> {
     const raw = await kv.get(KV_KEY_WIRE);
     if (!raw) return null;
     return JSON.parse(raw) as WireCache;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveAutoNews(cache: AutoNewsCache): Promise<void> {
+  const kv = await getKV();
+  if (!kv) return;
+
+  await kv.put(KV_KEY_AUTO_NEWS, JSON.stringify(cache), {
+    expirationTtl: 3600, // 1 hour
+  });
+}
+
+export async function loadAutoNews(): Promise<AutoNewsCache | null> {
+  const kv = await getKV();
+  if (!kv) return null;
+
+  try {
+    const raw = await kv.get(KV_KEY_AUTO_NEWS);
+    if (!raw) return null;
+    return JSON.parse(raw) as AutoNewsCache;
   } catch {
     return null;
   }

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/metadata";
 import {
-  getArticleBySlug,
   ORIGINAL_ARTICLES,
+  resolveArticleBySlug,
   type Article,
 } from "@/lib/data/articles";
 import { FORECAST_ARTICLES, getForecastBySlug } from "@/lib/data/forecasts";
@@ -19,7 +19,7 @@ type ArticlePageProps = {
 };
 
 async function getContentBySlug(slug: string): Promise<Article | undefined> {
-  return getArticleBySlug(slug) ?? (await getForecastBySlug(slug));
+  return (await resolveArticleBySlug(slug)) ?? (await getForecastBySlug(slug));
 }
 
 export async function generateStaticParams() {
@@ -105,6 +105,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </h1>
           <p className="mt-3 text-muted-foreground">
             By {article.author} · {formatRelativeTime(article.publishedAt)}
+            {!article.isOriginal && article.sourceName && (
+              <> · Syndicated from {article.sourceName}</>
+            )}
           </p>
         </header>
 
@@ -122,6 +125,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className="prose prose-slate mt-8 max-w-none">
           {renderMarkdown(article.content)}
         </div>
+
+        {!article.isOriginal && article.sourceUrl && (
+          <p className="mt-6">
+            <a
+              href={article.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-brand hover:underline"
+            >
+              Read full article at {article.sourceName ?? "source"} →
+            </a>
+          </p>
+        )}
 
         <DisclaimerBanner compact />
       </article>

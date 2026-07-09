@@ -128,12 +128,36 @@ export function getArticleBySlug(slug: string): Article | undefined {
   return ORIGINAL_ARTICLES.find((a) => a.slug === slug);
 }
 
+export async function resolveArticleBySlug(
+  slug: string
+): Promise<Article | undefined> {
+  const { getAutoNewsBySlug } = await import("@/lib/api/wire-news");
+  return (await getAutoNewsBySlug(slug)) ?? getArticleBySlug(slug);
+}
+
 export function getArticlesByCategory(category: ArticleCategory): Article[] {
   return ORIGINAL_ARTICLES.filter((a) => a.category === category);
 }
 
 export function getLatestArticles(limit = 10): Article[] {
   return [...ORIGINAL_ARTICLES]
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    )
+    .slice(0, limit);
+}
+
+export async function getMergedLatestArticles(
+  limit = 10
+): Promise<Article[]> {
+  const { getAutoPostedNews } = await import("@/lib/api/wire-news");
+  const [auto, editorial] = await Promise.all([
+    getAutoPostedNews(limit),
+    Promise.resolve(getLatestArticles(limit)),
+  ]);
+
+  return [...auto, ...editorial]
     .sort(
       (a, b) =>
         new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
