@@ -1,0 +1,7 @@
+name = "trading100-website"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat_v2"]
+pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+NEXT_PUBLIC_SITE_URL = "https://trading100.com"
