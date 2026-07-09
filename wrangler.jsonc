@@ -10,5 +10,11 @@
   },
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://trading100.com"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "FORECASTS_KV",
+      "id": "252fa18bf7df4f7189a7c44524328311"
+    }
+  ]
 }

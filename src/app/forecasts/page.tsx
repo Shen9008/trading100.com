@@ -27,9 +27,9 @@ type ForecastsPageProps = {
   searchParams: { filter?: string };
 };
 
-export default function ForecastsPage({ searchParams }: ForecastsPageProps) {
+export default async function ForecastsPage({ searchParams }: ForecastsPageProps) {
   const filter = (searchParams.filter ?? "all") as ForecastAssetFilter;
-  const forecasts = getForecasts(filter);
+  const forecasts = await getForecasts(filter);
 
   return (
     <>

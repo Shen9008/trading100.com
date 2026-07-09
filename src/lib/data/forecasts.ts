@@ -335,19 +335,57 @@ const FORECAST_TAGS: Record<string, ForecastAssetFilter[]> = {
   "sp500-index-forecast-h2-2026": ["indices", "stocks"],
 };
 
-export function getForecasts(filter: ForecastAssetFilter = "all"): Article[] {
-  const sorted = [...FORECAST_ARTICLES].sort(
+function inferAutoForecastTags(slug: string): ForecastAssetFilter[] {
+  if (slug.includes("bitcoin") || slug.includes("ethereum")) return ["crypto"];
+  if (slug.includes("eur-usd") || slug.includes("usd-jpy")) return ["forex"];
+  if (slug.includes("sp500")) return ["indices", "stocks"];
+  return [];
+}
+
+function getForecastTags(article: Article): ForecastAssetFilter[] {
+  return (
+    FORECAST_TAGS[article.slug] ??
+    (article.slug.includes("-auto-") ? inferAutoForecastTags(article.slug) : [])
+  );
+}
+
+async function mergeForecasts(): Promise<Article[]> {
+  const { loadDailyForecasts } = await import("@/lib/kv/forecasts-store");
+  const dynamic = await loadDailyForecasts();
+  const dynamicSlugs = new Set(dynamic.map((f) => f.slug));
+
+  const merged = [
+    ...dynamic,
+    ...FORECAST_ARTICLES.filter((f) => !dynamicSlugs.has(f.slug)),
+  ];
+
+  return merged.sort(
     (a, b) =>
       new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
+}
+
+export async function getForecasts(
+  filter: ForecastAssetFilter = "all"
+): Promise<Article[]> {
+  const sorted = await mergeForecasts();
   if (filter === "all") return sorted;
-  return sorted.filter((f) => FORECAST_TAGS[f.slug]?.includes(filter));
+  return sorted.filter((f) => getForecastTags(f).includes(filter));
 }
 
-export function getForecastBySlug(slug: string): Article | undefined {
-  return FORECAST_ARTICLES.find((f) => f.slug === slug);
+export async function getForecastBySlug(
+  slug: string
+): Promise<Article | undefined> {
+  const dynamic = await (
+    await import("@/lib/kv/forecasts-store")
+  ).loadDailyForecasts();
+  return (
+    dynamic.find((f) => f.slug === slug) ??
+    FORECAST_ARTICLES.find((f) => f.slug === slug)
+  );
 }
 
-export function getLatestForecasts(limit = 5): Article[] {
-  return getForecasts("all").slice(0, limit);
+export async function getLatestForecasts(limit = 5): Promise<Article[]> {
+  const all = await getForecasts("all");
+  return all.slice(0, limit);
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { buildMetadata } from "@/lib/metadata";
 import { getLatestArticles } from "@/lib/data/articles";
-import { fetchFinnhubNews } from "@/lib/api/finnhub";
+import { getWireHeadlines } from "@/lib/api/wire-news";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { JsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd";
 import { PageShell } from "@/components/layout/PageShell";
@@ -27,7 +27,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const perPage = 10;
 
   const originalArticles = getLatestArticles(50);
-  const externalNews = await fetchFinnhubNews("general");
+  const externalNews = await getWireHeadlines(15);
 
   return (
     <>

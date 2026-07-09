@@ -35,7 +35,9 @@ export async function convertCurrency(
     throw new Error(`Frankfurter conversion error: ${res.status}`);
   }
 
-  const data = await res.json();
+  const data = (await res.json()) as FrankfurterRates & {
+    rates: Record<string, number>;
+  };
   return {
     result: data.rates[to],
     rate: data.rates[to] / amount,

@@ -11,6 +11,8 @@ import { fetchCryptoMarkets } from "@/lib/api/coingecko";
 import { getFeaturedArticles, getLatestArticles } from "@/lib/data/articles";
 import { getEducationTeasers } from "@/lib/data/education";
 import { getLatestForecasts } from "@/lib/data/forecasts";
+import { getWireHeadlines } from "@/lib/api/wire-news";
+import { WireHeadlines } from "@/components/news/WireHeadlines";
 import { BookOpen } from "lucide-react";
 
 const EconomicCalendarWidget = dynamic(
@@ -37,7 +39,10 @@ export default async function HomePage() {
   const featured = getFeaturedArticles();
   const latest = getLatestArticles(8);
   const education = getEducationTeasers(4);
-  const todayForecasts = getLatestForecasts(5);
+  const [todayForecasts, wireHeadlines] = await Promise.all([
+    getLatestForecasts(5),
+    getWireHeadlines(8),
+  ]);
 
   return (
     <>
@@ -62,6 +67,18 @@ export default async function HomePage() {
               <FeaturedArticleCard key={article.slug} article={article} />
             ))}
           </div>
+        </section>
+
+        <section className="mt-14" aria-labelledby="wire-heading">
+          <SectionHeader
+            id="wire-heading"
+            title="Market Wire"
+            subtitle="Live headlines from trusted financial news sources"
+            eyebrow="Wire"
+            href="/news"
+            linkLabel="Full newsroom"
+          />
+          <WireHeadlines items={wireHeadlines} limit={8} compact />
         </section>
 
         <div className="mt-14 grid gap-8 lg:grid-cols-3">
@@ -113,7 +130,7 @@ export default async function HomePage() {
           <SectionHeader
             id="forecasts-heading"
             title="Today's Market Forecasts"
-            subtitle="Scenario analysis on the instruments moving global markets — July 9, 2026"
+            subtitle="Editorial outlooks plus auto-generated daily drafts from live market data"
             eyebrow="Outlook"
             href="/forecasts"
             linkLabel="All forecasts"

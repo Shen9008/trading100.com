@@ -18,8 +18,8 @@ type ArticlePageProps = {
   params: { slug: string };
 };
 
-function getContentBySlug(slug: string): Article | undefined {
-  return getArticleBySlug(slug) ?? getForecastBySlug(slug);
+async function getContentBySlug(slug: string): Promise<Article | undefined> {
+  return getArticleBySlug(slug) ?? (await getForecastBySlug(slug));
 }
 
 export async function generateStaticParams() {
@@ -31,7 +31,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
-  const article = getContentBySlug(params.slug);
+  const article = await getContentBySlug(params.slug);
   if (!article) return buildMetadata({ title: "Article Not Found", noIndex: true });
 
   return buildMetadata({
@@ -75,8 +75,8 @@ function renderMarkdown(content: string) {
   });
 }
 
-export default function ArticlePage({ params }: ArticlePageProps) {
-  const article = getContentBySlug(params.slug);
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const article = await getContentBySlug(params.slug);
   if (!article) notFound();
 
   return (

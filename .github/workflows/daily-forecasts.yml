@@ -1,0 +1,24 @@
+name: Daily Forecasts
+
+on:
+  schedule:
+    # 06:00 UTC daily (~2pm MYT)
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  generate-forecasts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger daily forecast generator
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://trading100.spartasoftofficial.workers.dev' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not set in repository secrets"
+            exit 1
+          fi
+          curl -sf -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/daily-forecasts"

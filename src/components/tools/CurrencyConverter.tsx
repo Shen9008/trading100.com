@@ -25,7 +25,11 @@ export function CurrencyConverter() {
         `/api/forex/convert?amount=${amount}&from=${from}&to=${to}`
       );
       if (!res.ok) throw new Error("Conversion failed");
-      const data = await res.json();
+      const data = (await res.json()) as {
+        result: number;
+        rate: number;
+        date: string;
+      };
       setResult(data.result);
       setRate(data.rate);
       setDate(data.date);

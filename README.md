@@ -10,13 +10,14 @@ Financial markets content website — live prices, news, forecasts, and trading 
 - Tailwind CSS + shadcn/ui components
 - TradingView embed widgets (ticker, charts, economic calendar)
 - CoinGecko, Frankfurter, Finnhub APIs
-- Deployed to Cloudflare Pages via `@cloudflare/next-on-pages`
+- Deployed to Cloudflare Workers via [OpenNext Cloudflare](https://opennext.js.org/cloudflare)
 
 ## Getting Started
 
 ```bash
 cp .env.example .env.local
-# Add FINNHUB_API_KEY for external news headlines (optional)
+# Add FINNHUB_API_KEY for wire headlines (optional)
+# Add CRON_SECRET for daily forecast cron (production)
 
 npm install
 npm run dev
@@ -29,20 +30,39 @@ Open [http://localhost:3000](http://localhost:3000).
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `NEXT_PUBLIC_SITE_URL` | No | Canonical site URL (default: https://trading100.com) |
-| `FINNHUB_API_KEY` | No | External market news headlines |
+| `FINNHUB_API_KEY` | No | Wire headlines + S&P proxy quotes for auto-forecasts |
+| `CRON_SECRET` | Prod | Bearer token for `POST /api/cron/daily-forecasts` |
 | `MARKETAUX_API_KEY` | No | Optional news supplement |
 | `FRED_API_KEY` | No | Optional economic indicator data |
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare Workers
 
 ```bash
-npm run pages:build
-npm run pages:deploy
+npm run deploy
 ```
 
-Set environment variables in the Cloudflare Pages dashboard under **Settings → Environment variables**.
+Set secrets on the Worker (not plain vars):
 
-> **Note:** `@cloudflare/next-on-pages` is deprecated in favor of [OpenNext Cloudflare](https://opennext.js.org/cloudflare). Consider migrating before production launch.
+```bash
+npx wrangler secret put FINNHUB_API_KEY
+npx wrangler secret put CRON_SECRET
+```
+
+### Daily auto-forecasts
+
+A GitHub Actions workflow (`.github/workflows/daily-forecasts.yml`) calls the cron API at 06:00 UTC. Add these in your GitHub repo:
+
+- **Secret:** `CRON_SECRET` — same value as the Worker secret
+- **Variable (optional):** `SITE_URL` — defaults to `https://trading100.spartasoftofficial.workers.dev`
+
+Generated drafts are stored in Cloudflare KV (`FORECASTS_KV`) and merged with hand-written forecasts on `/forecasts` and the homepage.
+
+Manual trigger:
+
+```bash
+curl -X POST -H "Authorization: Bearer YOUR_CRON_SECRET" \
+  https://trading100.spartasoftofficial.workers.dev/api/cron/daily-forecasts
+```
 
 ## Routes
 
