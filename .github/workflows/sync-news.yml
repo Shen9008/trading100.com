@@ -1,0 +1,63 @@
+name: Sync News
+
+on:
+  schedule:
+    # Every 30 minutes
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  sync-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch from NewsAPI and push to Trading 100
+        env:
+          NEWSAPI_API_KEY: ${{ secrets.NEWSAPI_API_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://trading100.spartasoftofficial.workers.dev' }}
+        run: |
+          set -euo pipefail
+          if [ -z "$NEWSAPI_API_KEY" ]; then
+            echo "NEWSAPI_API_KEY secret is required"
+            exit 1
+          fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET secret is required"
+            exit 1
+          fi
+
+          curl -sf -H "X-Api-Key: $NEWSAPI_API_KEY" \
+            "https://newsapi.org/v2/top-headlines?category=business&language=en&pageSize=25" \
+            > headlines.json
+
+          curl -sf -H "X-Api-Key: $NEWSAPI_API_KEY" \
+            "https://newsapi.org/v2/everything?q=stock+market+OR+forex+OR+bitcoin&language=en&sortBy=publishedAt&pageSize=25" \
+            > everything.json
+
+          python3 <<'PY'
+          import json
+
+          seen = set()
+          articles = []
+          for path in ("headlines.json", "everything.json"):
+              try:
+                  data = json.load(open(path))
+              except Exception:
+                  continue
+              for a in data.get("articles", []):
+                  url = a.get("url")
+                  if not url or url in seen or not a.get("title"):
+                      continue
+                  seen.add(url)
+                  articles.append(a)
+
+          payload = {"articles": articles[:40]}
+          json.dump(payload, open("payload.json", "w"))
+          print(f"Prepared {len(payload['articles'])} articles")
+          PY
+
+          curl -sf -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            --data-binary @payload.json \
+            "$SITE_URL/api/cron/sync-news"
