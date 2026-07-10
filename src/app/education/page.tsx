@@ -10,7 +10,7 @@ import { BookOpen } from "lucide-react";
 export const metadata: Metadata = buildMetadata({
   title: "Trading Education",
   description:
-    "Free trading guides and tutorials on forex, technical analysis, risk management, and more.",
+    "14+ free trading guides on moving averages, MACD, gold trading, forex position sizing, crypto, economic calendar, fibonacci, and trading psychology.",
   path: "/education",
 });
 

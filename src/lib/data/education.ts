@@ -1,16 +1,9 @@
 import { STOCK_IMAGES } from "@/lib/constants/images";
+import { EDUCATION_GUIDES_PART1 } from "./education-guides-part1";
+import { EDUCATION_GUIDES_PART2 } from "./education-guides-part2";
+import type { EducationGuide } from "./education-types";
 
-export type EducationGuide = {
-  slug: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  readTime: string;
-  level: "Beginner" | "Intermediate" | "Advanced";
-  publishedAt: string;
-  image: string;
-  faqs?: { question: string; answer: string }[];
-};
+export type { EducationGuide } from "./education-types";
 
 export const EDUCATION_GUIDES: EducationGuide[] = [
   {
@@ -159,14 +152,24 @@ Predefined rules reduce emotional decisions during volatility.
   },
 ];
 
+const EXTENDED_EDUCATION_GUIDES: EducationGuide[] = [
+  ...EDUCATION_GUIDES_PART1,
+  ...EDUCATION_GUIDES_PART2,
+];
+
+export const ALL_EDUCATION_GUIDES: EducationGuide[] = [
+  ...EDUCATION_GUIDES,
+  ...EXTENDED_EDUCATION_GUIDES,
+];
+
 export function getEducationGuides(): EducationGuide[] {
-  return EDUCATION_GUIDES;
+  return ALL_EDUCATION_GUIDES;
 }
 
 export function getEducationGuide(slug: string): EducationGuide | undefined {
-  return EDUCATION_GUIDES.find((g) => g.slug === slug);
+  return ALL_EDUCATION_GUIDES.find((g) => g.slug === slug);
 }
 
 export function getEducationTeasers(limit = 4): EducationGuide[] {
-  return EDUCATION_GUIDES.slice(0, limit);
+  return ALL_EDUCATION_GUIDES.slice(0, limit);
 }

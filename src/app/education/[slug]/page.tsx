@@ -8,7 +8,10 @@ import {
 } from "@/lib/data/education";
 import { DisclaimerBanner } from "@/components/layout/DisclaimerBanner";
 import { JsonLd, breadcrumbJsonLd, faqJsonLd } from "@/components/seo/JsonLd";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { EducationContent } from "@/components/education/EducationContent";
+import { isOptimizedImageHost } from "@/lib/constants/images";
 
 type EducationArticleProps = {
   params: { slug: string };
@@ -31,40 +34,6 @@ export async function generateMetadata({
   });
 }
 
-function renderContent(content: string) {
-  return content.split("\n\n").map((block, i) => {
-    if (block.startsWith("## ")) {
-      return (
-        <h2 key={i} className="mb-3 mt-6 text-xl font-bold">
-          {block.replace("## ", "")}
-        </h2>
-      );
-    }
-    if (block.match(/^\d+\./)) {
-      const items = block.split("\n");
-      return (
-        <ol key={i} className="mb-4 list-decimal space-y-1 pl-6">
-          {items.map((item, j) => (
-            <li key={j}>{item.replace(/^\d+\.\s*/, "")}</li>
-          ))}
-        </ol>
-      );
-    }
-    if (block.startsWith("*") && block.endsWith("*")) {
-      return (
-        <p key={i} className="mt-6 text-sm italic text-muted-foreground">
-          {block.replace(/^\*|\*$/g, "")}
-        </p>
-      );
-    }
-    return (
-      <p key={i} className="mb-3 leading-relaxed">
-        {block}
-      </p>
-    );
-  });
-}
-
 export default function EducationArticlePage({ params }: EducationArticleProps) {
   const guide = getEducationGuide(params.slug);
   if (!guide) notFound();
@@ -83,7 +52,7 @@ export default function EducationArticlePage({ params }: EducationArticleProps) 
       />
       {guide.faqs && <JsonLd data={faqJsonLd(guide.faqs)} />}
 
-      <article className="mx-auto max-w-3xl px-4 py-8 lg:px-6">
+      <article className="mx-auto max-w-4xl px-4 py-8 lg:px-6">
         <Link href="/education" className="text-sm text-brand hover:underline">
           ← All Guides
         </Link>
@@ -97,7 +66,28 @@ export default function EducationArticlePage({ params }: EducationArticleProps) 
           <p className="mt-2 text-muted-foreground">{guide.excerpt}</p>
         </header>
 
-        <div className="mt-8">{renderContent(guide.content)}</div>
+        <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-lg border border-border">
+          {isOptimizedImageHost(guide.image) ? (
+            <Image
+              src={guide.image}
+              alt={guide.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={guide.image}
+              alt={guide.title}
+              className="h-full w-full object-cover"
+            />
+          )}
+        </div>
+
+        <div className="mt-8">
+          <EducationContent content={guide.content} />
+        </div>
 
         {guide.faqs && guide.faqs.length > 0 && (
           <section className="mt-10" aria-labelledby="faq-heading">
