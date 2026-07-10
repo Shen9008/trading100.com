@@ -53,7 +53,7 @@ export default async function HomePage() {
 
       <HeroStrip />
 
-      <div className="mx-auto max-w-7xl px-4 py-10 lg:px-6 lg:py-14">
+      <div className="mx-auto max-w-7xl space-y-16 px-4 py-12 lg:px-6 lg:py-16">
         {/* Featured */}
         <section aria-labelledby="featured-heading" className="animate-fade-up">
           <SectionHeader
@@ -72,7 +72,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="mt-14" aria-labelledby="wire-heading">
+        <section className="mt-0" aria-labelledby="wire-heading">
           <SectionHeader
             id="wire-heading"
             title="Market Wire"
@@ -84,7 +84,7 @@ export default async function HomePage() {
           <WireHeadlines items={wireHeadlines} limit={8} compact />
         </section>
 
-        <div className="mt-14 grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3">
           <section className="lg:col-span-2" aria-labelledby="latest-heading">
             <SectionHeader
               id="latest-heading"
@@ -115,7 +115,7 @@ export default async function HomePage() {
           </section>
         </div>
 
-        <section className="mt-14" aria-labelledby="markets-heading">
+        <section aria-labelledby="markets-heading">
           <SectionHeader
             id="markets-heading"
             title="Across the Market"
@@ -129,7 +129,7 @@ export default async function HomePage() {
           </GlassCard>
         </section>
 
-        <section className="mt-14" aria-labelledby="forecasts-heading">
+        <section aria-labelledby="forecasts-heading">
           <SectionHeader
             id="forecasts-heading"
             title="Today's Market Forecasts"
@@ -149,7 +149,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="mt-14" aria-labelledby="education-heading">
+        <section aria-labelledby="education-heading">
           <SectionHeader
             id="education-heading"
             title="Guides & Education"
@@ -163,21 +163,19 @@ export default async function HomePage() {
               <Link
                 key={guide.slug}
                 href={`/education/${guide.slug}`}
-                className="glass-panel-hover group cursor-pointer p-5"
+                className="glass-panel-hover group cursor-pointer rounded-2xl p-6"
               >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-brand/20 bg-brand/10 transition-colors group-hover:border-brand/40 group-hover:bg-brand/20">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-brand/20 bg-gradient-to-br from-brand/15 to-transparent transition-all group-hover:border-brand/35">
                   <BookOpen className="h-4 w-4 text-brand" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-brand">
-                  {guide.level}
-                </span>
-                <h3 className="mt-2 font-display text-base font-semibold leading-snug transition-colors group-hover:text-brand">
+                <span className="eyebrow">{guide.level}</span>
+                <h3 className="mt-2 font-display text-base font-bold leading-snug transition-colors group-hover:text-brand">
                   {guide.title}
                 </h3>
-                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
                   {guide.excerpt}
                 </p>
-                <p className="mt-3 font-mono text-xs text-muted-foreground/70">
+                <p className="mt-4 font-mono text-[11px] text-muted-foreground/70">
                   {guide.readTime} read
                 </p>
               </Link>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
+import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { AppBackground } from "@/components/layout/AppBackground";
@@ -8,19 +8,19 @@ import { buildMetadata } from "@/lib/metadata";
 import { SITE_NAME } from "@/lib/constants";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const syne = Syne({
+const plusJakartaDisplay = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["600", "700", "800"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   weight: ["400", "500"],
@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${dmSans.variable} ${syne.variable} ${jetbrainsMono.variable} flex min-h-screen flex-col font-sans`}
+        className={`${plusJakarta.variable} ${plusJakartaDisplay.variable} ${ibmPlexMono.variable} flex min-h-screen flex-col font-sans`}
       >
         <AppBackground />
         <Header />

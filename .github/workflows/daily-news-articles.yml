@@ -1,0 +1,45 @@
+name: Daily News Articles
+
+# Subagent 2: 15 finance news articles sourced online every day
+on:
+  schedule:
+    # 07:00 UTC daily (~3pm MYT) — after instrument analysis
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  daily-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Source 15 daily news articles (RSS + API fallbacks)
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://trading100.spartasoftofficial.workers.dev' }}
+        run: |
+          set -euo pipefail
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET GitHub secret is required"
+            exit 1
+          fi
+
+          HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/daily-news")
+
+          echo "Daily news response ($HTTP_CODE):"
+          cat response.json
+          echo ""
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            exit 1
+          fi
+
+          python3 -c "
+          import json
+          d = json.load(open('response.json'))
+          synced = d.get('synced', 0)
+          target = d.get('target', 15)
+          print(f'Synced {synced}/{target} articles via {d.get(\"source\", \"unknown\")}')
+          if synced < 10:
+            print('Warning: fewer than 10 articles sourced')
+          "

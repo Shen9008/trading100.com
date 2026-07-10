@@ -1,3 +1,5 @@
+import { STOCK_IMAGES } from "@/lib/constants/images";
+
 export type EducationGuide = {
   slug: string;
   title: string;
@@ -19,7 +21,7 @@ export const EDUCATION_GUIDES: EducationGuide[] = [
     readTime: "12 min",
     level: "Beginner",
     publishedAt: "2026-06-01T00:00:00Z",
-    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
+    image: STOCK_IMAGES.forex,
     content: `Forex (foreign exchange) is the global marketplace for trading currencies. With over $7 trillion in daily turnover, it is the largest financial market in the world.
 
 ## What is a currency pair?
@@ -63,7 +65,7 @@ Leverage amplifies both gains and losses. Always define risk per trade (commonly
     readTime: "8 min",
     level: "Intermediate",
     publishedAt: "2026-06-15T00:00:00Z",
-    image: "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=800&q=80",
+    image: STOCK_IMAGES.education,
     content: `RSI (Relative Strength Index) is a momentum oscillator ranging from 0 to 100, developed by J. Welles Wilder.
 
 ## Default settings
@@ -101,7 +103,7 @@ When price makes a new high but RSI makes a lower high, **bearish divergence** m
     readTime: "10 min",
     level: "Beginner",
     publishedAt: "2026-06-20T00:00:00Z",
-    image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&q=80",
+    image: STOCK_IMAGES.stocks,
     content: `Japanese candlesticks visualize open, high, low, and close (OHLC) for each period.
 
 ## Single-candle patterns
@@ -127,7 +129,7 @@ Patterns work best at key levels (support/resistance, moving averages) with volu
     readTime: "15 min",
     level: "Beginner",
     publishedAt: "2026-07-01T00:00:00Z",
-    image: "https://images.unsplash.com/photo-1559526324-4b87b75e44e6?w=800&q=80",
+    image: STOCK_IMAGES.risk,
     content: `Risk management separates long-term participants from those who blow up accounts.
 
 ## The 1% rule

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL, ASSET_CLASSES, MARKET_SYMBOLS } from "@/lib/constants";
+import { SITE_URL, ASSET_CLASSES } from "@/lib/constants";
+import { MARKET_INSTRUMENTS } from "@/lib/data/market-instruments";
 import { ORIGINAL_ARTICLES } from "@/lib/data/articles";
 import { FORECAST_ARTICLES } from "@/lib/data/forecasts";
 import { getEducationGuides } from "@/lib/data/education";
@@ -26,12 +27,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const marketPages = ASSET_CLASSES.flatMap((ac) =>
-    MARKET_SYMBOLS[ac.id].map((item) => ({
-      url: `${SITE_URL}/markets/${ac.slug}/${item.symbol.toLowerCase().replace("/", "-")}`,
-      lastModified: new Date(),
-      changeFrequency: "hourly" as const,
-      priority: 0.7,
-    }))
+    MARKET_INSTRUMENTS[ac.id].map((item) => {
+      const slug =
+        item.slug ?? item.symbol.toLowerCase().replace("/", "-");
+      return {
+        url: `${SITE_URL}/markets/${ac.slug}/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: "hourly" as const,
+        priority: 0.7,
+      };
+    })
   );
 
   const articlePages = [...ORIGINAL_ARTICLES, ...FORECAST_ARTICLES].map((a) => ({

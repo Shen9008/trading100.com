@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { NewsApiArticle } from "@/lib/api/newsapi";
-import { fetchNewsApiFinance } from "@/lib/api/newsapi";
 import {
-  newsapiToArticle,
-  newsapiToWireHeadline,
-} from "@/lib/services/newsapi-news";
-import { saveAutoNews, saveWireCache } from "@/lib/kv/forecasts-store";
+  loadAutoNews,
+  loadWireCache,
+} from "@/lib/kv/forecasts-store";
+import {
+  syncNewsFromApis,
+  syncNewsFromPayload,
+} from "@/lib/services/news-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +25,32 @@ type SyncBody = {
   articles?: NewsApiArticle[];
 };
 
+export async function GET(request: NextRequest) {
+  if (request.nextUrl.searchParams.get("status") === "1") {
+    const autoNews = await loadAutoNews();
+    const wire = await loadWireCache();
+    const ageMs = autoNews?.fetchedAt
+      ? Date.now() - new Date(autoNews.fetchedAt).getTime()
+      : null;
+
+    return NextResponse.json({
+      ok: true,
+      autoPosts: autoNews?.articles?.length ?? 0,
+      wireItems: wire?.items?.length ?? 0,
+      fetchedAt: autoNews?.fetchedAt ?? null,
+      wireFetchedAt: wire?.fetchedAt ?? null,
+      ageMinutes: ageMs !== null ? Math.round(ageMs / 60000) : null,
+      sources: {
+        newsapi: Boolean(process.env.NEWSAPI_API_KEY),
+        marketaux: Boolean(process.env.MARKETAUX_API_KEY),
+        finnhub: Boolean(process.env.FINNHUB_API_KEY),
+      },
+    });
+  }
+
+  return POST(request);
+}
+
 export async function POST(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,49 +61,31 @@ export async function POST(request: NextRequest) {
 
     const contentType = request.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
-      const body = (await request.json()) as SyncBody & {
-        status?: string;
-        articles?: NewsApiArticle[];
-      };
+      const body = (await request.json()) as SyncBody;
       raw = body.articles ?? [];
     }
 
-    if (raw.length === 0) {
-      raw = await fetchNewsApiFinance(25);
-    }
+    const result =
+      raw.length > 0
+        ? await syncNewsFromPayload(raw)
+        : await syncNewsFromApis(25);
 
-    if (raw.length === 0) {
+    if (result.articles.length === 0) {
       return NextResponse.json(
         {
           error: "No articles fetched",
-          hint: "NewsAPI free plan blocks Cloudflare IPs — use GitHub Actions workflow to push articles.",
+          source: result.source,
+          hint: "NewsAPI blocks Cloudflare IPs. Set GitHub Actions secrets (NEWSAPI_API_KEY, CRON_SECRET) or configure MARKETAUX_API_KEY / FINNHUB_API_KEY on the Worker.",
         },
         { status: 502 }
       );
     }
 
-    const articles = raw.map(newsapiToArticle);
-    const wire = raw.map(newsapiToWireHeadline);
-    const fetchedAt = new Date().toISOString();
-
-    await saveAutoNews({ fetchedAt, articles });
-    await saveWireCache({
-      fetchedAt,
-      items: wire.map((item) => ({
-        id: item.id,
-        headline: item.headline,
-        summary: item.summary,
-        source: item.source,
-        url: item.url,
-        datetime: item.datetime,
-        image: item.image,
-      })),
-    });
-
     return NextResponse.json({
       ok: true,
-      synced: articles.length,
-      fetchedAt,
+      synced: result.articles.length,
+      source: result.source,
+      fetchedAt: result.fetchedAt,
     });
   } catch (error) {
     return NextResponse.json(
@@ -83,8 +93,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-export async function GET(request: NextRequest) {
-  return POST(request);
 }

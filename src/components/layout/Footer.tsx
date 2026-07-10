@@ -52,40 +52,41 @@ const FOOTER_COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-white/[0.06] bg-card/40 backdrop-blur-sm">
-      <div className="mx-auto max-w-7xl px-4 py-14 lg:px-6">
-        <div className="mb-10 flex flex-col gap-6 border-b border-white/[0.06] pb-10 sm:flex-row sm:items-center sm:justify-between">
+    <footer className="mt-auto border-t border-white/[0.05]">
+      <div className="border-b border-white/[0.05] bg-card/30">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-12 lg:flex-row lg:items-center lg:justify-between lg:px-6">
           <div>
-            <Link href="/" className="font-display text-xl font-bold">
-              <span className="text-brand">TRADING</span>
+            <Link href="/" className="font-display text-xl font-bold tracking-tight">
+              <span className="text-brand">Trading</span>
               <span className="text-foreground">100</span>
             </Link>
-            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-              Live markets. Smart analysis. Better decisions — built for traders who demand clarity.
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+              A premium market intelligence platform for price discovery, news,
+              forecasts, and trader education.
             </p>
           </div>
-          <div className="flex gap-3">
-            <span className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs text-muted-foreground">
-              App Store — Soon
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              iOS — Soon
             </span>
-            <span className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs text-muted-foreground">
-              Google Play — Soon
+            <span className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              Android — Soon
             </span>
           </div>
         </div>
+      </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.title}>
-              <h3 className="mb-4 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
-                {col.title}
-              </h3>
+              <h3 className="eyebrow mb-4">{col.title}</h3>
               <ul className="space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="cursor-pointer text-sm text-muted-foreground transition-colors duration-200 hover:text-brand"
+                      className="cursor-pointer text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
                     >
                       {link.label}
                     </Link>
@@ -96,9 +97,14 @@ export function Footer() {
           ))}
         </div>
 
-        <p className="mt-10 text-xs text-muted-foreground/60">
-          © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
-        </p>
+        <div className="mt-12 flex flex-col gap-2 border-t border-white/[0.05] pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-muted-foreground/70">
+            © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/50">
+            Data may be delayed · Educational use only
+          </p>
+        </div>
       </div>
       <DisclaimerBanner compact />
     </footer>

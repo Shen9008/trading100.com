@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArticleImage } from "@/components/articles/ArticleImage";
 import { buildMetadata } from "@/lib/metadata";
 import {
   ORIGINAL_ARTICLES,
@@ -112,8 +112,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </header>
 
         <div className="relative mt-6 aspect-video overflow-hidden rounded-lg">
-          <Image
+          <ArticleImage
             src={article.image}
+            category={article.category}
             alt=""
             fill
             className="object-cover"

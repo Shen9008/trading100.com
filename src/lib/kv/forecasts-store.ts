@@ -68,7 +68,7 @@ export async function saveWireCache(cache: WireCache): Promise<void> {
   if (!kv) return;
 
   await kv.put(KV_KEY_WIRE, JSON.stringify(cache), {
-    expirationTtl: 600, // 10 min
+    expirationTtl: 60 * 60 * 24, // 24 hours (refreshed by cron every 30 min)
   });
 }
 
@@ -90,7 +90,7 @@ export async function saveAutoNews(cache: AutoNewsCache): Promise<void> {
   if (!kv) return;
 
   await kv.put(KV_KEY_AUTO_NEWS, JSON.stringify(cache), {
-    expirationTtl: 3600, // 1 hour
+    expirationTtl: 60 * 60 * 24, // 24 hours (refreshed by cron every 30 min)
   });
 }
 

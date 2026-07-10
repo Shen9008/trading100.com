@@ -1,9 +1,7 @@
 import type { Article, ArticleCategory } from "@/lib/data/articles";
 import type { MarketauxArticle } from "@/lib/api/marketaux";
 import type { WireHeadline } from "@/lib/api/wire-types";
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80";
+import { resolveImageUrl } from "@/lib/constants/images";
 
 function inferCategory(article: MarketauxArticle): ArticleCategory {
   const types = new Set(article.entities.map((e) => e.type.toLowerCase()));
@@ -61,7 +59,7 @@ Read the full story at the original publisher: ${item.url}
     category: inferCategory(item),
     author: item.source,
     publishedAt: item.published_at,
-    image: item.image_url || FALLBACK_IMAGE,
+    image: resolveImageUrl(item.image_url, inferCategory(item)),
     isOriginal: false,
     sourceUrl: item.url,
     sourceName: item.source,

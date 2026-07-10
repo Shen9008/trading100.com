@@ -1,9 +1,7 @@
 import type { Article, ArticleCategory } from "@/lib/data/articles";
 import type { NewsApiArticle } from "@/lib/api/newsapi";
 import type { WireHeadline } from "@/lib/api/wire-types";
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80";
+import { resolveImageUrl } from "@/lib/constants/images";
 
 function slugFromUrl(url: string): string {
   let hash = 0;
@@ -45,7 +43,7 @@ ${body ? `${body}\n\n` : ""}Read the full story at the original publisher: ${ite
     category: inferCategory(item),
     author: item.author || sourceName,
     publishedAt: item.publishedAt,
-    image: item.urlToImage || FALLBACK_IMAGE,
+    image: resolveImageUrl(item.urlToImage, inferCategory(item)),
     isOriginal: false,
     sourceUrl: item.url,
     sourceName,
@@ -60,6 +58,8 @@ export function newsapiToWireHeadline(item: NewsApiArticle): WireHeadline {
     source: item.source.name,
     url: item.url,
     datetime: Math.floor(new Date(item.publishedAt).getTime() / 1000),
-    image: item.urlToImage ?? undefined,
+    image: item.urlToImage
+      ? resolveImageUrl(item.urlToImage, inferCategory(item))
+      : undefined,
   };
 }

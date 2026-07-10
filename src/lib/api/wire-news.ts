@@ -1,81 +1,37 @@
 import type { Article } from "@/lib/data/articles";
-import { fetchNewsApiFinance } from "@/lib/api/newsapi";
-import { fetchMarketauxNews } from "@/lib/api/marketaux";
 import type { WireHeadline } from "@/lib/api/wire-types";
-import {
-  newsapiToArticle,
-  newsapiToWireHeadline,
-} from "@/lib/services/newsapi-news";
-import {
-  marketauxToArticle,
-  marketauxToWireHeadline,
-} from "@/lib/services/marketaux-news";
-import {
-  loadAutoNews,
-  loadWireCache,
-  saveAutoNews,
-  saveWireCache,
-} from "@/lib/kv/forecasts-store";
+import { loadAutoNews, loadWireCache } from "@/lib/kv/forecasts-store";
+import { resolveImageUrl } from "@/lib/constants/images";
 import { fetchFinnhubNews } from "@/lib/api/finnhub";
+import { syncNewsFromApis } from "@/lib/services/news-sync";
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
+/** Background refresh when KV cache is older than this (GitHub Actions syncs every 30 min). */
+const REFRESH_AFTER_MS = 30 * 60 * 1000;
 
-function isCacheFresh(fetchedAt: string | undefined): boolean {
-  if (!fetchedAt) return false;
-  return Date.now() - new Date(fetchedAt).getTime() < CACHE_TTL_MS;
+function normalizeArticle(article: Article): Article {
+  return {
+    ...article,
+    image: resolveImageUrl(article.image, article.category),
+  };
 }
 
-async function syncAutoNews(limit = 25): Promise<{
-  articles: Article[];
-  wire: WireHeadline[];
-}> {
-  const newsApiRaw = await fetchNewsApiFinance(limit);
-  if (newsApiRaw.length > 0) {
-    const articles = newsApiRaw.map(newsapiToArticle);
-    const wire = newsApiRaw.map(newsapiToWireHeadline);
-    await persistNews(articles, wire);
-    return { articles, wire };
-  }
-
-  const marketauxRaw = await fetchMarketauxNews(limit);
-  if (marketauxRaw.length > 0) {
-    const articles = marketauxRaw.map(marketauxToArticle);
-    const wire = marketauxRaw.map(marketauxToWireHeadline);
-    await persistNews(articles, wire);
-    return { articles, wire };
-  }
-
-  return { articles: [], wire: [] };
-}
-
-async function persistNews(
-  articles: Article[],
-  wire: WireHeadline[]
-): Promise<void> {
-  const fetchedAt = new Date().toISOString();
-  await saveAutoNews({ fetchedAt, articles });
-  await saveWireCache({
-    fetchedAt,
-    items: wire.map((item) => ({
-      id: item.id,
-      headline: item.headline,
-      summary: item.summary,
-      source: item.source,
-      url: item.url,
-      datetime: item.datetime,
-      image: item.image,
-    })),
-  });
+function shouldBackgroundRefresh(fetchedAt: string | undefined): boolean {
+  if (!fetchedAt) return true;
+  return Date.now() - new Date(fetchedAt).getTime() > REFRESH_AFTER_MS;
 }
 
 export async function getAutoPostedNews(limit = 20): Promise<Article[]> {
   const cached = await loadAutoNews();
-  if (cached?.articles?.length && isCacheFresh(cached.fetchedAt)) {
-    return cached.articles.slice(0, limit);
+
+  if (cached?.articles?.length) {
+    if (shouldBackgroundRefresh(cached.fetchedAt)) {
+      syncNewsFromApis(25).catch(() => {});
+    }
+    return cached.articles.slice(0, limit).map(normalizeArticle);
   }
 
-  const fresh = await syncAutoNews(Math.max(limit, 25));
-  return fresh.articles.slice(0, limit);
+  const fresh = await syncNewsFromApis(Math.max(limit, 25));
+  return fresh.articles.slice(0, limit).map(normalizeArticle);
 }
 
 export async function getAutoNewsBySlug(
@@ -83,15 +39,31 @@ export async function getAutoNewsBySlug(
 ): Promise<Article | undefined> {
   const cached = await loadAutoNews();
   const fromCache = cached?.articles.find((a) => a.slug === slug);
-  if (fromCache) return fromCache;
+  if (fromCache) return normalizeArticle(fromCache);
 
-  const fresh = await syncAutoNews(30);
+  const fresh = await syncNewsFromApis(30);
   return fresh.articles.find((a) => a.slug === slug);
+}
+
+function articleToWire(article: Article): WireHeadline {
+  return {
+    id: article.slug,
+    headline: article.title,
+    summary: article.excerpt,
+    source: article.sourceName ?? article.author,
+    url: article.sourceUrl ?? "",
+    datetime: Math.floor(new Date(article.publishedAt).getTime() / 1000),
+    image: article.image,
+  };
 }
 
 export async function getWireHeadlines(limit = 15): Promise<WireHeadline[]> {
   const cached = await loadWireCache();
-  if (cached?.items?.length && isCacheFresh(cached.fetchedAt)) {
+
+  if (cached?.items?.length) {
+    if (shouldBackgroundRefresh(cached.fetchedAt)) {
+      syncNewsFromApis(25).catch(() => {});
+    }
     return cached.items.slice(0, limit).map((item) => ({
       id: String(item.id),
       headline: item.headline,
@@ -103,7 +75,15 @@ export async function getWireHeadlines(limit = 15): Promise<WireHeadline[]> {
     }));
   }
 
-  const { wire } = await syncAutoNews(Math.max(limit, 25));
+  const autoNews = await loadAutoNews();
+  if (autoNews?.articles?.length) {
+    if (shouldBackgroundRefresh(autoNews.fetchedAt)) {
+      syncNewsFromApis(25).catch(() => {});
+    }
+    return autoNews.articles.slice(0, limit).map(articleToWire);
+  }
+
+  const { wire } = await syncNewsFromApis(Math.max(limit, 25));
   if (wire.length > 0) return wire.slice(0, limit);
 
   const finnhub = await fetchFinnhubNews("general");

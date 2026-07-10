@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDailyForecasts } from "@/lib/services/daily-forecast-generator";
+import { generateDailyForecasts, DAILY_INSTRUMENT_IDS } from "@/lib/services/daily-forecast-generator";
 import { saveDailyForecasts } from "@/lib/kv/forecasts-store";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       generated: forecasts.length,
+      target: DAILY_INSTRUMENT_IDS.length,
+      instruments: DAILY_INSTRUMENT_IDS,
       slugs: forecasts.map((f) => f.slug),
       generatedAt: new Date().toISOString(),
     });

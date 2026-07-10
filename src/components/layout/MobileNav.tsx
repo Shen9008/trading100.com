@@ -14,7 +14,7 @@ export function MobileNav({ onNavigate }: MobileNavProps) {
 
   return (
     <nav
-      className="border-t border-white/[0.06] bg-header/95 px-4 py-4 backdrop-blur-xl lg:hidden"
+      className="rounded-2xl border border-white/[0.06] bg-header/95 p-3 backdrop-blur-2xl lg:hidden"
       aria-label="Mobile"
     >
       <ul className="flex flex-col gap-1">
@@ -26,7 +26,7 @@ export function MobileNav({ onNavigate }: MobileNavProps) {
                 href={link.href}
                 onClick={onNavigate}
                 className={cn(
-                  "block cursor-pointer rounded-lg px-3 py-3 text-sm font-medium transition-colors",
+                  "block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium transition-colors",
                   active
                     ? "bg-brand/10 text-brand"
                     : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
@@ -37,11 +37,11 @@ export function MobileNav({ onNavigate }: MobileNavProps) {
             </li>
           );
         })}
-        <li className="mt-2 border-t border-white/[0.06] pt-2">
+        <li className="mt-1 border-t border-white/[0.05] pt-1">
           <Link
             href="/tools/currency-converter"
             onClick={onNavigate}
-            className="block cursor-pointer rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
+            className="block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
           >
             Currency Converter
           </Link>

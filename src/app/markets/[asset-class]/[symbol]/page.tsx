@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
 import { buildMetadata } from "@/lib/metadata";
-import { ASSET_CLASSES, MARKET_SYMBOLS } from "@/lib/constants";
+import { ASSET_CLASSES } from "@/lib/constants";
+import { MARKET_INSTRUMENTS } from "@/lib/data/market-instruments";
 import { getLatestArticles } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { JsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd";
@@ -30,8 +31,9 @@ function resolveInstrument(assetClass: string, symbolSlug: string) {
   const normalized = symbolSlug.replace(/-/g, "/").toUpperCase();
   const altNormalized = symbolSlug.toUpperCase();
 
-  const instrument = MARKET_SYMBOLS[ac.id].find(
+  const instrument = MARKET_INSTRUMENTS[ac.id].find(
     (s) =>
+      s.slug?.toLowerCase() === symbolSlug.toLowerCase() ||
       s.symbol.replace("/", "-").toLowerCase() === symbolSlug.toLowerCase() ||
       s.symbol.toUpperCase() === normalized ||
       s.symbol.toUpperCase() === altNormalized ||
@@ -43,6 +45,7 @@ function resolveInstrument(assetClass: string, symbolSlug: string) {
       symbol: altNormalized,
       name: altNormalized,
       tvSymbol: `BINANCE:${altNormalized}USDT`,
+      slug: symbolSlug.toLowerCase(),
     };
   }
 
@@ -52,10 +55,12 @@ function resolveInstrument(assetClass: string, symbolSlug: string) {
 export async function generateStaticParams() {
   const params: { "asset-class": string; symbol: string }[] = [];
   for (const ac of ASSET_CLASSES) {
-    for (const item of MARKET_SYMBOLS[ac.id]) {
+    for (const item of MARKET_INSTRUMENTS[ac.id]) {
+      const slug =
+        item.slug ?? item.symbol.toLowerCase().replace("/", "-");
       params.push({
         "asset-class": ac.slug,
-        symbol: item.symbol.toLowerCase().replace("/", "-"),
+        symbol: slug,
       });
     }
   }

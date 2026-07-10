@@ -51,10 +51,10 @@ export default async function ForecastsPage({ searchParams }: ForecastsPageProps
               key={f.id}
               href={f.id === "all" ? "/forecasts" : `/forecasts?filter=${f.id}`}
               className={cn(
-                "cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200",
+                "cursor-pointer rounded-xl border px-4 py-2.5 text-sm font-medium transition-all duration-200",
                 filter === f.id
-                  ? "border-brand/40 bg-brand/15 text-brand shadow-glow"
-                  : "border-white/10 bg-white/[0.03] text-muted-foreground hover:border-brand/20 hover:text-foreground"
+                  ? "border-brand/25 bg-brand/10 text-brand shadow-glow-sm"
+                  : "border-white/[0.06] bg-white/[0.02] text-muted-foreground hover:border-brand/15 hover:text-foreground"
               )}
             >
               {f.label}

@@ -16,17 +16,19 @@ export function PageShell({
   className,
 }: PageShellProps) {
   return (
-    <div className={cn("mx-auto max-w-7xl px-4 py-10 lg:px-6 lg:py-14", className)}>
-      <header className="mb-10 animate-fade-up border-b border-white/[0.06] pb-8">
-        <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand">
-          {eyebrow}
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          {title}
-        </h1>
-        {description && (
-          <p className="mt-3 max-w-2xl text-muted-foreground">{description}</p>
-        )}
+    <div className={cn("mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16", className)}>
+      <header className="mb-12 animate-fade-up">
+        <div className="hero-frame px-6 py-8 sm:px-10 sm:py-10">
+          <p className="eyebrow">{eyebrow}</p>
+          <h1 className="mt-3 font-display text-3xl font-extrabold tracking-tight text-balance sm:text-4xl lg:text-[2.75rem]">
+            {title}
+          </h1>
+          {description && (
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+          )}
+        </div>
       </header>
       {children}
     </div>

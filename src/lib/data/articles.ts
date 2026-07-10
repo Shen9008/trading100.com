@@ -1,3 +1,5 @@
+import { STOCK_IMAGES } from "@/lib/constants/images";
+
 export type ArticleCategory =
   | "forex"
   | "crypto"
@@ -45,7 +47,7 @@ Rather than betting on a single outcome, consider structuring around event risk:
     category: "forex",
     author: "Sarah Chen",
     publishedAt: "2026-07-08T10:30:00Z",
-    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
+    image: STOCK_IMAGES.forex,
     isOriginal: true,
   },
   {
@@ -71,7 +73,7 @@ Regulatory headlines, stablecoin policy, and correlation with risk assets (parti
     category: "crypto",
     author: "Marcus Webb",
     publishedAt: "2026-07-07T14:00:00Z",
-    image: "https://images.unsplash.com/photo-1518546304927-5b4aa41e7635?w=800&q=80",
+    image: STOCK_IMAGES.crypto,
     isOriginal: true,
   },
   {
@@ -97,7 +99,7 @@ Gold often serves as a diversifier rather than a directional bet. Position sizin
     category: "commodities",
     author: "Elena Rodriguez",
     publishedAt: "2026-07-06T09:15:00Z",
-    image: "https://images.unsplash.com/photo-1610375461244-0c3f1a0a5c0e?w=800&q=80",
+    image: STOCK_IMAGES.gold,
     isOriginal: true,
   },
   {
@@ -119,7 +121,7 @@ Gold often serves as a diversifier rather than a directional bet. Position sizin
     category: "stocks",
     author: "James Okonkwo",
     publishedAt: "2026-07-05T16:45:00Z",
-    image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&q=80",
+    image: STOCK_IMAGES.stocks,
     isOriginal: true,
   },
 ];

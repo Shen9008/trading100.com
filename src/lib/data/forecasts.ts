@@ -1,3 +1,4 @@
+import { STOCK_IMAGES } from "@/lib/constants/images";
 import type { Article } from "./articles";
 
 export const FORECAST_ARTICLES: Article[] = [
@@ -38,7 +39,7 @@ A rapid diplomatic de-escalation, surprise OPEC+ production increase, or demand 
     category: "forecast",
     author: "Elena Rodriguez",
     publishedAt: "2026-07-09T06:00:00Z",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80",
+    image: STOCK_IMAGES.commodities,
     isOriginal: true,
   },
   {
@@ -82,7 +83,7 @@ Coordinated G7 concern over yen disorderly moves, a dovish Fed repricing if US d
     category: "forecast",
     author: "Sarah Chen",
     publishedAt: "2026-07-09T07:30:00Z",
-    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
+    image: STOCK_IMAGES.forex,
     isOriginal: true,
   },
   {
@@ -124,7 +125,7 @@ A break below $60,000 on the same headlines that are currently being absorbed wo
     category: "forecast",
     author: "Marcus Webb",
     publishedAt: "2026-07-09T08:00:00Z",
-    image: "https://images.unsplash.com/photo-1518546304927-5b4aa41e7635?w=800&q=80",
+    image: STOCK_IMAGES.crypto,
     isOriginal: true,
   },
   {
@@ -172,7 +173,7 @@ Gold is currently *negatively* correlated with oil (inflation fear trade) and *p
     category: "forecast",
     author: "Elena Rodriguez",
     publishedAt: "2026-07-09T09:00:00Z",
-    image: "https://images.unsplash.com/photo-1610375461244-0c3f1a0a5c0e?w=800&q=80",
+    image: STOCK_IMAGES.gold,
     isOriginal: true,
   },
   {
@@ -228,7 +229,7 @@ A sustained oil spike above $85, credit spread widening, or a mega-cap earnings 
     category: "forecast",
     author: "James Okonkwo",
     publishedAt: "2026-07-09T10:00:00Z",
-    image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&q=80",
+    image: STOCK_IMAGES.stocks,
     isOriginal: true,
   },
   {
@@ -249,7 +250,7 @@ Geopolitical shocks or strong US data break 1.05 support, targeting 1.02.
     category: "forecast",
     author: "Sarah Chen",
     publishedAt: "2026-07-08T08:00:00Z",
-    image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&q=80",
+    image: STOCK_IMAGES.forexPairs,
     isOriginal: true,
   },
   {
@@ -270,7 +271,7 @@ Macro risk-off events and regulatory headlines can trigger 10–15% drawdowns wi
     category: "forecast",
     author: "Marcus Webb",
     publishedAt: "2026-07-07T11:00:00Z",
-    image: "https://images.unsplash.com/photo-1621761190629-d097e49d8b47?w=800&q=80",
+    image: STOCK_IMAGES.crypto,
     isOriginal: true,
   },
   {
@@ -289,7 +290,7 @@ Macro risk-off events and regulatory headlines can trigger 10–15% drawdowns wi
     category: "forecast",
     author: "Elena Rodriguez",
     publishedAt: "2026-07-06T07:30:00Z",
-    image: "https://images.unsplash.com/photo-1610375461244-0c3f1a0a5c0e?w=800&q=80",
+    image: STOCK_IMAGES.gold,
     isOriginal: true,
   },
   {
@@ -310,7 +311,254 @@ Policy uncertainty and credit spreads widening could compress multiples quickly.
     category: "forecast",
     author: "James Okonkwo",
     publishedAt: "2026-07-05T10:00:00Z",
-    image: "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=800&q=80",
+    image: STOCK_IMAGES.indices,
+    isOriginal: true,
+  },
+  {
+    slug: "gbp-usd-forecast-july-10-2026",
+    title: "GBP/USD Forecast: Sterling Caught Between BoE Caution and Dollar Strength",
+    excerpt:
+      "Cable trades near 1.27 as UK inflation stickiness meets a firm dollar and elevated oil prices. We map the path for GBP/USD through late July.",
+    content: `## What's driving GBP/USD today
+
+GBP/USD hovered around 1.2680 on July 10, 2026 — softer than early-June highs near 1.29 but holding above the 1.25 floor that defined Q2. Sterling is being pulled in two directions:
+
+1. **BoE policy uncertainty:** UK services inflation remains sticky, keeping the Bank of England in a higher-for-longer posture. But growth data has softened, limiting how aggressively markets can price additional hikes.
+2. **Dollar dominance:** Surging oil and Gulf geopolitical risk have reinforced USD bid across G10. Cable is highly correlated with EUR/USD (~0.85 rolling correlation), so euro weakness caps GBP rallies even when UK data surprises positively.
+
+**UK-specific watch:** Chancellor and BoE speaker headlines on fiscal trajectory remain a background risk for gilt yields — higher yields can support sterling via carry, but fiscal concern can offset quickly.
+
+## Base case (55%) — 1.2550–1.2850 range
+
+**Target:** GBP/USD grinds within 1.2550–1.2850 through July.
+
+**Why:** Neither side has a decisive catalyst. Dollar strength from oil-driven inflation fears caps upside, while UK inflation persistence prevents a clean break below 1.25. The pair tends to mean-revert inside this band unless US data forces a repricing.
+
+**Key levels:**
+- Support: 1.2550 (July pivot), then 1.2400 (Q2 low zone)
+- Resistance: 1.2800 (prior congestion), then 1.2950 (June swing high)
+
+## Bull case (25%) — Recovery toward 1.30
+
+Requires a softer US CPI print that pushes Fed hike bets back toward 2027, plus a hawkish BoE hold with upgraded inflation language. A sustained break above 1.2850 on volume would signal short-covering toward 1.30.
+
+## Bear case (20%) — Break below 1.25 toward 1.23
+
+A hot US PPI/CPI sequence, further oil spike above $82, or weak UK retail sales could break 1.2550 support. In that scenario, cable often accelerates — liquidity thins below 1.25.
+
+## Trading framework
+
+- **Correlation:** Watch EUR/USD — if euro breaks 1.05, cable rarely holds 1.26.
+- **Events:** UK CPI, BoE MPC vote split, US NFP, and FOMC minutes are the July catalysts.
+- **Risk:** Reduce size ahead of UK inflation — GBP gaps are common on CPI day.
+
+*Educational forecast only — not a recommendation to trade forex or CFDs.*`,
+    category: "forecast",
+    author: "Sarah Chen",
+    publishedAt: "2026-07-10T06:00:00Z",
+    image: STOCK_IMAGES.forexPairs,
+    isOriginal: true,
+  },
+  {
+    slug: "ethereum-forecast-july-10-2026",
+    title: "Ethereum Forecast: ETH Outperforms BTC as Alt Beta Returns",
+    excerpt:
+      "ETH traded near $3,420 on July 10, outpacing bitcoin on the week. We assess whether network activity and ETF flows can extend the rally.",
+    content: `## What's driving Ethereum today
+
+Ethereum has been the standout large-cap crypto on July 10, 2026, trading around $3,420 — up roughly 6% on the week versus flat-to-soft bitcoin near $62,000. The ETH/BTC ratio is rising, a classic signal of risk appetite *within* crypto rather than macro safe-haven demand.
+
+**Three drivers stand out:**
+
+1. **Layer-2 activity:** Transaction counts on major L2 rollups hit multi-month highs, supporting the "ETH as infrastructure" narrative independent of BTC halving cycles.
+2. **Staking yield appeal:** With front-end Treasury yields elevated on Fed hike fears, ETH staking rewards (~3–4% net) look relatively more attractive to long-hold allocators than zero-yield BTC.
+3. **Beta catch-up:** ETH often lags BTC in the first leg of a recovery, then outperforms when macro stabilizes — current price action fits that pattern.
+
+## Base case (50%) — $3,200–$3,650 consolidation
+
+**Target range:** ETH holds $3,200–$3,650 as ETF flow data and BTC direction set the tone.
+
+**Why:** Institutional bid remains constructive but rate uncertainty caps vertical moves. ETH tends to trade at 1.2–1.5x BTC daily beta in risk-on phases — expect wider intraday ranges than bitcoin.
+
+**Key levels:**
+- Support: $3,200 (psychological), $3,050 (prior breakout retest)
+- Resistance: $3,650, then $3,850 (April swing zone)
+
+## Bull case (30%) — Push toward $4,000
+
+Requires Fed hike bets fading on soft US data, sustained ETH ETF inflow acceleration, and BTC holding $60K+. A weekly close above $3,650 would open path to $4,000 — the next major options open-interest cluster.
+
+## Bear case (20%) — Pullback to $2,900–$3,000
+
+A BTC break below $58,000, regulatory headline risk, or sharp rise in real yields could drag ETH toward $2,900. Alts historically suffer 1.5–2x BTC drawdown magnitude in risk-off episodes.
+
+## What to watch
+
+- ETH/BTC ratio direction (rising = internal risk-on)
+- Spot ETH ETF daily net flows
+- Gas fees and L2 TVL trends as on-chain confirmation
+
+*Not financial advice. Crypto is highly volatile and may not be suitable for all investors.*`,
+    category: "forecast",
+    author: "Marcus Webb",
+    publishedAt: "2026-07-10T07:30:00Z",
+    image: STOCK_IMAGES.crypto,
+    isOriginal: true,
+  },
+  {
+    slug: "nasdaq-100-forecast-july-10-2026",
+    title: "Nasdaq 100 Forecast: Tech Resilience Tested as Rates Climb",
+    excerpt:
+      "The NDX held near 22,800 despite rising yields and Gulf tensions. Can mega-cap AI earnings keep the index above 22,500?",
+    content: `## What's driving the Nasdaq 100 today
+
+The Nasdaq 100 traded around 22,820 on July 10, 2026 — down modestly from July highs but still within 3% of all-time peak territory. The index is outperforming the Dow (more oil-sensitive) but underperforming the equal-weight S&P, revealing the same narrow leadership that defined H1.
+
+**Key dynamics:**
+
+1. **Rate sensitivity:** NDX carries the highest duration risk among major US indices. Rising 10-year yields above 4.6% have pressured multiples, but NVDA/MSFT earnings beats keep the cap-weighted index afloat.
+2. **AI capex narrative:** Hyperscaler guidance on AI infrastructure spending remains the bullish anchor. Any sign of capex moderation in upcoming earnings could break index support quickly.
+3. **VIX term structure:** Near-term hedging demand is elevated — consistent with headline risk, not systemic stress.
+
+## Base case (50%) — 22,200–23,200 range
+
+**Target:** NDX oscillates between 22,200 and 23,200 through late July.
+
+**Why:** Mega-cap earnings provide a floor, but macro headwinds cap rallies. Expect 1.5–2% daily swings around Middle East and inflation headlines.
+
+**Key levels:**
+- Support: 22,200 (50-day MA zone), 21,600 (200-day MA)
+- Resistance: 23,200, then all-time high zone ~23,600
+
+## Bull case (25%) — Break toward 24,000
+
+Requires Middle East de-escalation, softer US inflation data, and broadening earnings beats beyond the top 7 names. QQQ flow turning positive for 5+ consecutive sessions would confirm institutional re-risking.
+
+## Bear case (25%) — Correction toward 21,000–21,500
+
+A sustained oil move above $85, credit spread widening, or a mega-cap guidance miss could break 22,200 quickly. NDX corrections of 8–12% have been common in rate-shock episodes since 2022.
+
+## Sector notes
+
+| Theme | Impact on NDX |
+|-------|---------------|
+| AI / semiconductors | Bullish anchor |
+| Consumer internet | Mixed — ad spend sensitivity |
+| Biotech | Defensive within growth |
+| Cybersecurity | Geopolitical bid |
+
+## Events this week
+
+- Remaining mega-cap earnings (cloud + semiconductor)
+- US CPI preview positioning
+- Fed speaker commentary on inflation pass-through
+
+*For informational purposes only. Index trading involves substantial risk.*`,
+    category: "forecast",
+    author: "James Okonkwo",
+    publishedAt: "2026-07-10T09:00:00Z",
+    image: STOCK_IMAGES.indices,
+    isOriginal: true,
+  },
+  {
+    slug: "silver-xagusd-forecast-july-10-2026",
+    title: "Silver (XAG/USD) Forecast: Industrial Demand Meets Precious Metal Headwinds",
+    excerpt:
+      "Silver slid to ~$36.80/oz as rising real yields and a firm dollar outweigh solar-demand optimism. Where does XAG go next?",
+    content: `## What's driving silver today
+
+Silver extended its pullback on July 10, 2026, trading near $36.80/oz — down from the $39+ zone seen in May. Like gold, silver is facing macro gravity from higher real yields and dollar strength. But silver's industrial component (solar, electronics) provides a different demand profile than pure safe-haven bullion.
+
+**The dual nature tension:**
+
+1. **Precious metal drag:** XAG/USD is 85%+ correlated with gold on daily timeframes. Gold's slide toward $4,060 on rate-hike repricing directly pressures silver.
+2. **Industrial support:** Global solar installation forecasts remain bullish for 2026–2027, creating a structural demand floor that gold lacks.
+3. **Gold/silver ratio:** At ~110:1, the ratio is elevated versus the 10-year average (~80:1), suggesting silver is *cheap relative to gold* — but ratio trades require patience.
+
+## Base case (55%) — $34.50–$38.50 range
+
+**Target:** Silver grinds within $34.50–$38.50 through July.
+
+**Why:** Macro headwinds cap rallies above $38, but industrial demand and the elevated gold/silver ratio limit downside below $34 unless gold breaks decisively lower.
+
+**Key levels:**
+- Support: $35.50 (near-term), $34.00 (Q2 accumulation zone)
+- Resistance: $38.00, then $39.50 (May rejection zone)
+
+## Bull case (25%) — Recovery toward $40–$42
+
+Requires gold stabilizing above $4,100, real yields reversing lower, and USD softness. A break above $39.50 on strong volume would signal industrial + precious metal demand aligning.
+
+## Bear case (20%) — Test $32–$33
+
+If gold breaks $3,900 on further Fed hawkish repricing, silver could overshoot to the downside — industrial bid is slower to absorb macro selling. Ratio could push toward 115:1 temporarily.
+
+## Trading framework
+
+- **Pair trade:** Watch gold/silver ratio for relative value — not directional certainty.
+- **Correlation:** Silver beta to gold is ~1.3x on down days, ~1.1x on up days.
+- **Calendar:** US industrial production and China PMI are demand-side catalysts.
+
+*Educational forecast only. Precious metals can be volatile and affected by rates, USD, and industrial cycles.*`,
+    category: "forecast",
+    author: "Elena Rodriguez",
+    publishedAt: "2026-07-10T10:30:00Z",
+    image: STOCK_IMAGES.gold,
+    isOriginal: true,
+  },
+  {
+    slug: "aud-usd-forecast-july-10-2026",
+    title: "AUD/USD Forecast: Aussie Dollar Pressured as China Slows and Iron Ore Softens",
+    excerpt:
+      "AUD/USD traded near 0.6520 on July 10 — a 3-month low. We assess whether RBA patience or commodity stabilization can halt the decline.",
+    content: `## What's driving AUD/USD today
+
+The Australian dollar remains under pressure on July 10, 2026, with AUD/USD near 0.6520 — down from 0.68 in May. As a classic commodity-linked G10 currency, the Aussie is catching headwinds from multiple angles:
+
+1. **China demand concerns:** Weaker-than-expected China credit and property data have weighed on iron ore and base metals — Australia's primary export earners.
+2. **RBA divergence:** The Reserve Bank of Australia has shifted to a patient, data-dependent stance while markets price Fed hikes on oil-driven inflation fears. The rate spread favors USD.
+3. **Risk sentiment:** AUD is a pro-cyclical currency — Gulf geopolitical risk and equity volatility reduce appetite for carry trades funded in JPY or CHF against AUD.
+
+**Offsetting factor:** Australian employment has remained resilient, preventing a disorderly AUD collapse. The RBA's reluctance to signal imminent cuts provides a verbal support floor.
+
+## Base case (50%) — 0.6450–0.6650 range
+
+**Target:** AUD/USD trades between 0.6450 and 0.6650 through July.
+
+**Why:** Commodity softness caps rallies, but extreme shorts and solid domestic labor data limit downside. The pair often consolidates in 200-pip bands until China stimulus headlines or US data shift the macro picture.
+
+**Key levels:**
+- Support: 0.6450 (psychological), 0.6380 (2025 low zone)
+- Resistance: 0.6600 (prior support-turned-resistance), 0.6720 (50-day MA)
+
+## Bull case (25%) — Bounce toward 0.68
+
+Requires China stimulus announcement, iron ore recovery above $105/tonne, and softer US inflation data. AUD/JPY strength would confirm risk-on rotation into commodity currencies.
+
+## Bear case (25%) — Break toward 0.63
+
+A hard landing signal from China, sustained oil above $85 crushing Asian growth outlook, or hot US CPI could break 0.6450. AUD tends to gap on China policy surprises.
+
+## Cross-market watchlist
+
+| Input | AUD impact |
+|-------|------------|
+| Iron ore (SGX) | Direct — top correlation |
+| China PMI | Leading indicator |
+| S&P 500 risk tone | Indirect beta |
+| RBA minutes tone | Policy divergence |
+
+## Events to watch
+
+- China trade balance and credit data
+- RBA Governor speech
+- US CPI and NFP (USD side driver)
+
+*Educational forecast only — not a recommendation to trade forex or CFDs.*`,
+    category: "forecast",
+    author: "Sarah Chen",
+    publishedAt: "2026-07-10T12:00:00Z",
+    image: STOCK_IMAGES.forex,
     isOriginal: true,
   },
 ];
@@ -333,12 +581,25 @@ const FORECAST_TAGS: Record<string, ForecastAssetFilter[]> = {
   "bitcoin-price-outlook-july-2026": ["crypto"],
   "gold-xauusd-forecast-summer-2026": ["commodities"],
   "sp500-index-forecast-h2-2026": ["indices", "stocks"],
+  "gbp-usd-forecast-july-10-2026": ["forex"],
+  "ethereum-forecast-july-10-2026": ["crypto"],
+  "nasdaq-100-forecast-july-10-2026": ["indices", "stocks"],
+  "silver-xagusd-forecast-july-10-2026": ["commodities"],
+  "aud-usd-forecast-july-10-2026": ["forex"],
 };
 
 function inferAutoForecastTags(slug: string): ForecastAssetFilter[] {
   if (slug.includes("bitcoin") || slug.includes("ethereum")) return ["crypto"];
-  if (slug.includes("eur-usd") || slug.includes("usd-jpy")) return ["forex"];
-  if (slug.includes("sp500")) return ["indices", "stocks"];
+  if (
+    slug.includes("eur-usd") ||
+    slug.includes("usd-jpy") ||
+    slug.includes("gbp-usd") ||
+    slug.includes("aud-usd")
+  )
+    return ["forex"];
+  if (slug.includes("sp500") || slug.includes("nasdaq")) return ["indices", "stocks"];
+  if (slug.includes("gold") || slug.includes("silver") || slug.includes("xagusd"))
+    return ["commodities"];
   return [];
 }
 
