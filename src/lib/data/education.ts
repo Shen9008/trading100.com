@@ -1,6 +1,7 @@
 import { STOCK_IMAGES } from "@/lib/constants/images";
 import { EDUCATION_GUIDES_PART1 } from "./education-guides-part1";
 import { EDUCATION_GUIDES_PART2 } from "./education-guides-part2";
+import { EDUCATION_GUIDES_PART3 } from "./education-guides-part3";
 import type { EducationGuide } from "./education-types";
 
 export type { EducationGuide } from "./education-types";
@@ -155,6 +156,7 @@ Predefined rules reduce emotional decisions during volatility.
 const EXTENDED_EDUCATION_GUIDES: EducationGuide[] = [
   ...EDUCATION_GUIDES_PART1,
   ...EDUCATION_GUIDES_PART2,
+  ...EDUCATION_GUIDES_PART3,
 ];
 
 export const ALL_EDUCATION_GUIDES: EducationGuide[] = [

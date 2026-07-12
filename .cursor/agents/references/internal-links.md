@@ -32,6 +32,7 @@ Use only these verified paths when adding internal links in daily forecast draft
 - `/education/cryptocurrency-trading-beginners-guide`
 - `/education/forex-position-sizing-lot-size-guide`
 - `/education/trading-psychology-discipline-guide`
+- `/education/how-to-trade-sp500-index-trading-guide`
 
 ## News (`/news/[slug]`)
 

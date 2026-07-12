@@ -172,6 +172,7 @@ const EDUCATION_SLUG_KEYWORDS: Record<string, string[]> = {
   "cryptocurrency-trading-beginners-guide": ["cryptocurrency trading", "how to trade bitcoin", "crypto for beginners"],
   "forex-position-sizing-lot-size-guide": ["forex position sizing", "lot size calculator", "pip value calculator", "margin forex"],
   "trading-psychology-discipline-guide": ["trading psychology", "emotional trading", "trading discipline", "fear and greed"],
+  "how-to-trade-sp500-index-trading-guide": ["how to trade the S&P 500", "S&P 500 trading for beginners", "SPX index explained", "E-mini S&P 500 futures", "US stock index trading"],
 };
 
 export function getInstrumentSeo(
