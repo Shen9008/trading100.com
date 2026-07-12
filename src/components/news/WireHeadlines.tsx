@@ -23,7 +23,7 @@ export function WireHeadlines({
         <p className="text-sm leading-relaxed text-muted-foreground">
           Market wire headlines appear here once{" "}
           <code className="rounded-md bg-white/[0.04] px-1.5 py-0.5 font-mono text-xs text-brand">
-            NEWSAPI_API_KEY
+            FINNHUB_API_KEY
           </code>{" "}
           is configured.
         </p>

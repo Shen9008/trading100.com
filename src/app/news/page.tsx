@@ -73,7 +73,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
           <SectionHeader
             id="auto-news"
             title="Latest Market News"
-            subtitle="Auto-syndicated headlines refreshed every few minutes from NewsAPI"
+            subtitle="Auto-syndicated headlines refreshed every few minutes from Finnhub"
             eyebrow="Live Wire"
           />
           <GlassCard padding={false} className="overflow-hidden px-4 sm:px-6">
@@ -149,11 +149,10 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
           </section>
         )}
 
-        {!process.env.NEWSAPI_API_KEY &&
-          !process.env.MARKETAUX_API_KEY &&
+        {!process.env.FINNHUB_API_KEY &&
           autoNews.length === 0 && (
           <p className="mt-6 rounded-xl border border-dashed border-white/10 p-4 text-sm text-muted-foreground">
-            Add <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-brand">NEWSAPI_API_KEY</code> to enable auto-posted market news.
+            Add <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-brand">FINNHUB_API_KEY</code> to enable auto-posted market news.
           </p>
         )}
       </PageShell>
