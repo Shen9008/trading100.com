@@ -1,0 +1,20 @@
+{
+  "runDate": "2026-07-12",
+  "instruments": ["Brent Crude", "GBP/USD", "XAUUSD", "ETHUSD", "Nasdaq 100"],
+  "slugs": [
+    "brent-crude-forecast-today-oil-price-analysis-july-12-2026",
+    "gbpusd-forecast-today-pound-dollar-analysis-july-12-2026",
+    "xauusd-forecast-today-gold-price-analysis-july-12-2026",
+    "ethereum-forecast-today-eth-price-analysis-july-12-2026",
+    "nasdaq-100-forecast-today-index-analysis-july-12-2026"
+  ],
+  "primaryKeywords": [
+    "brent crude oil forecast today",
+    "GBP USD forecast today",
+    "gold price forecast today",
+    "ethereum price forecast today",
+    "Nasdaq 100 forecast today"
+  ],
+  "previousRunInstruments": ["bitcoin", "eur-usd", "gold-xauusd", "sp500", "usd-jpy"],
+  "note": "Gold repeated due to CPI week + oil/Fed catalyst; other four instruments rotated from Jul 11 run."
+}

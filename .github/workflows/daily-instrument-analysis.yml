@@ -1,6 +1,9 @@
 name: Daily Instrument Analysis
 
-# Subagent 1: 5 popular trading instrument analyses every day
+# Cursor subagent spec: .cursor/agents/daily-instrument-analysis.md
+# Produces 5 SEO analysis drafts (800+ words) for human review.
+# This workflow calls the template API fallback until LLM drafts are wired to publish.
+# Schedule: 06:00 UTC daily (~2pm MYT). Manual: workflow_dispatch.
 on:
   schedule:
     # 06:00 UTC daily (~2pm MYT)
