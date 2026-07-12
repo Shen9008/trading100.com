@@ -1,14 +1,24 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-media-query";
 
 type TradingViewChartProps = {
   symbol: string;
   height?: number;
+  mobileHeight?: number;
 };
 
-export function TradingViewChart({ symbol, height = 500 }: TradingViewChartProps) {
+export function TradingViewChart({
+  symbol,
+  height,
+  mobileHeight,
+}: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const widgetHeight = isMobile
+    ? (mobileHeight ?? (height !== undefined ? Math.min(height, 400) : 360))
+    : (height ?? 500);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -30,14 +40,17 @@ export function TradingViewChart({ symbol, height = 500 }: TradingViewChartProps
       allow_symbol_change: true,
       calendar: false,
       support_host: "https://www.tradingview.com",
-      height,
+      height: widgetHeight,
     });
     containerRef.current.appendChild(script);
-  }, [symbol, height]);
+  }, [symbol, widgetHeight]);
 
   return (
-    <div className="tv-widget-container" style={{ height }}>
-      <div ref={containerRef} className="tradingview-widget-container h-full w-full" />
+    <div className="tv-widget-container" style={{ height: widgetHeight }}>
+      <div
+        ref={containerRef}
+        className="tradingview-widget-container h-full w-full"
+      />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { formatPrice } from "@/lib/utils";
 import type { CoinGeckoMarket } from "@/lib/api/coingecko";
 import { ASSET_CLASSES, type AssetClassId } from "@/lib/constants";
 import { MarketOverviewWidget } from "@/components/widgets/MarketOverview";
+import { useIsMobile } from "@/hooks/use-media-query";
 
 type SortKey = "symbol" | "price" | "change" | "marketCap";
 
@@ -46,6 +47,48 @@ function MiniSparkline({ prices }: { prices: number[] }) {
         points={points}
       />
     </svg>
+  );
+}
+
+function CryptoMobileCards({ data }: { data: CoinGeckoMarket[] }) {
+  return (
+    <ul className="space-y-2 md:hidden">
+      {data.map((coin) => (
+        <li key={coin.id}>
+          <Link
+            href={`/markets/crypto/${coin.id}`}
+            className="glass-panel-hover flex cursor-pointer items-center justify-between gap-3 p-4"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <Image
+                src={coin.image}
+                alt=""
+                width={36}
+                height={36}
+                className="shrink-0 rounded-full"
+              />
+              <div className="min-w-0">
+                <p className="truncate font-display font-semibold uppercase">
+                  {coin.symbol}
+                </p>
+                <p className="truncate text-sm text-muted-foreground">
+                  {coin.name}
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="font-medium tabular-nums">
+                ${formatPrice(coin.current_price, coin.current_price < 1 ? 4 : 2)}
+              </p>
+              <div className="mt-1 flex items-center justify-end gap-2">
+                <PriceChangeBadge value={coin.price_change_percentage_24h} />
+                <MiniSparkline prices={coin.sparkline_in_7d?.price ?? []} />
+              </div>
+            </div>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -88,7 +131,7 @@ function CryptoTable({ data }: { data: CoinGeckoMarket[] }) {
     <button
       type="button"
       onClick={() => toggleSort(col)}
-      className="inline-flex cursor-pointer items-center gap-1 transition-colors hover:text-brand"
+      className="inline-flex min-h-10 cursor-pointer items-center gap-1 rounded-md px-1 transition-colors hover:text-brand"
     >
       {label}
       <ArrowUpDown className="h-3 w-3" />
@@ -96,78 +139,90 @@ function CryptoTable({ data }: { data: CoinGeckoMarket[] }) {
   );
 
   return (
-    <div className="market-table-scroll">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-white/[0.08] text-left text-[10px] uppercase tracking-wider text-muted-foreground">
-            <th className="px-3 py-2 font-medium">#</th>
-            <th className="px-3 py-2 font-medium">
-              <SortHeader label="Symbol" col="symbol" />
-            </th>
-            <th className="px-3 py-2 text-right font-medium">
-              <SortHeader label="Price" col="price" />
-            </th>
-            <th className="px-3 py-2 text-right font-medium">
-              <SortHeader label="24h %" col="change" />
-            </th>
-            <th className="hidden px-3 py-2 text-right font-medium md:table-cell">
-              24h High/Low
-            </th>
-            <th className="hidden px-3 py-2 text-right font-medium lg:table-cell">
-              <SortHeader label="Market Cap" col="marketCap" />
-            </th>
-            <th className="px-3 py-2 text-right font-medium">7d</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((coin) => (
-            <tr
-              key={coin.id}
-              className="interactive-row border-b border-white/[0.04]"
-            >
-              <td className="px-3 py-2 text-muted-foreground">{coin.market_cap_rank}</td>
-              <td className="px-3 py-2">
-                <Link
-                  href={`/markets/crypto/${coin.id}`}
-                  className="flex cursor-pointer items-center gap-2 font-medium transition-colors hover:text-brand"
-                >
-                  <Image
-                    src={coin.image}
-                    alt=""
-                    width={20}
-                    height={20}
-                    className="rounded-full"
-                  />
-                  <span className="uppercase">{coin.symbol}</span>
-                  <span className="hidden text-muted-foreground sm:inline">
-                    {coin.name}
-                  </span>
-                </Link>
-              </td>
-              <td className="px-3 py-2 text-right tabular-nums">
-                ${formatPrice(coin.current_price, coin.current_price < 1 ? 4 : 2)}
-              </td>
-              <td className="px-3 py-2 text-right">
-                <PriceChangeBadge value={coin.price_change_percentage_24h} />
-              </td>
-              <td className="hidden px-3 py-2 text-right tabular-nums text-xs text-muted-foreground md:table-cell">
-                ${formatPrice(coin.high_24h)} / ${formatPrice(coin.low_24h)}
-              </td>
-              <td className="hidden px-3 py-2 text-right tabular-nums lg:table-cell">
-                {formatPrice(coin.market_cap, 0)}
-              </td>
-              <td className="px-3 py-2 text-right">
-                <MiniSparkline prices={coin.sparkline_in_7d?.price ?? []} />
-              </td>
+    <>
+      <CryptoMobileCards data={sorted} />
+
+      <div className="market-table-scroll hidden md:block">
+        <p className="mb-2 font-mono text-[11px] text-muted-foreground lg:hidden">
+          Swipe to see more columns →
+        </p>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/[0.08] text-left text-[10px] uppercase tracking-wider text-muted-foreground">
+              <th className="px-3 py-2 font-medium">#</th>
+              <th className="px-3 py-2 font-medium">
+                <SortHeader label="Symbol" col="symbol" />
+              </th>
+              <th className="px-3 py-2 text-right font-medium">
+                <SortHeader label="Price" col="price" />
+              </th>
+              <th className="px-3 py-2 text-right font-medium">
+                <SortHeader label="24h %" col="change" />
+              </th>
+              <th className="hidden px-3 py-2 text-right font-medium md:table-cell">
+                24h High/Low
+              </th>
+              <th className="hidden px-3 py-2 text-right font-medium lg:table-cell">
+                <SortHeader label="Market Cap" col="marketCap" />
+              </th>
+              <th className="px-3 py-2 text-right font-medium">7d</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {sorted.map((coin) => (
+              <tr
+                key={coin.id}
+                className="interactive-row border-b border-white/[0.04]"
+              >
+                <td className="px-3 py-2 text-muted-foreground">
+                  {coin.market_cap_rank}
+                </td>
+                <td className="px-3 py-2">
+                  <Link
+                    href={`/markets/crypto/${coin.id}`}
+                    className="flex cursor-pointer items-center gap-2 font-medium transition-colors hover:text-brand"
+                  >
+                    <Image
+                      src={coin.image}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                    <span className="uppercase">{coin.symbol}</span>
+                    <span className="hidden text-muted-foreground sm:inline">
+                      {coin.name}
+                    </span>
+                  </Link>
+                </td>
+                <td className="px-3 py-2 text-right tabular-nums">
+                  ${formatPrice(coin.current_price, coin.current_price < 1 ? 4 : 2)}
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <PriceChangeBadge value={coin.price_change_percentage_24h} />
+                </td>
+                <td className="hidden px-3 py-2 text-right tabular-nums text-xs text-muted-foreground md:table-cell">
+                  ${formatPrice(coin.high_24h)} / ${formatPrice(coin.low_24h)}
+                </td>
+                <td className="hidden px-3 py-2 text-right tabular-nums lg:table-cell">
+                  {formatPrice(coin.market_cap, 0)}
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <MiniSparkline prices={coin.sparkline_in_7d?.price ?? []} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
-const TV_TAB_MAP: Record<AssetClassId, "forex" | "crypto" | "commodities" | "indices" | "stocks"> = {
+const TV_TAB_MAP: Record<
+  AssetClassId,
+  "forex" | "crypto" | "commodities" | "indices" | "stocks"
+> = {
   currencies: "forex",
   commodities: "commodities",
   crypto: "crypto",
@@ -180,15 +235,17 @@ export function MarketDataTable({
   cryptoData = [],
   defaultTab = "currencies",
 }: MarketDataTableProps) {
+  const isMobile = useIsMobile();
+
   return (
     <Tabs defaultValue={defaultTab} className="w-full">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <TabsList className="h-auto flex-wrap justify-start bg-transparent p-0 border-0">
+        <TabsList className="tabs-scroll-mobile h-auto border-0 bg-transparent p-0">
           {ASSET_CLASSES.map((ac) => (
             <TabsTrigger
               key={ac.id}
               value={ac.id}
-              className="rounded-lg border border-transparent px-4 py-2 data-[state=active]:border-brand/30 data-[state=active]:bg-brand/10"
+              className="shrink-0 rounded-lg border border-transparent px-4 py-2.5 data-[state=active]:border-brand/30 data-[state=active]:bg-brand/10"
             >
               {ac.label}
             </TabsTrigger>
@@ -196,7 +253,7 @@ export function MarketDataTable({
         </TabsList>
         <Link
           href="/markets"
-          className="cursor-pointer text-sm font-medium text-brand transition-colors hover:text-amber-200"
+          className="min-h-11 cursor-pointer text-sm font-medium text-brand transition-colors hover:text-amber-200 sm:inline-flex sm:items-center"
         >
           View All →
         </Link>
@@ -207,7 +264,10 @@ export function MarketDataTable({
           {ac.id === "crypto" && cryptoData.length > 0 ? (
             <CryptoTable data={cryptoData} />
           ) : (
-            <MarketOverviewWidget tab={TV_TAB_MAP[ac.id]} height={380} />
+            <MarketOverviewWidget
+              tab={TV_TAB_MAP[ac.id]}
+              height={isMobile ? 300 : 380}
+            />
           )}
         </TabsContent>
       ))}

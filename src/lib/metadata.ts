@@ -17,11 +17,11 @@ type PageMeta = {
 };
 
 function resolveOgImage(ogImage?: string): string {
-  if (!ogImage) return DEFAULT_OG_IMAGE;
-  if (ogImage.startsWith("http://") || ogImage.startsWith("https://")) {
-    return ogImage;
+  const src = ogImage ?? DEFAULT_OG_IMAGE;
+  if (src.startsWith("http://") || src.startsWith("https://")) {
+    return src;
   }
-  return `${SITE_URL}${ogImage.startsWith("/") ? ogImage : `/${ogImage}`}`;
+  return `${SITE_URL}${src.startsWith("/") ? src : `/${src}`}`;
 }
 
 export function buildMetadata({

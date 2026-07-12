@@ -69,10 +69,60 @@ export function CurrencyConverter() {
             step="any"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            className="h-11 text-base"
           />
         </div>
 
-        <div className="grid grid-cols-[1fr,auto,1fr] items-end gap-3">
+        <div className="flex flex-col gap-3 sm:hidden">
+          <div>
+            <label htmlFor="from-mobile" className="mb-1 block text-sm text-muted-foreground">
+              From
+            </label>
+            <select
+              id="from-mobile"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              className="flex h-11 w-full cursor-pointer rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-base transition-colors focus:border-brand/40 focus:outline-none focus:ring-2 focus:ring-brand/20"
+            >
+              {CURRENCY_OPTIONS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={swap}
+            aria-label="Swap currencies"
+            className="mx-auto h-11 w-11"
+          >
+            <ArrowLeftRight className="h-4 w-4" />
+          </Button>
+
+          <div>
+            <label htmlFor="to-mobile" className="mb-1 block text-sm text-muted-foreground">
+              To
+            </label>
+            <select
+              id="to-mobile"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className="flex h-11 w-full cursor-pointer rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-base transition-colors focus:border-brand/40 focus:outline-none focus:ring-2 focus:ring-brand/20"
+            >
+              {CURRENCY_OPTIONS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="hidden grid-cols-[1fr,auto,1fr] items-end gap-3 sm:grid">
           <div>
             <label htmlFor="from" className="mb-1 block text-sm text-muted-foreground">
               From

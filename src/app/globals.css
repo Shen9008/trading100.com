@@ -42,10 +42,12 @@
 
   html {
     @apply scroll-smooth;
+    overflow-x: clip;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    overflow-x: clip;
     background-image:
       radial-gradient(ellipse 90% 60% at 50% -30%, hsl(var(--glow-gold) / 0.07), transparent 55%),
       radial-gradient(ellipse 50% 40% at 100% 10%, hsl(var(--glow-teal) / 0.04), transparent 50%),
@@ -497,7 +499,31 @@
 }
 
 .ticker-tape-container {
-  @apply border-b border-white/[0.05] bg-header/80 backdrop-blur-xl;
+  @apply overflow-hidden border-b border-white/[0.05] bg-header/80 backdrop-blur-xl;
+}
+
+.tabs-scroll-mobile {
+  @apply -mx-4 flex-nowrap justify-start overflow-x-auto px-4;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabs-scroll-mobile::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .tabs-scroll-mobile {
+    @apply mx-0 flex-wrap overflow-visible px-0;
+  }
+}
+
+.touch-target {
+  @apply inline-flex min-h-11 min-w-11 items-center justify-center;
+}
+
+.footer-link {
+  @apply block min-h-11 cursor-pointer py-2.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground;
 }
 
 .market-table-scroll {
@@ -505,7 +531,7 @@
 }
 
 .market-table-scroll table {
-  @apply min-w-[640px];
+  @apply min-w-[520px] md:min-w-[640px];
 }
 
 .market-table-scroll::-webkit-scrollbar {

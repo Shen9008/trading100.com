@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { TrendingUp } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,15 @@ export function MobileNav({ onNavigate }: MobileNavProps) {
       className="rounded-2xl border border-white/[0.06] bg-header/95 p-3 backdrop-blur-2xl lg:hidden"
       aria-label="Mobile"
     >
+      <Link
+        href="/markets"
+        onClick={onNavigate}
+        className="mb-2 flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-brand-foreground shadow-glow-sm transition-all hover:brightness-110"
+      >
+        <TrendingUp className="h-4 w-4" aria-hidden="true" />
+        Live Markets
+      </Link>
+
       <ul className="flex flex-col gap-1">
         {NAV_LINKS.map((link) => {
           const active = pathname.startsWith(link.href);
@@ -26,7 +36,7 @@ export function MobileNav({ onNavigate }: MobileNavProps) {
                 href={link.href}
                 onClick={onNavigate}
                 className={cn(
-                  "block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium transition-colors",
+                  "block min-h-11 cursor-pointer rounded-xl px-4 py-3 text-sm font-medium transition-colors",
                   active
                     ? "bg-brand/10 text-brand"
                     : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
@@ -41,7 +51,7 @@ export function MobileNav({ onNavigate }: MobileNavProps) {
           <Link
             href="/tools/currency-converter"
             onClick={onNavigate}
-            className="block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
+            className="block min-h-11 cursor-pointer rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
           >
             Currency Converter
           </Link>

@@ -1,4 +1,5 @@
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { BRAND_LOGO } from "@/lib/constants/brand";
 import { seoUrl } from "@/lib/seo/urls";
 
 type JsonLdProps = {
@@ -20,7 +21,7 @@ export function organizationJsonLd() {
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: seoUrl("/logo.png"),
+    logo: seoUrl(BRAND_LOGO),
     description:
       "Live market data, financial news, forecasts, and trading education for forex, crypto, commodities, indices, and stocks.",
     sameAs: [],
@@ -80,7 +81,7 @@ export function articleJsonLd(article: {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: seoUrl("/logo.png"),
+        url: seoUrl(BRAND_LOGO),
       },
     },
   };

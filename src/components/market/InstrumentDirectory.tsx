@@ -73,7 +73,7 @@ export function InstrumentDirectory({
       </div>
 
       <Tabs defaultValue={defaultTab}>
-        <TabsList className="mb-6 h-auto flex-wrap justify-start">
+        <TabsList className="tabs-scroll-mobile mb-6 h-auto justify-start">
           {ASSET_CLASSES.map((ac) => (
             <TabsTrigger key={ac.id} value={ac.id} className="gap-1.5">
               {ac.label}

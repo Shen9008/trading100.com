@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-media-query";
 
 declare global {
   interface Window {
@@ -78,9 +79,11 @@ const TAB_CONFIG: Record<
 
 export function MarketOverviewWidget({
   tab = "forex",
-  height = 400,
+  height,
 }: MarketOverviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const widgetHeight = height ?? (isMobile ? 300 : 400);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -98,7 +101,7 @@ export function MarketOverviewWidget({
       showChart: true,
       locale: "en",
       width: "100%",
-      height,
+      height: widgetHeight,
       largeChartUrl: "",
       isTransparent: false,
       showSymbolLogo: true,
@@ -121,7 +124,7 @@ export function MarketOverviewWidget({
       ],
     });
     containerRef.current.appendChild(script);
-  }, [tab, height]);
+  }, [tab, widgetHeight]);
 
   return (
     <div className="tv-widget-container">

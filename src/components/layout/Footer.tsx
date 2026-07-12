@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SITE_NAME } from "@/lib/constants";
 import { DisclaimerBanner } from "./DisclaimerBanner";
+import { SiteLogo } from "./SiteLogo";
 
 const FOOTER_COLUMNS = [
   {
@@ -52,14 +53,11 @@ const FOOTER_COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-white/[0.05]">
+    <footer className="mt-auto border-t border-white/[0.05] pb-[env(safe-area-inset-bottom)]">
       <div className="border-b border-white/[0.05] bg-card/30">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-12 lg:flex-row lg:items-center lg:justify-between lg:px-6">
           <div>
-            <Link href="/" className="font-display text-xl font-bold tracking-tight">
-              <span className="text-brand">Trading</span>
-              <span className="text-foreground">100</span>
-            </Link>
+            <SiteLogo variant="footer" />
             <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
               A premium market intelligence platform for price discovery, news,
               forecasts, and trader education.
@@ -81,13 +79,10 @@ export function Footer() {
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.title}>
               <h3 className="eyebrow mb-4">{col.title}</h3>
-              <ul className="space-y-2.5">
+              <ul className="space-y-1">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="cursor-pointer text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
-                    >
+                    <Link href={link.href} className="footer-link">
                       {link.label}
                     </Link>
                   </li>

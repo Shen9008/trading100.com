@@ -1,8 +1,9 @@
+import { BRAND_OG_DEFAULT } from "@/lib/constants/brand";
 import { STOCK_IMAGES } from "@/lib/constants/images";
 import type { AssetClassId } from "@/lib/constants";
 import type { ArticleCategory } from "@/lib/data/articles";
 
-export const DEFAULT_OG_IMAGE = STOCK_IMAGES.default;
+export const DEFAULT_OG_IMAGE = BRAND_OG_DEFAULT;
 
 export const HOME_KEYWORDS = [
   "live market data",
