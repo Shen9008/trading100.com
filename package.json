@@ -9,6 +9,7 @@
     "lint": "next lint",
     "preview": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && wrangler deploy",
+    "publish-forecasts": "node scripts/publish-forecast-drafts.mjs",
     "pages:build": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
     "pages:deploy": "npm run deploy"
   },

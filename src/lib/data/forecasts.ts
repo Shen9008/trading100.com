@@ -589,25 +589,58 @@ const FORECAST_TAGS: Record<string, ForecastAssetFilter[]> = {
 };
 
 function inferAutoForecastTags(slug: string): ForecastAssetFilter[] {
-  if (slug.includes("bitcoin") || slug.includes("ethereum")) return ["crypto"];
+  if (
+    slug.includes("bitcoin") ||
+    slug.includes("ethereum") ||
+    slug.includes("ethusd")
+  )
+    return ["crypto"];
   if (
     slug.includes("eur-usd") ||
     slug.includes("usd-jpy") ||
     slug.includes("gbp-usd") ||
+    slug.includes("gbpusd") ||
     slug.includes("aud-usd")
   )
     return ["forex"];
   if (slug.includes("sp500") || slug.includes("nasdaq")) return ["indices", "stocks"];
-  if (slug.includes("gold") || slug.includes("silver") || slug.includes("xagusd"))
+  if (
+    slug.includes("gold") ||
+    slug.includes("silver") ||
+    slug.includes("xagusd") ||
+    slug.includes("xauusd") ||
+    slug.includes("brent") ||
+    slug.includes("crude")
+  )
     return ["commodities"];
   return [];
 }
 
+function categoryToForecastTags(
+  category: Article["category"]
+): ForecastAssetFilter[] {
+  switch (category) {
+    case "forex":
+      return ["forex"];
+    case "crypto":
+      return ["crypto"];
+    case "commodities":
+      return ["commodities"];
+    case "indices":
+    case "stocks":
+      return ["indices", "stocks"];
+    default:
+      return [];
+  }
+}
+
 function getForecastTags(article: Article): ForecastAssetFilter[] {
-  return (
-    FORECAST_TAGS[article.slug] ??
-    (article.slug.includes("-auto-") ? inferAutoForecastTags(article.slug) : [])
-  );
+  if (FORECAST_TAGS[article.slug]) return FORECAST_TAGS[article.slug];
+
+  const inferred = inferAutoForecastTags(article.slug);
+  if (inferred.length > 0) return inferred;
+
+  return categoryToForecastTags(article.category);
 }
 
 async function mergeForecasts(): Promise<Article[]> {

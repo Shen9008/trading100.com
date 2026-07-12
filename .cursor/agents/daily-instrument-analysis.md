@@ -182,23 +182,25 @@ This repo does **not** use `/content/articles/` for production forecasts. Publis
 
 ### Option A — Manual publish after review
 
-Convert approved drafts to `Article` objects and POST:
+After drafts are committed, publish to KV:
 
 ```bash
-curl -X POST -H "Authorization: Bearer $CRON_SECRET" \
-  https://trading100.spartasoftofficial.workers.dev/api/cron/daily-forecasts
+CRON_SECRET=... npm run publish-forecasts
+# or for a specific run date:
+CRON_SECRET=... node scripts/publish-forecast-drafts.mjs --date 2026-07-12
 ```
 
-The API (`src/app/api/cron/daily-forecasts/route.ts`) currently runs the **template generator** (`src/lib/services/daily-forecast-generator.ts`). Full LLM-quality drafts require either:
+The script reads `content/drafts/forecasts/*.mdx` (via `_last-run.json` or filename date), converts to `Article` objects, and POSTs JSON to `/api/cron/daily-forecasts`.
 
-- Adding approved content to KV via a publish script, or
-- Replacing the generator with LLM-driven output (future automation).
+### Option B — GitHub Actions schedule (automated)
 
-### Option B — GitHub Actions schedule (template fallback)
+`.github/workflows/daily-instrument-analysis.yml` runs **06:00 UTC daily**:
 
-`.github/workflows/daily-instrument-analysis.yml` runs **06:00 UTC daily** and calls the API above. This produces **shorter template-based** analyses until this subagent's output is wired into the publish pipeline.
+1. Checks out the repo (including committed drafts from this subagent).
+2. Runs `node scripts/publish-forecast-drafts.mjs --fallback-template`.
+3. Publishes today's MDX drafts to KV when present; otherwise falls back to the template generator.
 
-**Cursor agents do not run on cron by themselves.** Trigger this subagent manually in Cursor, or wire a scheduled job (GitHub Action + Cursor CLI / API) once output quality is confirmed.
+**Workflow:** Run this subagent in Cursor → review drafts → commit to `main` → cron publishes on the next 06:00 UTC run (or trigger `workflow_dispatch` manually).
 
 ---
 

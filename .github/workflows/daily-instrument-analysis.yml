@@ -1,8 +1,8 @@
 name: Daily Instrument Analysis
 
 # Cursor subagent spec: .cursor/agents/daily-instrument-analysis.md
-# Produces 5 SEO analysis drafts (800+ words) for human review.
-# This workflow calls the template API fallback until LLM drafts are wired to publish.
+# Publishes committed MDX drafts from content/drafts/forecasts/ to KV.
+# Falls back to template generator when no drafts exist for today.
 # Schedule: 06:00 UTC daily (~2pm MYT). Manual: workflow_dispatch.
 on:
   schedule:
@@ -14,7 +14,15 @@ jobs:
   instrument-analysis:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate 5 daily instrument analyses
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Publish forecast drafts (or template fallback)
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: ${{ vars.SITE_URL || 'https://trading100.spartasoftofficial.workers.dev' }}
@@ -25,21 +33,4 @@ jobs:
             exit 1
           fi
 
-          HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" -X POST \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            "$SITE_URL/api/cron/daily-forecasts")
-
-          echo "Instrument analysis response ($HTTP_CODE):"
-          cat response.json
-          echo ""
-
-          if [ "$HTTP_CODE" != "200" ]; then
-            exit 1
-          fi
-
-          python3 -c "
-          import json, sys
-          d = json.load(open('response.json'))
-          if d.get('generated', 0) < d.get('target', 5):
-            print(f\"Warning: only {d.get('generated')} of {d.get('target')} analyses generated\")
-          "
+          node scripts/publish-forecast-drafts.mjs --fallback-template
