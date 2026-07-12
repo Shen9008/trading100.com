@@ -67,6 +67,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
         description="Auto-syndicated market news plus original analysis from Trading 100."
         eyebrow="Newsroom"
         variant="news"
+        live
       >
         <section aria-labelledby="auto-news">
           <SectionHeader

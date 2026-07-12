@@ -8,6 +8,7 @@ type PageShellProps = {
   eyebrow?: string;
   variant?: HeroVariant;
   heroImage?: string;
+  live?: boolean;
   children: React.ReactNode;
   className?: string;
 };
@@ -18,6 +19,7 @@ export function PageShell({
   eyebrow = "Trading 100",
   variant = "default",
   heroImage,
+  live = false,
   children,
   className,
 }: PageShellProps) {
@@ -29,6 +31,7 @@ export function PageShell({
         eyebrow={eyebrow}
         variant={variant}
         image={heroImage}
+        live={live}
         className="mb-12"
       />
       {children}

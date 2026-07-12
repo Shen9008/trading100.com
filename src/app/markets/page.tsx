@@ -84,6 +84,7 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
         description={`Real-time quotes across ${instrumentCount}+ instruments — currencies, commodities, crypto, indices, stocks, and ETFs.`}
         eyebrow="Market Hub"
         variant="markets"
+        live
       >
 
         <GlassCard>

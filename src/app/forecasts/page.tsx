@@ -57,6 +57,7 @@ export default async function ForecastsPage({ searchParams }: ForecastsPageProps
         description="In-house outlooks and scenario analysis. For educational purposes only."
         eyebrow="Outlook"
         variant="forecasts"
+        live
       >
         <div className="mb-8 flex flex-wrap gap-2">
           {FILTERS.map((f) => (

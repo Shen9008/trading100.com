@@ -142,6 +142,7 @@ export default function InstrumentPage({ params }: InstrumentPageProps) {
           description={`Live ${instrument.symbol} price chart, key stats, and related market news.`}
           eyebrow={assetClass.label}
           variant={assetClassToHeroVariant(assetClass.id)}
+          live
           compact
           className="mb-8"
         >

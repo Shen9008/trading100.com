@@ -5,6 +5,7 @@ import {
   type HeroVariant,
 } from "@/lib/hero/variants";
 import { HeroGraphic } from "@/components/layout/HeroGraphics";
+import { HeroAmbient, HeroLivePulse } from "@/components/layout/HeroAmbient";
 import { isOptimizedImageHost } from "@/lib/constants/images";
 
 type PageHeroBannerProps = {
@@ -16,6 +17,19 @@ type PageHeroBannerProps = {
   compact?: boolean;
   className?: string;
   children?: React.ReactNode;
+  live?: boolean;
+};
+
+const VARIANT_HUE: Partial<Record<HeroVariant, number>> = {
+  markets: 42,
+  news: 210,
+  forecasts: 168,
+  education: 260,
+  crypto: 270,
+  commodities: 38,
+  forex: 168,
+  calendar: 15,
+  converter: 200,
 };
 
 export function PageHeroBanner({
@@ -27,72 +41,71 @@ export function PageHeroBanner({
   compact = false,
   className,
   children,
+  live = false,
 }: PageHeroBannerProps) {
   const config = getHeroVariant(variant);
   const bgImage = image ?? config.image;
   const useNextImage = isOptimizedImageHost(bgImage);
+  const accentHue = VARIANT_HUE[variant] ?? 42;
 
   return (
     <header className={cn("animate-fade-up", className)}>
       <div
         className={cn(
-          "hero-frame relative overflow-hidden",
-          compact ? "min-h-[200px]" : "min-h-[240px] sm:min-h-[280px]"
+          "hero-frame hero-banner-glow relative overflow-hidden",
+          compact ? "min-h-[200px]" : "min-h-[260px] sm:min-h-[300px]"
         )}
       >
-        {/* Background image */}
-        <div className="absolute inset-0">
-          {useNextImage ? (
-            <Image
-              src={bgImage}
-              alt=""
-              fill
-              className="object-cover opacity-30"
-              priority
-              sizes="(max-width: 1280px) 100vw, 1280px"
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={bgImage}
-              alt=""
-              className="h-full w-full object-cover opacity-30"
-            />
-          )}
+        {/* Ken Burns background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="hero-ken-burns absolute inset-0 scale-110">
+            {useNextImage ? (
+              <Image
+                src={bgImage}
+                alt=""
+                fill
+                className="object-cover opacity-35"
+                priority
+                sizes="(max-width: 1280px) 100vw, 1280px"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={bgImage}
+                alt=""
+                className="h-full w-full object-cover opacity-35"
+              />
+            )}
+          </div>
         </div>
 
         {/* Gradient overlays */}
         <div
           className="absolute inset-0"
           style={{
-            background: `linear-gradient(135deg, hsl(220 20% 6% / 0.92) 0%, hsl(220 20% 8% / 0.85) 45%, ${config.accentFrom} 100%)`,
+            background: `linear-gradient(135deg, hsl(220 20% 6% / 0.88) 0%, hsl(220 20% 8% / 0.78) 40%, ${config.accentFrom} 100%)`,
           }}
         />
         <div
-          className="absolute inset-0 opacity-60"
+          className="absolute inset-0 opacity-70"
           style={{
-            background: `radial-gradient(ellipse 80% 60% at 85% 40%, ${config.accentTo}, transparent 70%)`,
+            background: `radial-gradient(ellipse 90% 70% at 90% 30%, ${config.accentTo}, transparent 65%)`,
           }}
         />
 
-        {/* Decorative mesh grid */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(hsl(42 62% 58%) 1px, transparent 1px), linear-gradient(90deg, hsl(42 62% 58%) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
+        {/* Animated ambient layer */}
+        <HeroAmbient accentHue={accentHue} />
 
-        {/* Floating orbs */}
-        <div className="pointer-events-none absolute -right-8 top-8 h-32 w-32 rounded-full bg-brand/10 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-4 left-1/4 h-24 w-24 rounded-full bg-positive/10 blur-2xl" />
+        {/* Scrolling mesh grid */}
+        <div className="hero-grid-scroll pointer-events-none absolute inset-0 opacity-[0.05]" />
 
         {/* Content grid */}
-        <div className="relative grid items-center gap-6 px-6 py-8 sm:px-10 sm:py-10 lg:grid-cols-[1fr_auto] lg:gap-10">
+        <div className="relative grid items-center gap-6 px-6 py-8 sm:px-10 sm:py-10 lg:grid-cols-[1fr_auto] lg:gap-12">
           <div className="max-w-2xl">
-            <p className="eyebrow">{eyebrow}</p>
+            <p className="eyebrow flex flex-wrap items-center gap-0">
+              <span>{eyebrow}</span>
+              {live && <HeroLivePulse />}
+            </p>
             <h1
               className={cn(
                 "mt-3 font-display font-extrabold tracking-tight text-balance text-foreground",
@@ -112,13 +125,17 @@ export function PageHeroBanner({
           </div>
 
           {!compact && (
-            <div className="hidden h-28 w-52 shrink-0 opacity-90 lg:block xl:h-32 xl:w-60">
-              <div className="surface-inset h-full rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 backdrop-blur-sm">
-                <HeroGraphic variant={config.graphic} className="h-full w-full" />
+            <div className="hidden h-32 w-56 shrink-0 md:block lg:h-36 lg:w-64">
+              <div className="hero-graphic-panel relative h-full overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-md">
+                <div className="absolute inset-0 bg-gradient-to-br from-brand/5 via-transparent to-positive/5" />
+                <HeroGraphic variant={config.graphic} className="relative h-full w-full" />
               </div>
             </div>
           )}
         </div>
+
+        {/* Bottom edge glow line */}
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
       </div>
     </header>
   );

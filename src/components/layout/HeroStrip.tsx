@@ -9,6 +9,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { STOCK_IMAGES } from "@/lib/constants/images";
+import { HeroAmbient } from "@/components/layout/HeroAmbient";
 
 const QUICK_LINKS = [
   { label: "Markets", href: "/markets", icon: TrendingUp },
@@ -26,7 +27,7 @@ const STATS = [
 function HeroChartGraphic() {
   return (
     <div className="relative h-full min-h-[280px] w-full p-6 lg:min-h-[340px]">
-      <div className="absolute inset-6 rounded-2xl border border-white/[0.06] bg-white/[0.02]" />
+      <div className="absolute inset-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] hero-graphic-panel" />
       <svg
         viewBox="0 0 400 200"
         className="absolute inset-x-8 bottom-16 top-12 w-[calc(100%-4rem)] text-brand/80"
@@ -46,6 +47,7 @@ function HeroChartGraphic() {
         <path
           d="M0,140 C40,120 80,150 120,110 S200,80 240,95 S320,60 400,45 L400,200 L0,200 Z"
           fill="url(#heroFill)"
+          className="hero-book-float"
         />
         <path
           d="M0,140 C40,120 80,150 120,110 S200,80 240,95 S320,60 400,45"
@@ -53,13 +55,17 @@ function HeroChartGraphic() {
           stroke="url(#heroLine)"
           strokeWidth="2.5"
           strokeLinecap="round"
+          className="hero-home-line-draw"
         />
+        {/* Animated price dot at line end */}
+        <circle cx="400" cy="45" r="4" fill="hsl(168 45% 55%)" className="hero-pulse-dot" />
       </svg>
       <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between gap-4">
         {["EUR/USD", "BTC", "XAU"].map((sym, i) => (
           <div
             key={sym}
-            className="surface-inset flex-1 rounded-xl px-3 py-2.5 backdrop-blur-sm"
+            className="surface-inset hero-ticker-flash flex-1 rounded-xl px-3 py-2.5 backdrop-blur-sm"
+            style={{ animationDelay: `${i * 0.8}s` }}
           >
             <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
               {sym}
@@ -92,25 +98,28 @@ export function HeroStrip() {
   return (
     <section className="relative border-b border-white/[0.05]">
       <div className="absolute inset-0 overflow-hidden">
-        <Image
-          src={STOCK_IMAGES.forex}
-          alt=""
-          fill
-          className="object-cover opacity-[0.12]"
-          priority
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/60 to-background" />
+        <div className="hero-ken-burns absolute inset-0 scale-110">
+          <Image
+            src={STOCK_IMAGES.forex}
+            alt=""
+            fill
+            className="object-cover opacity-[0.15]"
+            priority
+            sizes="100vw"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
+        <HeroAmbient accentHue={42} />
       </div>
       <div className="relative mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
-        <div className="hero-frame">
+        <div className="hero-frame hero-banner-glow">
           <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
             <div className="flex flex-col justify-center px-6 py-10 sm:px-10 lg:py-14">
               <div className="animate-fade-up">
                 <p className="eyebrow">Institutional-grade market desk</p>
                 <h1 className="mt-4 max-w-xl font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-balance sm:text-5xl lg:text-[3.25rem]">
                   Clarity at the speed of{" "}
-                  <span className="gradient-text">global markets</span>
+                  <span className="gradient-text gradient-text-animate">global markets</span>
                 </h1>
                 <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-[17px]">
                   Live prices, syndicated wire news, editorial forecasts, and

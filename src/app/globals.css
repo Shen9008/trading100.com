@@ -188,6 +188,123 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* ── Hero banner dynamics ── */
+  .hero-ken-burns {
+    animation: heroKenBurns 20s ease-in-out infinite alternate;
+  }
+  .hero-gradient-shift {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--hero-accent-h, 42) 62% 58% / 0.08),
+      transparent 40%,
+      hsl(168 45% 46% / 0.06),
+      transparent 70%,
+      hsl(var(--hero-accent-h, 42) 62% 58% / 0.05)
+    );
+    background-size: 200% 200%;
+    animation: heroGradientShift 12s ease infinite;
+  }
+  .hero-orb-1 {
+    top: -10%;
+    right: 5%;
+    animation: heroOrbFloat1 14s ease-in-out infinite;
+  }
+  .hero-orb-2 {
+    bottom: -15%;
+    left: 30%;
+    animation: heroOrbFloat2 18s ease-in-out infinite;
+  }
+  .hero-orb-3 {
+    top: 40%;
+    right: 35%;
+    animation: heroOrbFloat3 10s ease-in-out infinite;
+  }
+  .hero-particles {
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, hsl(42 62% 58% / 0.5), transparent),
+      radial-gradient(1px 1px at 30% 65%, hsl(168 45% 55% / 0.4), transparent),
+      radial-gradient(1px 1px at 55% 15%, white, transparent),
+      radial-gradient(1px 1px at 70% 80%, hsl(42 62% 58% / 0.35), transparent),
+      radial-gradient(1px 1px at 85% 40%, hsl(168 45% 55% / 0.3), transparent),
+      radial-gradient(1.5px 1.5px at 45% 50%, hsl(42 70% 72% / 0.4), transparent),
+      radial-gradient(1px 1px at 92% 70%, white, transparent);
+    animation: heroParticleDrift 25s linear infinite;
+  }
+  .hero-scan-line {
+    animation: heroScanLine 6s ease-in-out infinite;
+  }
+  .hero-shimmer-sweep {
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      hsl(42 62% 58% / 0.06) 50%,
+      transparent 60%
+    );
+    background-size: 200% 100%;
+    animation: heroShimmerSweep 8s ease-in-out infinite;
+  }
+  .hero-grid-scroll {
+    background-image:
+      linear-gradient(hsl(42 62% 58%) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(42 62% 58%) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: gridScroll 40s linear infinite;
+  }
+  .hero-banner-glow {
+    animation: heroBannerGlow 4s ease-in-out infinite;
+  }
+  .hero-graphic-panel {
+    animation: heroPanelFloat 6s ease-in-out infinite;
+  }
+  .hero-candle-pop {
+    transform-origin: bottom center;
+    animation: heroCandlePop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+  .hero-headline-slide {
+    opacity: 0;
+    animation: heroHeadlineSlide 0.5s ease forwards;
+  }
+  .hero-line-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: heroLineDraw 2s ease forwards;
+  }
+  .hero-pulse-dot {
+    animation: heroPulseDot 2s ease-in-out infinite;
+  }
+  .hero-dash-march {
+    animation: heroDashMarch 3s linear infinite;
+  }
+  .hero-book-float {
+    animation: heroBookFloat 5s ease-in-out infinite;
+  }
+  .hero-calendar-pulse {
+    animation: heroCalendarPulse 2s ease-in-out infinite;
+  }
+  .hero-orbit-ring {
+    animation: heroOrbitSpin 12s linear infinite;
+    transform-origin: 110px 60px;
+  }
+  .hero-orbit-item {
+    animation: heroOrbitPulse 3s ease-in-out infinite;
+  }
+  .hero-swap-pulse {
+    animation: heroSwapPulse 2s ease-in-out infinite;
+  }
+  .hero-ticker-flash {
+    animation: heroTickerFlash 3s ease-in-out infinite;
+  }
+  .hero-home-line-draw {
+    stroke-dasharray: 800;
+    stroke-dashoffset: 800;
+    animation: heroHomeLineDraw 3s ease forwards;
+  }
+  .gradient-text-animate {
+    background-size: 200% auto;
+    animation: heroGradientText 6s linear infinite;
+  }
 }
 
 @keyframes fadeUp {
@@ -220,6 +337,122 @@
   }
 }
 
+@keyframes heroKenBurns {
+  from { transform: scale(1.05) translate(0, 0); }
+  to { transform: scale(1.15) translate(-1%, -1%); }
+}
+
+@keyframes heroGradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes heroOrbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-20px, 15px) scale(1.1); }
+  66% { transform: translate(10px, -10px) scale(0.95); }
+}
+
+@keyframes heroOrbFloat2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(25px, -20px) scale(1.08); }
+}
+
+@keyframes heroOrbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-15px, 10px) scale(1.15); }
+}
+
+@keyframes heroParticleDrift {
+  from { transform: translateY(0); opacity: 0.6; }
+  to { transform: translateY(-30px); opacity: 1; }
+}
+
+@keyframes heroScanLine {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes heroShimmerSweep {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes heroBannerGlow {
+  0%, 100% { box-shadow: 0 0 0 1px hsl(var(--border) / 0.5), 0 40px 80px -40px rgba(0,0,0,0.7); }
+  50% { box-shadow: 0 0 0 1px hsl(var(--brand) / 0.15), 0 40px 80px -40px rgba(0,0,0,0.7), 0 0 40px -10px hsl(var(--brand) / 0.12); }
+}
+
+@keyframes heroPanelFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes heroCandlePop {
+  from { opacity: 0; transform: scaleY(0); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes heroHeadlineSlide {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes heroLineDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes heroPulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+@keyframes heroDashMarch {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -20; }
+}
+
+@keyframes heroBookFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes heroCalendarPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes heroOrbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes heroOrbitPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes heroSwapPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes heroTickerFlash {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0.6; }
+}
+
+@keyframes heroHomeLineDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes heroGradientText {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-fade-up-delay-1,
@@ -227,10 +460,35 @@
   .animate-fade-up-delay-3,
   .animate-shimmer,
   .animate-grid-scroll,
-  .glass-panel-hover:hover {
+  .glass-panel-hover:hover,
+  .hero-ken-burns,
+  .hero-gradient-shift,
+  .hero-orb-1,
+  .hero-orb-2,
+  .hero-orb-3,
+  .hero-particles,
+  .hero-scan-line,
+  .hero-shimmer-sweep,
+  .hero-grid-scroll,
+  .hero-banner-glow,
+  .hero-graphic-panel,
+  .hero-candle-pop,
+  .hero-headline-slide,
+  .hero-line-draw,
+  .hero-pulse-dot,
+  .hero-dash-march,
+  .hero-book-float,
+  .hero-calendar-pulse,
+  .hero-orbit-ring,
+  .hero-orbit-item,
+  .hero-swap-pulse,
+  .hero-ticker-flash,
+  .hero-home-line-draw,
+  .gradient-text-animate {
     animation: none;
     opacity: 1;
     transform: none;
+    stroke-dashoffset: 0;
   }
 }
 
