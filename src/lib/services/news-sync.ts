@@ -3,7 +3,7 @@ import type { Article } from "@/lib/data/articles";
 import type { WireHeadline } from "@/lib/api/wire-types";
 import { fetchNewsApiFinance } from "@/lib/api/newsapi";
 import { fetchMarketauxNews } from "@/lib/api/marketaux";
-import { fetchFinnhubNews } from "@/lib/api/finnhub";
+import { fetchFinnhubFinanceNews } from "@/lib/api/finnhub";
 import {
   newsapiToArticle,
   newsapiToWireHeadline,
@@ -57,7 +57,32 @@ export async function syncNewsFromPayload(
   return { articles, wire, source: "payload", fetchedAt };
 }
 
+export async function syncNewsFromFinnhub(
+  limit = 25
+): Promise<NewsSyncResult> {
+  const finnhubRaw = await fetchFinnhubFinanceNews(limit);
+  if (finnhubRaw.length === 0) {
+    return {
+      articles: [],
+      wire: [],
+      source: "none",
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+
+  const slice = finnhubRaw.slice(0, limit);
+  const articles = slice.map(finnhubToArticle);
+  const wire = slice.map(finnhubToWireHeadline);
+  const fetchedAt = await persistNews(articles, wire);
+  return { articles, wire, source: "finnhub", fetchedAt };
+}
+
 export async function syncNewsFromApis(limit = 25): Promise<NewsSyncResult> {
+  const finnhubResult = await syncNewsFromFinnhub(limit);
+  if (finnhubResult.articles.length > 0) {
+    return finnhubResult;
+  }
+
   const newsApiRaw = await fetchNewsApiFinance(limit);
   if (newsApiRaw.length > 0) {
     const articles = newsApiRaw.map(newsapiToArticle);
@@ -72,15 +97,6 @@ export async function syncNewsFromApis(limit = 25): Promise<NewsSyncResult> {
     const wire = marketauxRaw.map(marketauxToWireHeadline);
     const fetchedAt = await persistNews(articles, wire);
     return { articles, wire, source: "marketaux", fetchedAt };
-  }
-
-  const finnhubRaw = await fetchFinnhubNews("general");
-  if (finnhubRaw.length > 0) {
-    const slice = finnhubRaw.slice(0, limit);
-    const articles = slice.map(finnhubToArticle);
-    const wire = slice.map(finnhubToWireHeadline);
-    const fetchedAt = await persistNews(articles, wire);
-    return { articles, wire, source: "finnhub", fetchedAt };
   }
 
   return {

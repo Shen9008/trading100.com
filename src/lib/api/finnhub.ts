@@ -21,6 +21,12 @@ export type FinnhubQuote = {
   t: number;
 };
 
+const FINNHUB_NEWS_CATEGORIES = [
+  "general",
+  "forex",
+  "crypto",
+] as const;
+
 export async function fetchFinnhubNews(
   category: "general" | "forex" | "crypto" | "merger" = "general"
 ): Promise<FinnhubNewsItem[]> {
@@ -34,6 +40,26 @@ export async function fetchFinnhubNews(
 
   if (!res.ok) return [];
   return res.json();
+}
+
+/** Merges finance-relevant Finnhub categories for daily news batches. */
+export async function fetchFinnhubFinanceNews(
+  limit = 25
+): Promise<FinnhubNewsItem[]> {
+  const seen = new Set<number>();
+  const merged: FinnhubNewsItem[] = [];
+
+  for (const category of FINNHUB_NEWS_CATEGORIES) {
+    const items = await fetchFinnhubNews(category);
+    for (const item of items) {
+      if (seen.has(item.id)) continue;
+      seen.add(item.id);
+      merged.push(item);
+      if (merged.length >= limit) return merged;
+    }
+  }
+
+  return merged;
 }
 
 export async function fetchFinnhubQuote(symbol: string): Promise<FinnhubQuote | null> {

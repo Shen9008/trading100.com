@@ -20,14 +20,14 @@ Source **exactly 15** news articles covering:
 - Finance & markets
 
 ## Data sources (priority order)
-1. **RSS feeds** (no API key required):
+1. **Finnhub** (primary — `FINNHUB_API_KEY` on Worker): general + forex + crypto news
+2. **RSS feeds** (fallback, no API key):
    - BBC Business & Economy
    - CNBC Top News, Economy, Finance
    - Yahoo Finance
    - Investing.com Forex & Commodities
-2. **NewsAPI** (via GitHub Actions runner — not from Worker)
-3. **Marketaux** (fallback)
-4. **Finnhub** (fallback)
+3. **NewsAPI** (optional fallback — often blocked on Cloudflare IPs)
+4. **Marketaux** (optional fallback)
 
 ## Article format
 Each article is syndicated with:

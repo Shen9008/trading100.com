@@ -2,7 +2,11 @@ import type { Article } from "@/lib/data/articles";
 import type { WireHeadline } from "@/lib/api/wire-types";
 import { fetchAllRssItems } from "@/lib/api/rss-feeds";
 import { rssToArticle, rssToNewsApiArticle } from "@/lib/services/rss-news";
-import { syncNewsFromApis, syncNewsFromPayload } from "@/lib/services/news-sync";
+import {
+  syncNewsFromApis,
+  syncNewsFromFinnhub,
+  syncNewsFromPayload,
+} from "@/lib/services/news-sync";
 import type { NewsSyncResult } from "@/lib/services/news-sync";
 import { saveAutoNews, saveWireCache } from "@/lib/kv/forecasts-store";
 
@@ -59,10 +63,15 @@ async function persistMerged(
   return { articles, wire, source, fetchedAt };
 }
 
-/** Daily news subagent: source 15 finance articles from RSS + API fallbacks. */
+/** Daily news subagent: source 15 finance articles (Finnhub primary, RSS/API fallback). */
 export async function sourceDailyNewsArticles(
   limit = DAILY_NEWS_COUNT
 ): Promise<NewsSyncResult> {
+  const finnhubResult = await syncNewsFromFinnhub(limit);
+  if (finnhubResult.articles.length >= limit) {
+    return finnhubResult;
+  }
+
   const rssItems = await fetchAllRssItems(100);
   const onTopic = rssItems.filter(matchesFinanceTopics);
 
@@ -76,16 +85,34 @@ export async function sourceDailyNewsArticles(
     return apiResult;
   }
 
-  const seen = new Set(apiResult.articles.map((a) => a.sourceUrl ?? a.slug));
+  const seen = new Set(
+    [...finnhubResult.articles, ...apiResult.articles].map(
+      (a) => a.sourceUrl ?? a.slug
+    )
+  );
   const rssExtras = rssItems
     .filter((item) => !seen.has(item.link))
-    .slice(0, limit - apiResult.articles.length)
+    .slice(0, limit - finnhubResult.articles.length - apiResult.articles.length)
     .map(rssToArticle);
 
-  const merged = [...apiResult.articles, ...rssExtras].slice(0, limit);
+  const merged = [
+    ...finnhubResult.articles,
+    ...apiResult.articles,
+    ...rssExtras,
+  ].slice(0, limit);
+
   if (merged.length === 0) {
-    return apiResult;
+    return finnhubResult.articles.length > 0
+      ? finnhubResult
+      : apiResult;
   }
 
-  return persistMerged(merged, onTopic.length > 0 ? "payload" : apiResult.source);
+  const source: NewsSyncResult["source"] =
+    finnhubResult.articles.length > 0
+      ? "finnhub"
+      : apiResult.source !== "none"
+        ? apiResult.source
+        : "payload";
+
+  return persistMerged(merged, source);
 }

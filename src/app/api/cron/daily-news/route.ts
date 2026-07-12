@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         {
           error: "No articles sourced",
           source: result.source,
-          hint: "RSS feeds and API keys may be unavailable. Retry later or check secrets.",
+          hint: "Set FINNHUB_API_KEY on the Worker. RSS and other APIs are optional fallbacks.",
         },
         { status: 502 }
       );

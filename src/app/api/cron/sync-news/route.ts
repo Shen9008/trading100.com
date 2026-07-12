@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         {
           error: "No articles fetched",
           source: result.source,
-          hint: "NewsAPI blocks Cloudflare IPs. Set GitHub Actions secrets (NEWSAPI_API_KEY, CRON_SECRET) or configure MARKETAUX_API_KEY / FINNHUB_API_KEY on the Worker.",
+          hint: "Set FINNHUB_API_KEY on the Worker (primary). RSS and NewsAPI/Marketaux are optional fallbacks.",
         },
         { status: 502 }
       );
