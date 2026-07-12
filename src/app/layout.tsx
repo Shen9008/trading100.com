@@ -5,7 +5,8 @@ import { Footer } from "@/components/layout/Footer";
 import { AppBackground } from "@/components/layout/AppBackground";
 import { TickerTape } from "@/components/widgets/TickerTape";
 import { buildMetadata } from "@/lib/metadata";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
+import { HOME_KEYWORDS } from "@/lib/seo/page-seo";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -28,9 +29,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = buildMetadata({
   title: SITE_NAME,
-  description:
-    "Live forex, crypto, commodities, and stock market data with news, forecasts, and trading education.",
+  description: SITE_DESCRIPTION,
   path: "/",
+  keywords: HOME_KEYWORDS,
 });
 
 export default function RootLayout({

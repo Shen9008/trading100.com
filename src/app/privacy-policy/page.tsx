@@ -1,23 +1,33 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/metadata";
+import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 
 export const metadata: Metadata = buildMetadata({
   title: "Privacy Policy",
-  description: "Privacy policy for Trading 100.",
+  description:
+    "Privacy policy for Trading 100 — how we collect, use, and protect your information when you visit our financial markets platform.",
   path: "/privacy-policy",
+  keywords: ["privacy policy", "Trading 100 privacy", "data protection"],
 });
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 lg:px-6">
+    <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
+      <PageHeroBanner
+        title="Privacy Policy"
+        description="Last updated: July 9, 2026"
+        eyebrow="Legal"
+        variant="legal"
+        compact
+        className="mb-8"
+      />
+
+      <div className="mx-auto max-w-3xl">
       <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
         <strong>DRAFT — Have reviewed by a lawyer before launch.</strong>
       </div>
 
-      <h1 className="text-3xl font-bold">Privacy Policy</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: July 9, 2026</p>
-
-      <div className="mt-6 space-y-4 text-sm leading-relaxed">
+      <div className="space-y-4 text-sm leading-relaxed">
         <p>
           Trading 100 (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) respects your privacy. This policy
           describes how we collect, use, and protect information when you visit trading100.com.
@@ -53,6 +63,7 @@ export default function PrivacyPolicyPage() {
             privacy@trading100.com
           </a>
         </p>
+      </div>
       </div>
     </div>
   );

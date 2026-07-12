@@ -1,26 +1,45 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { buildMetadata } from "@/lib/metadata";
+import { buildMetadataWithCanonical } from "@/lib/metadata";
 import { getAutoPostedNews, getWireHeadlines } from "@/lib/api/wire-news";
 import { getLatestArticles } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { JsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { PageShell } from "@/components/layout/PageShell";
 import { GlassCard } from "@/components/layout/GlassCard";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { formatRelativeTime } from "@/lib/utils";
-
-export const metadata: Metadata = buildMetadata({
-  title: "Financial News",
-  description: "Latest financial news covering forex, crypto, commodities, stocks, and global markets.",
-  path: "/news",
-});
+import { getNewsCategorySeo } from "@/lib/seo/page-seo";
 
 export const revalidate = 300;
 
 type NewsPageProps = {
   searchParams: { page?: string; category?: string };
 };
+
+export async function generateMetadata({
+  searchParams,
+}: NewsPageProps): Promise<Metadata> {
+  const category = searchParams.category;
+  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
+  const seo = getNewsCategorySeo(category);
+
+  const title =
+    page > 1 ? `${seo.title} — Page ${page}` : seo.title;
+
+  const path =
+    page > 1
+      ? `${seo.path}${seo.path.includes("?") ? "&" : "?"}page=${page}`
+      : seo.path;
+
+  return buildMetadataWithCanonical({
+    title,
+    description: seo.description,
+    path,
+    canonicalPath: seo.path.split("?")[0],
+    keywords: seo.keywords,
+  });
+}
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
@@ -35,16 +54,19 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   return (
     <>
       <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: "https://trading100.com" },
-          { name: "News", url: "https://trading100.com/news" },
-        ])}
+        data={breadcrumbJsonLd(
+          breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: "News", path: "/news" },
+          ])
+        )}
       />
 
       <PageShell
         title="Financial News"
         description="Auto-syndicated market news plus original analysis from Trading 100."
         eyebrow="Newsroom"
+        variant="news"
       >
         <section aria-labelledby="auto-news">
           <SectionHeader

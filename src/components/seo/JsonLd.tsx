@@ -1,3 +1,6 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { seoUrl } from "@/lib/seo/urls";
+
 type JsonLdProps = {
   data: Record<string, unknown> | Record<string, unknown>[];
 };
@@ -15,12 +18,36 @@ export function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Trading 100",
-    url: "https://trading100.com",
-    logo: "https://trading100.com/logo.png",
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: seoUrl("/logo.png"),
     description:
-      "Live market data, financial news, forecasts, and trading education.",
+      "Live market data, financial news, forecasts, and trading education for forex, crypto, commodities, indices, and stocks.",
     sameAs: [],
+  };
+}
+
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    description:
+      "Live forex, crypto, commodities, and stock market data with news, forecasts, and trading education.",
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/markets?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   };
 }
 
@@ -31,10 +58,11 @@ export function articleJsonLd(article: {
   publishedAt: string;
   image: string;
   slug: string;
+  category?: string;
 }) {
   return {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "NewsArticle",
     headline: article.title,
     description: article.excerpt,
     author: {
@@ -42,22 +70,65 @@ export function articleJsonLd(article: {
       name: article.author,
     },
     datePublished: article.publishedAt,
+    dateModified: article.publishedAt,
     image: article.image,
-    url: `https://trading100.com/news/${article.slug}`,
+    url: seoUrl(`/news/${article.slug}`),
+    mainEntityOfPage: seoUrl(`/news/${article.slug}`),
+    articleSection: article.category,
     publisher: {
       "@type": "Organization",
-      name: "Trading 100",
+      name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: "https://trading100.com/logo.png",
+        url: seoUrl("/logo.png"),
       },
     },
   };
 }
 
-export function breadcrumbJsonLd(
-  items: { name: string; url: string }[]
-) {
+export function learningResourceJsonLd(guide: {
+  title: string;
+  excerpt: string;
+  slug: string;
+  image: string;
+  publishedAt: string;
+  level: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    name: guide.title,
+    description: guide.excerpt,
+    url: seoUrl(`/education/${guide.slug}`),
+    image: guide.image,
+    datePublished: guide.publishedAt,
+    educationalLevel: guide.level,
+    learningResourceType: "Guide",
+    provider: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+  };
+}
+
+export function financialProductJsonLd(product: {
+  name: string;
+  symbol: string;
+  url: string;
+  category: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FinancialProduct",
+    name: product.name,
+    description: `Live ${product.name} (${product.symbol}) price chart and market data.`,
+    url: product.url,
+    category: product.category,
+  };
+}
+
+export function breadcrumbJsonLd(items: { name: string; url: string }[]) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -65,7 +136,7 @@ export function breadcrumbJsonLd(
       "@type": "ListItem",
       position: i + 1,
       name: item.name,
-      item: item.url,
+      item: item.url.startsWith("http") ? item.url : seoUrl(item.url),
     })),
   };
 }
@@ -83,4 +154,14 @@ export function faqJsonLd(faqs: { question: string; answer: string }[]) {
       },
     })),
   };
+}
+
+/** Build breadcrumb items using SITE_URL */
+export function breadcrumbs(
+  items: { name: string; path: string }[]
+): { name: string; url: string }[] {
+  return items.map((item) => ({
+    name: item.name,
+    url: seoUrl(item.path),
+  }));
 }

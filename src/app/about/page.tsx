@@ -1,27 +1,39 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/metadata";
 import { SITE_NAME } from "@/lib/constants";
-import { JsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
+import { ABOUT_KEYWORDS } from "@/lib/seo/page-seo";
+import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 
 export const metadata: Metadata = buildMetadata({
-  title: "About Us",
-  description: `Learn about ${SITE_NAME} — live market data, analysis, and trading education.`,
+  title: "About Trading 100 — Market Data & Trading Education",
+  description: `Learn about ${SITE_NAME} — independent financial markets media with live data, news, forecasts, and trading education for forex, crypto, and stocks.`,
   path: "/about",
+  keywords: ABOUT_KEYWORDS,
 });
 
 export default function AboutPage() {
   return (
     <>
       <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: "https://trading100.com" },
-          { name: "About", url: "https://trading100.com/about" },
-        ])}
+        data={breadcrumbJsonLd(
+          breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: "About", path: "/about" },
+          ])
+        )}
       />
 
-      <div className="mx-auto max-w-3xl px-4 py-8 lg:px-6">
-        <h1 className="text-3xl font-bold">About Trading 100</h1>
-        <div className="mt-6 space-y-4 leading-relaxed text-foreground/90">
+      <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
+        <PageHeroBanner
+          title="About Trading 100"
+          description="Independent financial markets media for traders who want clarity, data, and education — without the noise."
+          eyebrow="Our Story"
+          variant="about"
+          className="mb-10"
+        />
+
+        <div className="mx-auto max-w-3xl space-y-4 leading-relaxed text-foreground/90">
           <p>
             Trading 100 is an independent financial markets media platform built for
             traders and investors who want clear data, thoughtful analysis, and

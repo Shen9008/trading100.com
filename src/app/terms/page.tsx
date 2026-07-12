@@ -1,23 +1,33 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/metadata";
+import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 
 export const metadata: Metadata = buildMetadata({
   title: "Terms of Service",
-  description: "Terms of service for Trading 100.",
+  description:
+    "Terms of service for Trading 100 — rules for using our market data, news, forecasts, and trading education platform.",
   path: "/terms",
+  keywords: ["terms of service", "Trading 100 terms", "website terms"],
 });
 
 export default function TermsPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 lg:px-6">
+    <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
+      <PageHeroBanner
+        title="Terms of Service"
+        description="Last updated: July 9, 2026"
+        eyebrow="Legal"
+        variant="legal"
+        compact
+        className="mb-8"
+      />
+
+      <div className="mx-auto max-w-3xl">
       <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
         <strong>DRAFT — Have reviewed by a lawyer before launch.</strong>
       </div>
 
-      <h1 className="text-3xl font-bold">Terms of Service</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: July 9, 2026</p>
-
-      <div className="mt-6 space-y-4 text-sm leading-relaxed">
+      <div className="space-y-4 text-sm leading-relaxed">
         <p>
           By accessing or using Trading 100 (trading100.com), you agree to these Terms of
           Service. If you do not agree, please do not use the site.
@@ -50,6 +60,7 @@ export default function TermsPage() {
           These terms shall be governed by applicable laws in the jurisdiction where Trading
           100 operates, without regard to conflict of law principles.
         </p>
+      </div>
       </div>
     </div>
   );

@@ -1,22 +1,34 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/metadata";
 import { DisclaimerBanner } from "@/components/layout/DisclaimerBanner";
+import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Disclaimer",
-  description: "Legal disclaimer and risk disclosure for Trading 100.",
+  title: "Disclaimer — Risk Disclosure",
+  description:
+    "Legal disclaimer and risk disclosure for Trading 100. Market data and analysis are for educational purposes only — not financial advice.",
   path: "/disclaimer",
+  keywords: ["trading disclaimer", "risk disclosure", "not financial advice", "Trading 100 disclaimer"],
 });
 
 export default function DisclaimerPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 lg:px-6">
+    <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
+      <PageHeroBanner
+        title="Disclaimer"
+        description="Risk disclosure and legal information for Trading 100 visitors."
+        eyebrow="Legal"
+        variant="legal"
+        compact
+        className="mb-8"
+      />
+
+      <div className="mx-auto max-w-3xl">
       <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
         <strong>DRAFT — Have reviewed by a lawyer before launch.</strong>
       </div>
 
-      <h1 className="text-3xl font-bold">Disclaimer</h1>
-      <div className="mt-6 space-y-4 text-sm leading-relaxed text-foreground/90">
+      <div className="space-y-4 text-sm leading-relaxed text-foreground/90">
         <p>
           The information provided on Trading 100 (trading100.com) is for general
           informational and educational purposes only. Nothing on this website
@@ -59,6 +71,7 @@ export default function DisclaimerPage() {
       </div>
       <div className="mt-8">
         <DisclaimerBanner />
+      </div>
       </div>
     </div>
   );

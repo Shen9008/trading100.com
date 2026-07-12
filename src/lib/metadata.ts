@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from "./constants";
+import { DEFAULT_OG_IMAGE } from "./seo/page-seo";
 
 type PageMeta = {
   title: string;
@@ -7,37 +8,98 @@ type PageMeta = {
   path?: string;
   ogImage?: string;
   noIndex?: boolean;
+  keywords?: string[];
+  ogType?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  authors?: string[];
+  section?: string;
 };
+
+function resolveOgImage(ogImage?: string): string {
+  if (!ogImage) return DEFAULT_OG_IMAGE;
+  if (ogImage.startsWith("http://") || ogImage.startsWith("https://")) {
+    return ogImage;
+  }
+  return `${SITE_URL}${ogImage.startsWith("/") ? ogImage : `/${ogImage}`}`;
+}
 
 export function buildMetadata({
   title,
   description = SITE_DESCRIPTION,
   path = "",
-  ogImage = "/og-default.png",
+  ogImage,
   noIndex = false,
+  keywords,
+  ogType = "website",
+  publishedTime,
+  modifiedTime,
+  authors,
+  section,
 }: PageMeta): Metadata {
   const url = `${SITE_URL}${path}`;
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
+  const imageUrl = resolveOgImage(ogImage);
+
+  const openGraphBase = {
+    title: fullTitle,
+    description,
+    url,
+    siteName: SITE_NAME,
+    type: ogType,
+    locale: "en_US" as const,
+    images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
+    ...(ogType === "article"
+      ? {
+          publishedTime,
+          modifiedTime,
+          authors,
+          section,
+        }
+      : {}),
+  };
+
+  const canonicalPath = (path ?? "").split("?")[0];
+  const canonical = canonicalPath
+    ? `${SITE_URL}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`
+    : SITE_URL;
 
   return {
     title: fullTitle,
     description,
+    keywords: keywords?.length ? keywords : undefined,
     metadataBase: new URL(SITE_URL),
-    alternates: { canonical: url },
-    openGraph: {
-      title: fullTitle,
-      description,
-      url,
-      siteName: SITE_NAME,
-      type: "website",
-      images: [{ url: ogImage, width: 1200, height: 630, alt: SITE_NAME }],
-    },
+    alternates: { canonical },
+    openGraph: openGraphBase,
     twitter: {
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: [ogImage],
+      images: [imageUrl],
     },
-    robots: noIndex ? { index: false, follow: false } : undefined,
+    robots: noIndex
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+          },
+        },
+  };
+}
+
+/** Canonical URL without query params for paginated/filtered views */
+export function buildMetadataWithCanonical(
+  meta: PageMeta & { canonicalPath?: string }
+): Metadata {
+  const base = buildMetadata(meta);
+  const canonical = `${SITE_URL}${meta.canonicalPath ?? meta.path ?? ""}`.split("?")[0];
+  return {
+    ...base,
+    alternates: { canonical },
   };
 }

@@ -53,6 +53,8 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "2xl": "1rem",
+        "3xl": "1.25rem",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
@@ -60,15 +62,22 @@ const config: Config = {
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       boxShadow: {
-        glow: "0 0 24px -4px hsl(var(--brand) / 0.35)",
-        "glow-cyan": "0 0 24px -4px hsl(var(--accent) / 0.3)",
+        glow: "0 0 32px -8px hsl(var(--brand) / 0.4)",
+        "glow-sm": "0 0 16px -4px hsl(var(--brand) / 0.35)",
+        "glow-teal": "0 0 24px -6px hsl(var(--accent) / 0.35)",
+        premium: "0 24px 48px -12px rgba(0, 0, 0, 0.55)",
       },
       backgroundImage: {
         "grid-pattern":
-          "linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          "linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px)",
+        "noise":
+          "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
       },
       backgroundSize: {
-        grid: "64px 64px",
+        grid: "72px 72px",
+      },
+      letterSpacing: {
+        luxury: "0.18em",
       },
     },
   },

@@ -7,11 +7,10 @@ import {
   getEducationGuides,
 } from "@/lib/data/education";
 import { DisclaimerBanner } from "@/components/layout/DisclaimerBanner";
-import { JsonLd, breadcrumbJsonLd, faqJsonLd } from "@/components/seo/JsonLd";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
+import { JsonLd, breadcrumbJsonLd, faqJsonLd, breadcrumbs, learningResourceJsonLd } from "@/components/seo/JsonLd";
 import { EducationContent } from "@/components/education/EducationContent";
-import { isOptimizedImageHost } from "@/lib/constants/images";
+import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
+import { getEducationKeywords } from "@/lib/seo/page-seo";
 
 type EducationArticleProps = {
   params: { slug: string };
@@ -31,6 +30,11 @@ export async function generateMetadata({
     title: guide.title,
     description: guide.excerpt,
     path: `/education/${guide.slug}`,
+    ogImage: guide.image,
+    keywords: getEducationKeywords(guide.slug),
+    ogType: "article",
+    publishedTime: guide.publishedAt,
+    section: "Trading Education",
   });
 }
 
@@ -41,14 +45,23 @@ export default function EducationArticlePage({ params }: EducationArticleProps) 
   return (
     <>
       <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: "https://trading100.com" },
-          { name: "Education", url: "https://trading100.com/education" },
-          {
-            name: guide.title,
-            url: `https://trading100.com/education/${guide.slug}`,
-          },
-        ])}
+        data={breadcrumbJsonLd(
+          breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: "Education", path: "/education" },
+            { name: guide.title, path: `/education/${guide.slug}` },
+          ])
+        )}
+      />
+      <JsonLd
+        data={learningResourceJsonLd({
+          title: guide.title,
+          excerpt: guide.excerpt,
+          slug: guide.slug,
+          image: guide.image,
+          publishedAt: guide.publishedAt,
+          level: guide.level,
+        })}
       />
       {guide.faqs && <JsonLd data={faqJsonLd(guide.faqs)} />}
 
@@ -57,33 +70,14 @@ export default function EducationArticlePage({ params }: EducationArticleProps) 
           ← All Guides
         </Link>
 
-        <header className="mt-4">
-          <div className="flex items-center gap-2">
-            <Badge variant="education">{guide.level}</Badge>
-            <span className="text-sm text-muted-foreground">{guide.readTime} read</span>
-          </div>
-          <h1 className="mt-3 text-3xl font-bold">{guide.title}</h1>
-          <p className="mt-2 text-muted-foreground">{guide.excerpt}</p>
-        </header>
-
-        <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-lg border border-border">
-          {isOptimizedImageHost(guide.image) ? (
-            <Image
-              src={guide.image}
-              alt={guide.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={guide.image}
-              alt={guide.title}
-              className="h-full w-full object-cover"
-            />
-          )}
-        </div>
+        <PageHeroBanner
+          title={guide.title}
+          description={`${guide.level} · ${guide.readTime} read — ${guide.excerpt}`}
+          eyebrow="Trading Academy"
+          variant="education"
+          image={guide.image}
+          className="mt-4"
+        />
 
         <div className="mt-8">
           <EducationContent content={guide.content} />

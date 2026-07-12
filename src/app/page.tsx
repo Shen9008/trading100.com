@@ -1,12 +1,16 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import type { Metadata } from "next";
 import { FeaturedArticleCard } from "@/components/articles/FeaturedArticleCard";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { MarketDataTable } from "@/components/market/MarketDataTable";
 import { HeroStrip } from "@/components/layout/HeroStrip";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { GlassCard } from "@/components/layout/GlassCard";
-import { JsonLd, organizationJsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/components/seo/JsonLd";
+import { buildMetadata } from "@/lib/metadata";
+import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
+import { HOME_KEYWORDS } from "@/lib/seo/page-seo";
 import { fetchCryptoMarkets } from "@/lib/api/coingecko";
 import {
   getFeaturedArticles,
@@ -31,6 +35,13 @@ const EconomicCalendarWidget = dynamic(
   }
 );
 
+export const metadata: Metadata = buildMetadata({
+  title: `${SITE_NAME} — Live Market Data, News & Trading Education`,
+  description: SITE_DESCRIPTION,
+  path: "/",
+  keywords: HOME_KEYWORDS,
+});
+
 export default async function HomePage() {
   let cryptoData: Awaited<ReturnType<typeof fetchCryptoMarkets>> = [];
   try {
@@ -50,6 +61,7 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={organizationJsonLd()} />
+      <JsonLd data={websiteJsonLd()} />
 
       <HeroStrip />
 

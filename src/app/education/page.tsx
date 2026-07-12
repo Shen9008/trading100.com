@@ -2,16 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { buildMetadata } from "@/lib/metadata";
 import { getEducationGuides } from "@/lib/data/education";
-import { JsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { PageShell } from "@/components/layout/PageShell";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen } from "lucide-react";
+import { EDUCATION_KEYWORDS } from "@/lib/seo/page-seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Trading Education",
+  title: "Trading Education — Free Guides & Tutorials",
   description:
     "14+ free trading guides on moving averages, MACD, gold trading, forex position sizing, crypto, economic calendar, fibonacci, and trading psychology.",
   path: "/education",
+  keywords: EDUCATION_KEYWORDS,
 });
 
 export default function EducationPage() {
@@ -20,16 +22,19 @@ export default function EducationPage() {
   return (
     <>
       <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: "https://trading100.com" },
-          { name: "Education", url: "https://trading100.com/education" },
-        ])}
+        data={breadcrumbJsonLd(
+          breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: "Education", path: "/education" },
+          ])
+        )}
       />
 
       <PageShell
         title="Trading Education"
         description="Learn forex fundamentals, technical analysis, and risk management with our in-house guides."
         eyebrow="Academy"
+        variant="education"
       >
         <div className="grid gap-4 sm:grid-cols-2">
           {guides.map((guide) => (

@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { buildMetadata } from "@/lib/metadata";
+import { buildMetadataWithCanonical } from "@/lib/metadata";
 import { getForecasts, type ForecastAssetFilter } from "@/lib/data/forecasts";
 import { FeaturedArticleCard } from "@/components/articles/FeaturedArticleCard";
-import { JsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { PageShell } from "@/components/layout/PageShell";
 import { cn } from "@/lib/utils";
-
-export const metadata: Metadata = buildMetadata({
-  title: "Market Forecasts",
-  description:
-    "Expert market forecasts for forex, crypto, commodities, indices, and stocks.",
-  path: "/forecasts",
-});
+import { getForecastFilterSeo } from "@/lib/seo/page-seo";
 
 const FILTERS: { id: ForecastAssetFilter; label: string }[] = [
   { id: "all", label: "All" },
@@ -27,6 +21,22 @@ type ForecastsPageProps = {
   searchParams: { filter?: string };
 };
 
+export async function generateMetadata({
+  searchParams,
+}: ForecastsPageProps): Promise<Metadata> {
+  const filter = searchParams.filter ?? "all";
+  const seo = getForecastFilterSeo(filter);
+  const path = filter === "all" ? "/forecasts" : `/forecasts?filter=${filter}`;
+
+  return buildMetadataWithCanonical({
+    title: seo.title,
+    description: seo.description,
+    path,
+    canonicalPath: "/forecasts",
+    keywords: seo.keywords,
+  });
+}
+
 export default async function ForecastsPage({ searchParams }: ForecastsPageProps) {
   const filter = (searchParams.filter ?? "all") as ForecastAssetFilter;
   const forecasts = await getForecasts(filter);
@@ -34,16 +44,19 @@ export default async function ForecastsPage({ searchParams }: ForecastsPageProps
   return (
     <>
       <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: "https://trading100.com" },
-          { name: "Forecasts", url: "https://trading100.com/forecasts" },
-        ])}
+        data={breadcrumbJsonLd(
+          breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: "Forecasts", path: "/forecasts" },
+          ])
+        )}
       />
 
       <PageShell
         title="Market Forecasts"
         description="In-house outlooks and scenario analysis. For educational purposes only."
         eyebrow="Outlook"
+        variant="forecasts"
       >
         <div className="mb-8 flex flex-wrap gap-2">
           {FILTERS.map((f) => (

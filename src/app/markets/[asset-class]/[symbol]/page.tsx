@@ -7,8 +7,12 @@ import { ASSET_CLASSES } from "@/lib/constants";
 import { MARKET_INSTRUMENTS } from "@/lib/data/market-instruments";
 import { getLatestArticles } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { JsonLd, breadcrumbJsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, breadcrumbJsonLd, breadcrumbs, financialProductJsonLd } from "@/components/seo/JsonLd";
 import { Badge } from "@/components/ui/badge";
+import { getInstrumentSeo } from "@/lib/seo/page-seo";
+import { seoUrl } from "@/lib/seo/urls";
+import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
+import { assetClassToHeroVariant } from "@/lib/hero/variants";
 
 const TradingViewChart = dynamic(
   () => import("@/components/widgets/TradingViewChart").then((m) => m.TradingViewChart),
@@ -73,10 +77,24 @@ export async function generateMetadata({
   const resolved = resolveInstrument(params["asset-class"], params.symbol);
   if (!resolved) return buildMetadata({ title: "Instrument Not Found", noIndex: true });
 
+  const assetClassId =
+    "assetClass" in resolved ? resolved.assetClass.id : ASSET_CLASSES.find((a) => a.slug === params["asset-class"])!.id;
+  const assetClassLabel =
+    "assetClass" in resolved ? resolved.assetClass.label : ASSET_CLASSES.find((a) => a.slug === params["asset-class"])!.label;
+
+  const seo = getInstrumentSeo(
+    resolved.name,
+    resolved.symbol,
+    assetClassId,
+    assetClassLabel
+  );
+
   return buildMetadata({
-    title: `${resolved.name} (${resolved.symbol}) Price & Chart`,
-    description: `Live ${resolved.name} price, chart, key stats, and related news on Trading 100.`,
+    title: seo.title,
+    description: seo.description,
     path: `/markets/${params["asset-class"]}/${params.symbol}`,
+    ogImage: seo.ogImage,
+    keywords: seo.keywords,
   });
 }
 
@@ -97,34 +115,47 @@ export default function InstrumentPage({ params }: InstrumentPageProps) {
   return (
     <>
       <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: "https://trading100.com" },
-          { name: "Markets", url: "https://trading100.com/markets" },
-          {
-            name: assetClass.label,
-            url: `https://trading100.com/markets?tab=${assetClass.slug}`,
-          },
-          {
-            name: instrument.symbol,
-            url: `https://trading100.com/markets/${params["asset-class"]}/${params.symbol}`,
-          },
-        ])}
+        data={financialProductJsonLd({
+          name: instrument.name,
+          symbol: instrument.symbol,
+          url: seoUrl(`/markets/${params["asset-class"]}/${params.symbol}`),
+          category: assetClass.label,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd(
+          breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: "Markets", path: "/markets" },
+            { name: assetClass.label, path: `/markets?tab=${assetClass.slug}` },
+            {
+              name: instrument.symbol,
+              path: `/markets/${params["asset-class"]}/${params.symbol}`,
+            },
+          ])
+        )}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
-        <div className="mb-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold">{instrument.name}</h1>
+        <PageHeroBanner
+          title={instrument.name}
+          description={`Live ${instrument.symbol} price chart, key stats, and related market news.`}
+          eyebrow={assetClass.label}
+          variant={assetClassToHeroVariant(assetClass.id)}
+          compact
+          className="mb-8"
+        >
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <Badge variant="outline">{instrument.symbol}</Badge>
             <Badge>{assetClass.label}</Badge>
+            <Link
+              href="/markets"
+              className="text-sm text-brand hover:underline"
+            >
+              ← Back to Markets
+            </Link>
           </div>
-          <Link
-            href="/markets"
-            className="mt-2 inline-block text-sm text-brand hover:underline"
-          >
-            ← Back to Markets
-          </Link>
-        </div>
+        </PageHeroBanner>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">

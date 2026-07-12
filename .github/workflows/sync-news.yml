@@ -10,54 +10,100 @@ jobs:
   sync-news:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch from NewsAPI and push to Trading 100
+      - name: Fetch market news and push to Trading 100
         env:
           NEWSAPI_API_KEY: ${{ secrets.NEWSAPI_API_KEY }}
+          MARKETAUX_API_KEY: ${{ secrets.MARKETAUX_API_KEY }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: ${{ vars.SITE_URL || 'https://trading100.spartasoftofficial.workers.dev' }}
         run: |
           set -euo pipefail
-          if [ -z "$NEWSAPI_API_KEY" ]; then
-            echo "NEWSAPI_API_KEY secret is required"
-            exit 1
-          fi
+
           if [ -z "$CRON_SECRET" ]; then
-            echo "CRON_SECRET secret is required"
+            echo "CRON_SECRET GitHub secret is required"
             exit 1
           fi
-
-          curl -sf -H "X-Api-Key: $NEWSAPI_API_KEY" \
-            "https://newsapi.org/v2/top-headlines?category=business&language=en&pageSize=25" \
-            > headlines.json
-
-          curl -sf -H "X-Api-Key: $NEWSAPI_API_KEY" \
-            "https://newsapi.org/v2/everything?q=stock+market+OR+forex+OR+bitcoin&language=en&sortBy=publishedAt&pageSize=25" \
-            > everything.json
 
           python3 <<'PY'
           import json
+          import os
+          import urllib.request
+          import urllib.error
 
-          seen = set()
           articles = []
-          for path in ("headlines.json", "everything.json"):
-              try:
-                  data = json.load(open(path))
-              except Exception:
-                  continue
-              for a in data.get("articles", []):
+          seen = set()
+
+          def add_articles(items):
+              for a in items or []:
                   url = a.get("url")
                   if not url or url in seen or not a.get("title"):
                       continue
                   seen.add(url)
                   articles.append(a)
 
+          newsapi_key = os.environ.get("NEWSAPI_API_KEY", "")
+          if newsapi_key:
+              for endpoint in (
+                  "https://newsapi.org/v2/top-headlines?category=business&language=en&pageSize=25",
+                  "https://newsapi.org/v2/everything?q=stock+market+OR+forex+OR+bitcoin&language=en&sortBy=publishedAt&pageSize=25",
+              ):
+                  req = urllib.request.Request(endpoint, headers={"X-Api-Key": newsapi_key})
+                  try:
+                      with urllib.request.urlopen(req, timeout=30) as res:
+                          data = json.load(res)
+                          add_articles(data.get("articles"))
+                          print(f"NewsAPI {endpoint.split('?')[0].split('/')[-1]}: {len(data.get('articles', []))} items")
+                  except urllib.error.HTTPError as e:
+                      print(f"NewsAPI error {e.code}: {e.reason}")
+                  except Exception as e:
+                      print(f"NewsAPI fetch failed: {e}")
+          else:
+              print("NEWSAPI_API_KEY not set — skipping NewsAPI")
+
+          marketaux_key = os.environ.get("MARKETAUX_API_KEY", "")
+          if not articles and marketaux_key:
+              endpoint = (
+                  "https://api.marketaux.com/v1/news/all?"
+                  f"api_token={marketaux_key}&language=en&filter_entities=true&limit=40"
+              )
+              try:
+                  with urllib.request.urlopen(endpoint, timeout=30) as res:
+                      data = json.load(res)
+                      for item in data.get("data", []):
+                          add_articles([{
+                              "source": {"id": None, "name": item.get("source", "Marketaux")},
+                              "author": item.get("source"),
+                              "title": item.get("title"),
+                              "description": item.get("description") or item.get("snippet"),
+                              "url": item.get("url"),
+                              "urlToImage": item.get("image_url"),
+                              "publishedAt": item.get("published_at"),
+                              "content": item.get("snippet"),
+                          }])
+                      print(f"Marketaux: {len(data.get('data', []))} items")
+              except Exception as e:
+                  print(f"Marketaux fetch failed: {e}")
+
+          if not articles:
+              print("No articles fetched from any source")
+              exit(1)
+
           payload = {"articles": articles[:40]}
-          json.dump(payload, open("payload.json", "w"))
-          print(f"Prepared {len(payload['articles'])} articles")
+          with open("payload.json", "w", encoding="utf-8") as f:
+              json.dump(payload, f)
+          print(f"Prepared {len(payload['articles'])} articles for sync")
           PY
 
-          curl -sf -X POST \
+          HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" -X POST \
             -H "Authorization: Bearer $CRON_SECRET" \
             -H "Content-Type: application/json" \
             --data-binary @payload.json \
-            "$SITE_URL/api/cron/sync-news"
+            "$SITE_URL/api/cron/sync-news")
+
+          echo "Sync response ($HTTP_CODE):"
+          cat response.json
+          echo ""
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            exit 1
+          fi
