@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { buildMetadata } from "@/lib/metadata";
 import {
   ORIGINAL_ARTICLES,
@@ -10,11 +10,13 @@ import {
 } from "@/lib/data/articles";
 import { FORECAST_ARTICLES, getForecastBySlug } from "@/lib/data/forecasts";
 import { DisclaimerBanner } from "@/components/layout/DisclaimerBanner";
+import { MarkdownContent } from "@/components/content/MarkdownContent";
 import { JsonLd, articleJsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { formatRelativeTime } from "@/lib/utils";
 import { getArticleKeywords } from "@/lib/seo/page-seo";
 import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 import type { HeroVariant } from "@/lib/hero/variants";
+import { forecastArticlePath, isForecastArticle } from "@/lib/forecasts/paths";
 
 type ArticlePageProps = {
   params: { slug: string };
@@ -36,10 +38,14 @@ export async function generateMetadata({
   const article = await getContentBySlug(params.slug);
   if (!article) return buildMetadata({ title: "Article Not Found", noIndex: true });
 
+  const path = isForecastArticle(article)
+    ? forecastArticlePath(article.slug)
+    : `/news/${article.slug}`;
+
   return buildMetadata({
     title: article.title,
     description: article.excerpt,
-    path: `/news/${article.slug}`,
+    path,
     ogImage: article.image,
     keywords: getArticleKeywords(article.category, article.title),
     ogType: "article",
@@ -47,39 +53,6 @@ export async function generateMetadata({
     modifiedTime: article.publishedAt,
     authors: [article.author],
     section: article.category,
-  });
-}
-
-function renderMarkdown(content: string) {
-  return content.split("\n\n").map((block, i) => {
-    if (block.startsWith("## ")) {
-      return (
-        <h2 key={i} className="mb-3 mt-6 text-xl font-bold">
-          {block.replace("## ", "")}
-        </h2>
-      );
-    }
-    if (block.startsWith("**") && block.includes("**:")) {
-      const [bold, ...rest] = block.split(":");
-      return (
-        <p key={i} className="mb-3 leading-relaxed">
-          <strong>{bold.replace(/\*\*/g, "")}:</strong>
-          {rest.join(":")}
-        </p>
-      );
-    }
-    if (block.startsWith("*") && block.endsWith("*")) {
-      return (
-        <p key={i} className="mt-6 text-sm italic text-muted-foreground">
-          {block.replace(/^\*|\*$/g, "")}
-        </p>
-      );
-    }
-    return (
-      <p key={i} className="mb-3 leading-relaxed text-foreground/90">
-        {block}
-      </p>
-    );
   });
 }
 
@@ -99,6 +72,10 @@ function categoryToHeroVariant(category: ArticleCategory): HeroVariant {
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const article = await getContentBySlug(params.slug);
   if (!article) notFound();
+
+  if (isForecastArticle(article)) {
+    redirect(forecastArticlePath(article.slug));
+  }
 
   return (
     <>
@@ -127,8 +104,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           className="mt-4"
         />
 
-        <div className="prose prose-slate mt-8 max-w-none">
-          {renderMarkdown(article.content)}
+        <div className="mt-8">
+          <MarkdownContent content={article.content} className="prose-content" />
         </div>
 
         {!article.isOriginal && article.sourceUrl && (

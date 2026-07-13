@@ -81,7 +81,7 @@ export default async function ForecastsPage({ searchParams }: ForecastsPageProps
             <FeaturedArticleCard
               key={forecast.slug}
               article={forecast}
-              href={`/news/${forecast.slug}`}
+              href={`/forecasts/${forecast.slug}`}
             />
           ))}
         </div>

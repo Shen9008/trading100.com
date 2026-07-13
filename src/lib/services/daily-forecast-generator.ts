@@ -37,6 +37,7 @@ type ForecastSectionInput = {
   technical: string;
   keyLevels: string[];
   chartPlaceholder: string;
+  indicatorSignals?: string;
   fundamentals: string;
   bullish: string;
   bearish: string;
@@ -52,7 +53,7 @@ function buildForecastContent(input: ForecastSectionInput): string {
 
   return `${input.intro}
 
-## Current Price Action / Market Overview
+## Price Action Overview
 
 ${input.priceAction}
 
@@ -60,21 +61,25 @@ ${input.priceAction}
 
 ${input.technical}
 
-### Key Levels to Watch
+### Key Support and Resistance Levels
 
 ${input.keyLevels.map((level) => `- ${level}`).join("\n")}
 
 ${input.chartPlaceholder}
 
-## Fundamental Factors
+### Indicator Signals
+
+${input.indicatorSignals ?? "RSI and moving-average readings should be verified on a live chart at publish time — see the technical section above for current structure."}
+
+## Fundamental Analysis
 
 ${input.fundamentals}
 
-## Trading Outlook / Forecast
+## Forecast / Outlook
 
-**Bullish case:** ${input.bullish}
+**Bullish scenario:** ${input.bullish}
 
-**Bearish case:** ${input.bearish}
+**Bearish scenario:** ${input.bearish}
 
 **Base case:** ${input.baseCase}
 

@@ -1,0 +1,115 @@
+---
+# =============================================================================
+# TRADING 100 — FORECAST ANALYSIS TEMPLATE (reusable)
+# =============================================================================
+# INSTRUCTIONS FOR AGENT:
+# 1. Complete forecast-data-sourcing-workflow.md BEFORE replacing tokens.
+# 2. Replace every {{TOKEN}}; delete HTML comments when filling.
+# 3. Save filled instances to: content/drafts/forecasts/{{INSTRUMENT_SLUG}}-forecast-today-{{ANGLE_SLUG}}-analysis-{{DATE}}.mdx
+# 4. Do NOT publish or commit unless the user explicitly asks.
+# =============================================================================
+
+title: "{{INSTRUMENT}} Forecast Today: {{ANGLE}} Analysis & Key Levels"
+description: "{{META_DESCRIPTION}}"
+slug: "{{INSTRUMENT_SLUG}}-forecast-today-{{ANGLE_SLUG}}-analysis-{{DATE}}"
+instrument: "{{INSTRUMENT}}"
+category: "{{CATEGORY}}"
+publishDate: "{{DATE}}"
+keywords:
+  - "{{PRIMARY_KEYWORD}}"
+  - "{{SECONDARY_KEYWORD_1}}"
+  - "{{SECONDARY_KEYWORD_2}}"
+author: "Trading 100 Desk"
+chartPlaceholder: "[CHART: {{INSTRUMENT}} {{TIMEFRAME}} chart showing resistance at {{RESISTANCE_1}} and support at {{SUPPORT_1}}]"
+internalLinks:
+  - "{{INTERNAL_LINK_1}}"
+  - "{{INTERNAL_LINK_2}}"
+wordCount: 0
+dataSources:
+  price: "{{PRICE_SOURCE}}"
+  catalyst: "{{CATALYST_SOURCE}}"
+  indicators: "{{INDICATOR_SOURCE}}"
+---
+
+# {{INSTRUMENT}} Forecast Today: {{ANGLE}} Analysis & Key Levels
+
+<!-- INTRO (80–120 words)
+     REQUIRED LIVE DATA: {{CURRENT_PRICE}}, {{SESSION_CHANGE_PCT}}, {{CATALYST_HEADLINE}}
+     Include {{PRIMARY_KEYWORD}} in first 100 words.
+     State what reader will learn (levels, indicators, catalyst, scenarios). -->
+
+{{INSTRUMENT}} is trading near **{{CURRENT_PRICE}}** on {{DATE}}, {{SESSION_CHANGE_DIRECTION}} roughly **{{SESSION_CHANGE_PCT}}** on the session. {{CATALYST_ONE_LINER}} This {{PRIMARY_KEYWORD}} walks through today's price structure, sourced support and resistance, indicator context, and balanced bullish versus bearish scenarios — without issuing trade signals.
+
+You will learn where {{INSTRUMENT}} sits within its recent range, which levels matter on the {{TIMEFRAME}} and daily charts, how {{CATALYST_HEADLINE}} is shaping sentiment, and what conditional paths could unfold into {{UPCOMING_EVENT}}.
+
+## Price Action Overview
+
+<!-- ~150 words
+     REQUIRED LIVE DATA: {{SESSION_HIGH}}, {{SESSION_LOW}}, {{CHART_CONTEXT}}
+     Describe trend shape (trending/ranging/reversing) over last 5–10 sessions. -->
+
+{{INSTRUMENT}} printed a session range of **{{SESSION_LOW}}** to **{{SESSION_HIGH}}** on {{DATE}}, with the latest quote near **{{CURRENT_PRICE}}** (source: {{PRICE_SOURCE}}). {{CHART_CONTEXT}}
+
+The immediate session driver is **{{CATALYST_HEADLINE}}**. {{CATALYST_IMPACT}} Cross-asset context: note how related markets (USD, yields, oil, equities) are moving if relevant to {{INSTRUMENT}}.
+
+## Technical Analysis
+
+<!-- ~200–250 words
+     REQUIRED LIVE DATA: swing structure, pattern if any, relation to MAs
+     Prose only — save bullets for Key Levels H3 below. -->
+
+On the {{TIMEFRAME}} chart, {{INSTRUMENT}} is {{TREND_DESCRIPTION}} between **{{SWING_LOW}}** and **{{SWING_HIGH}}**, reflecting {{CHART_CONTEXT_SHORT}}. {{TECHNICAL_NARRATIVE}}
+
+Price action relative to moving averages: {{MA_POSITION_NARRATIVE}}. Structure suggests {{BIAS_NEUTRAL_OR_DIRECTIONAL}} until {{RESISTANCE_1}} or {{SUPPORT_1}} breaks with conviction.
+
+### Key Support and Resistance Levels
+
+<!-- Bullets ONLY here. Each level must match Step 3 of sourcing workflow. -->
+
+- **Resistance:** {{RESISTANCE_1}} ({{RESISTANCE_1_LABEL}}), {{RESISTANCE_2}} ({{RESISTANCE_2_LABEL}})
+- **Support:** {{SUPPORT_1}} ({{SUPPORT_1_LABEL}}), {{SUPPORT_2}} ({{SUPPORT_2_LABEL}})
+- **Pivot:** {{PIVOT_LEVEL}} — {{PIVOT_INTERPRETATION}}
+
+[CHART: {{INSTRUMENT}} {{TIMEFRAME}} chart showing resistance at {{RESISTANCE_1}} and support at {{SUPPORT_1}}]
+
+### Indicator Signals
+
+<!-- REQUIRED: at least one sourced indicator reading -->
+<!-- {{INDICATOR_SOURCE}} -->
+
+**{{INDICATOR_PRIMARY}}** — {{INDICATOR_INTERPRETATION}}
+
+{{INDICATOR_SECONDARY_BLOCK}}
+
+## Fundamental Analysis
+
+<!-- ~150–200 words
+     REQUIRED LIVE DATA: {{CATALYST_HEADLINE}}, {{CATALYST_SOURCE}}, {{UPCOMING_EVENT}} -->
+
+{{FUNDAMENTAL_NARRATIVE}}
+
+Markets are interpreting {{CATALYST_HEADLINE}} through the lens of {{MACRO_CHANNEL}} — for example rates, USD liquidity, inflation pass-through, or risk appetite. The next scheduled catalyst is **{{UPCOMING_EVENT}}**, which could reset positioning if the print surprises.
+
+For background on trading this market, see our [{{INTERNAL_LINK_1_ANCHOR}}]({{INTERNAL_LINK_1}}). Prior scenario work: [{{INTERNAL_LINK_2_ANCHOR}}]({{INTERNAL_LINK_2}}).
+
+## Forecast / Outlook
+
+<!-- ~150 words — conditional framing ONLY; no "buy now" / "sell now" -->
+
+**Bullish scenario:** If {{INSTRUMENT}} reclaims **{{RESISTANCE_1}}** and holds above it, a push toward **{{RESISTANCE_2}}** becomes plausible — especially if {{BULLISH_CONDITION}}.
+
+**Bearish scenario:** Failure to hold **{{SUPPORT_1}}** opens a move toward **{{SUPPORT_2}}**, particularly if {{BEARISH_CONDITION}}.
+
+**Base case:** {{INSTRUMENT}} consolidates between **{{SUPPORT_1}}** and **{{RESISTANCE_1}}** into {{UPCOMING_EVENT}}, with headline-driven intraday spikes. Reduce size ahead of binary macro prints.
+
+## FAQ
+
+<!-- 2–3 Q&As (~80–100 words total). Target People Also Ask phrasing. -->
+
+**Is {{INSTRUMENT}} bullish or bearish today?** {{FAQ_1_ANSWER}}
+
+**What is the next resistance level for {{INSTRUMENT}}?** {{FAQ_2_ANSWER}}
+
+**What event matters most for {{INSTRUMENT}} this week?** {{FAQ_3_ANSWER}}
+
+*{{DISCLAIMER}}*

@@ -152,11 +152,7 @@ export default async function HomePage() {
           />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {todayForecasts.map((forecast) => (
-              <FeaturedArticleCard
-                key={forecast.slug}
-                article={forecast}
-                href={`/news/${forecast.slug}`}
-              />
+              <FeaturedArticleCard key={forecast.slug} article={forecast} />
             ))}
           </div>
         </section>

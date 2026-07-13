@@ -1,20 +1,27 @@
 {
-  "runDate": "2026-07-12",
-  "instruments": ["Brent Crude", "GBP/USD", "XAUUSD", "ETHUSD", "Nasdaq 100"],
+  "runDate": "2026-07-13",
+  "instruments": ["EUR/USD", "XAUUSD", "BTCUSD", "S&P 500", "USD/JPY"],
   "slugs": [
-    "brent-crude-forecast-today-oil-price-analysis-july-12-2026",
-    "gbpusd-forecast-today-pound-dollar-analysis-july-12-2026",
-    "xauusd-forecast-today-gold-price-analysis-july-12-2026",
-    "ethereum-forecast-today-eth-price-analysis-july-12-2026",
-    "nasdaq-100-forecast-today-index-analysis-july-12-2026"
+    "eur-usd-forecast-today-euro-dollar-analysis-july-13-2026",
+    "xauusd-forecast-today-gold-price-analysis-july-13-2026",
+    "bitcoin-forecast-today-btc-price-analysis-july-13-2026",
+    "sp500-forecast-today-index-analysis-july-13-2026",
+    "usd-jpy-forecast-today-yen-analysis-july-13-2026"
   ],
   "primaryKeywords": [
-    "brent crude oil forecast today",
-    "GBP USD forecast today",
+    "EUR USD forecast today",
     "gold price forecast today",
-    "ethereum price forecast today",
-    "Nasdaq 100 forecast today"
+    "bitcoin forecast today",
+    "S&P 500 forecast today",
+    "USD JPY forecast today"
   ],
-  "previousRunInstruments": ["bitcoin", "eur-usd", "gold-xauusd", "sp500", "usd-jpy"],
-  "note": "Gold repeated due to CPI week + oil/Fed catalyst; other four instruments rotated from Jul 11 run."
+  "dataSources": [
+    "Frankfurter ECB fix (2026-07-10) — EUR/USD, USD/JPY",
+    "Yahoo Finance GC=F, ^GSPC — gold, S&P 500",
+    "CoinGecko — BTCUSD",
+    "FXStreet, Finovely, Stockwirex — July 13 catalysts; US CPI July 14"
+  ],
+  "previousRunDate": "2026-07-12",
+  "previousRunInstruments": ["Brent Crude", "GBP/USD", "XAUUSD", "ETHUSD", "Nasdaq 100"],
+  "note": "Rotated from Jul 12 picks; XAUUSD repeated due to CPI week + oil/Fed channel. FX fix date 2026-07-10 flagged where intraday quotes differ."
 }
