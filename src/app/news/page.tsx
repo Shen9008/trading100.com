@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { buildMetadataWithCanonical } from "@/lib/metadata";
 import { getAutoPostedNews, getWireHeadlines } from "@/lib/api/wire-news";
 import { getLatestArticles } from "@/lib/data/articles";
@@ -8,10 +9,13 @@ import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { PageShell } from "@/components/layout/PageShell";
 import { GlassCard } from "@/components/layout/GlassCard";
 import { SectionHeader } from "@/components/layout/SectionHeader";
+import { NewsFeedPagination } from "@/components/news/NewsFeedPagination";
 import { formatRelativeTime } from "@/lib/utils";
 import { getNewsCategorySeo } from "@/lib/seo/page-seo";
 
 export const revalidate = 300;
+
+const PER_PAGE = 10;
 
 type NewsPageProps = {
   searchParams: { page?: string; category?: string };
@@ -43,116 +47,178 @@ export async function generateMetadata({
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
-  const perPage = 10;
+  const category = searchParams.category;
+  const isHubPage = page === 1;
 
   const [autoNews, editorialArticles, wireHeadlines] = await Promise.all([
-    getAutoPostedNews(20),
+    getAutoPostedNews(100),
     Promise.resolve(getLatestArticles(50)),
     getWireHeadlines(15),
   ]);
 
+  const totalPages = Math.max(1, Math.ceil(autoNews.length / PER_PAGE));
+
+  if (page > totalPages && autoNews.length > 0) {
+    notFound();
+  }
+
+  const paginatedNews = autoNews.slice(
+    (page - 1) * PER_PAGE,
+    page * PER_PAGE
+  );
+
+  const breadcrumbItems = breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "News", path: "/news" },
+    ...(page > 1 ? [{ name: `Page ${page}`, path: `/news?page=${page}` }] : []),
+  ]);
+
+  const shellDescription =
+    page > 1
+      ? `Page ${page} of ${totalPages} — browse older auto-syndicated market headlines.`
+      : "Auto-syndicated market news plus original analysis from Trading 100.";
+
   return (
     <>
-      <JsonLd
-        data={breadcrumbJsonLd(
-          breadcrumbs([
-            { name: "Home", path: "/" },
-            { name: "News", path: "/news" },
-          ])
-        )}
-      />
+      <JsonLd data={breadcrumbJsonLd(breadcrumbItems)} />
 
       <PageShell
-        title="Financial News"
-        description="Auto-syndicated market news plus original analysis from Trading 100."
+        title={page > 1 ? `Financial News — Page ${page}` : "Financial News"}
+        description={shellDescription}
         eyebrow="Newsroom"
         variant="news"
-        live
+        live={isHubPage}
       >
+        {page > 1 && (
+          <div className="mb-8">
+            <Link
+              href="/news"
+              className="inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-brand transition-colors hover:text-amber-200"
+            >
+              ← Back to newsroom hub
+            </Link>
+          </div>
+        )}
+
         <section aria-labelledby="auto-news">
           <SectionHeader
             id="auto-news"
-            title="Latest Market News"
-            subtitle="Auto-syndicated headlines refreshed every few minutes from Finnhub"
+            title={page > 1 ? "Market News Archive" : "Latest Market News"}
+            subtitle={
+              page > 1
+                ? `Older Finnhub syndicated headlines — page ${page} of ${totalPages}.`
+                : "Auto-syndicated headlines refreshed every few minutes from Finnhub"
+            }
             eyebrow="Live Wire"
           />
-          <GlassCard padding={false} className="overflow-hidden px-4 sm:px-6">
-            {autoNews
-              .slice((page - 1) * perPage, page * perPage)
-              .map((article) => (
-                <ArticleCard key={article.slug} article={article} />
-              ))}
-          </GlassCard>
 
-          {autoNews.length > page * perPage && (
-            <div className="mt-4 text-center">
-              <Link
-                href={`/news?page=${page + 1}`}
-                className="cursor-pointer text-sm font-medium text-brand transition-colors hover:text-amber-200"
-              >
-                Load more →
-              </Link>
-            </div>
+          {paginatedNews.length > 0 ? (
+            <>
+              <NewsFeedPagination
+                page={page}
+                totalPages={totalPages}
+                totalItems={autoNews.length}
+                perPage={PER_PAGE}
+                category={category}
+                className="mb-4"
+              />
+
+              <GlassCard padding={false} className="overflow-hidden px-4 sm:px-6">
+                {paginatedNews.map((article) => (
+                  <ArticleCard key={article.slug} article={article} />
+                ))}
+              </GlassCard>
+
+              <NewsFeedPagination
+                page={page}
+                totalPages={totalPages}
+                totalItems={autoNews.length}
+                perPage={PER_PAGE}
+                category={category}
+                className="mt-4"
+              />
+            </>
+          ) : (
+            <GlassCard className="border-dashed border-white/10">
+              <p className="text-sm text-muted-foreground">
+                No syndicated headlines on this page yet.{" "}
+                <Link href="/news" className="text-brand hover:underline">
+                  Return to the newsroom
+                </Link>
+                .
+              </p>
+            </GlassCard>
           )}
         </section>
 
-        <section className="mt-10" aria-labelledby="original-news">
-          <SectionHeader
-            id="original-news"
-            title="Trading 100 Analysis"
-            eyebrow="Original"
-          />
-          <GlassCard padding={false} className="overflow-hidden px-4 sm:px-6">
-            {editorialArticles.slice(0, perPage).map((article) => (
-              <ArticleCard key={article.slug} article={article} />
-            ))}
-          </GlassCard>
-        </section>
+        {isHubPage && (
+          <>
+            <section className="mt-10" aria-labelledby="original-news">
+              <SectionHeader
+                id="original-news"
+                title="Trading 100 Analysis"
+                eyebrow="Original"
+              />
+              <GlassCard padding={false} className="overflow-hidden px-4 sm:px-6">
+                {editorialArticles.slice(0, PER_PAGE).map((article) => (
+                  <ArticleCard key={article.slug} article={article} />
+                ))}
+              </GlassCard>
+            </section>
 
-        {wireHeadlines.length > 0 && (
-          <section className="mt-10" aria-labelledby="external-headlines">
-            <SectionHeader
-              id="external-headlines"
-              title="More Headlines"
-              subtitle="Additional wire stories — click through to read at the original publisher."
-              eyebrow="Wire"
-            />
-            <div className="space-y-3">
-              {wireHeadlines.slice(0, 15).map((item) => (
-                <article
-                  key={item.id}
-                  className="glass-panel-hover cursor-pointer p-4"
-                >
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">{item.source}</span>
-                    <span>·</span>
-                    <time dateTime={new Date(item.datetime * 1000).toISOString()}>
-                      {formatRelativeTime(new Date(item.datetime * 1000).toISOString())}
-                    </time>
-                  </div>
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 block font-semibold hover:text-brand"
-                  >
-                    {item.headline}
-                  </a>
-                  {item.summary && (
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                      {item.summary}
-                    </p>
-                  )}
-                </article>
-              ))}
-            </div>
-          </section>
+            {wireHeadlines.length > 0 && (
+              <section className="mt-10" aria-labelledby="external-headlines">
+                <SectionHeader
+                  id="external-headlines"
+                  title="More Headlines"
+                  subtitle="Additional wire stories — click through to read at the original publisher."
+                  eyebrow="Wire"
+                />
+                <div className="space-y-3">
+                  {wireHeadlines.slice(0, 15).map((item) => (
+                    <article
+                      key={item.id}
+                      className="glass-panel-hover cursor-pointer p-4"
+                    >
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">
+                          {item.source}
+                        </span>
+                        <span>·</span>
+                        <time dateTime={new Date(item.datetime * 1000).toISOString()}>
+                          {formatRelativeTime(
+                            new Date(item.datetime * 1000).toISOString()
+                          )}
+                        </time>
+                      </div>
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 block font-semibold hover:text-brand"
+                      >
+                        {item.headline}
+                      </a>
+                      {item.summary && (
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          {item.summary}
+                        </p>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
 
-        {!process.env.FINNHUB_API_KEY &&
-          autoNews.length === 0 && (
+        {!process.env.FINNHUB_API_KEY && autoNews.length === 0 && (
           <p className="mt-6 rounded-xl border border-dashed border-white/10 p-4 text-sm text-muted-foreground">
-            Add <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-brand">FINNHUB_API_KEY</code> to enable auto-posted market news.
+            Add{" "}
+            <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-brand">
+              FINNHUB_API_KEY
+            </code>{" "}
+            to enable auto-posted market news.
           </p>
         )}
       </PageShell>
