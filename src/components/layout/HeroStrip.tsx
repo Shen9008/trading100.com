@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { STOCK_IMAGES } from "@/lib/constants/images";
 import { HeroAmbient } from "@/components/layout/HeroAmbient";
+import { countInstruments } from "@/lib/data/market-instruments";
 
 const QUICK_LINKS = [
   { label: "Markets", href: "/markets", icon: TrendingUp },
@@ -18,11 +19,11 @@ const QUICK_LINKS = [
   { label: "Academy", href: "/education", icon: BookOpen },
 ];
 
-const STATS = [
+const STATS_BASE = [
   { label: "Asset classes", value: "6", detail: "Forex to crypto" },
-  { label: "Live instruments", value: "40+", detail: "Updated continuously" },
+  { label: "Live instruments", value: "250+", detail: "Updated continuously" },
   { label: "Market hours", value: "24/7", detail: "Global coverage" },
-];
+] as const;
 
 function HeroChartGraphic() {
   return (
@@ -95,6 +96,13 @@ function HeroChartGraphic() {
 }
 
 export function HeroStrip() {
+  const instrumentCount = countInstruments();
+  const stats = STATS_BASE.map((stat) =>
+    stat.label === "Live instruments"
+      ? { ...stat, value: `${instrumentCount}+` }
+      : stat
+  );
+
   return (
     <section className="relative border-b border-white/[0.05]">
       <div className="absolute inset-0 overflow-hidden">
@@ -118,13 +126,13 @@ export function HeroStrip() {
               <div className="animate-fade-up">
                 <p className="eyebrow">Institutional-grade market desk</p>
                 <h1 className="mt-4 max-w-xl font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-balance sm:text-5xl lg:text-[3.25rem]">
-                  Clarity at the speed of{" "}
-                  <span className="gradient-text gradient-text-animate">global markets</span>
+                  Live forex, crypto &amp; gold{" "}
+                  <span className="gradient-text gradient-text-animate">market intelligence</span>
                 </h1>
                 <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-[17px]">
-                  Live prices, syndicated wire news, editorial forecasts, and
-                  structured education for traders who expect precision without
-                  noise.
+                  Real-time prices across 250+ instruments, daily market forecasts,
+                  financial news, and structured trading education — built for
+                  traders who need clarity without noise.
                 </p>
               </div>
 
@@ -167,7 +175,7 @@ export function HeroStrip() {
           </div>
 
           <div className="grid border-t border-white/[0.05] sm:grid-cols-3">
-            {STATS.map((stat, i) => (
+            {stats.map((stat, i) => (
               <div
                 key={stat.label}
                 className={`animate-fade-up-delay-3 px-6 py-5 sm:px-8 ${i > 0 ? "border-t border-white/[0.05] sm:border-l sm:border-t-0" : ""}`}

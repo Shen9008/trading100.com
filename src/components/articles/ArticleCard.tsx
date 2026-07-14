@@ -3,6 +3,7 @@ import { ArticleImage } from "@/components/articles/ArticleImage";
 import { Badge } from "@/components/ui/badge";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Article, ArticleCategory } from "@/lib/data/articles";
+import { articlePublicPath } from "@/lib/forecasts/paths";
 import { ArrowUpRight } from "lucide-react";
 
 const CATEGORY_VARIANT: Record<
@@ -24,7 +25,7 @@ type ArticleCardProps = {
 };
 
 export function ArticleCard({ article, href }: ArticleCardProps) {
-  const link = href ?? `/news/${article.slug}`;
+  const link = href ?? articlePublicPath(article);
 
   return (
     <article className="group flex cursor-pointer gap-4 border-b border-white/[0.05] py-5 last:border-0">

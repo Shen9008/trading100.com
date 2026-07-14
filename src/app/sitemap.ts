@@ -2,10 +2,25 @@ import type { MetadataRoute } from "next";
 import { SITE_URL, ASSET_CLASSES } from "@/lib/constants";
 import { MARKET_INSTRUMENTS } from "@/lib/data/market-instruments";
 import { ORIGINAL_ARTICLES } from "@/lib/data/articles";
+import type { Article } from "@/lib/data/articles";
 import { FORECAST_ARTICLES } from "@/lib/data/forecasts";
 import { getEducationGuides } from "@/lib/data/education";
 import { loadAutoNews } from "@/lib/kv/forecasts-store";
 import { loadDailyForecasts } from "@/lib/kv/forecasts-store";
+import { articlePublicPath, isForecastArticle } from "@/lib/forecasts/paths";
+
+function articleSitemapEntry(
+  article: Article,
+  priority: number,
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]
+): MetadataRoute.Sitemap[number] {
+  return {
+    url: `${SITE_URL}${articlePublicPath(article)}`,
+    lastModified: new Date(article.publishedAt),
+    changeFrequency,
+    priority,
+  };
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
@@ -45,39 +60,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     [...ORIGINAL_ARTICLES, ...FORECAST_ARTICLES].map((a) => a.slug)
   );
 
-  const articlePages = [...ORIGINAL_ARTICLES, ...FORECAST_ARTICLES].map((a) => ({
-    url: `${SITE_URL}/news/${a.slug}`,
-    lastModified: new Date(a.publishedAt),
-    changeFrequency: "weekly" as const,
-    priority: 0.6,
-  }));
+  const newsArticlePages = ORIGINAL_ARTICLES.map((a) =>
+    articleSitemapEntry(a, 0.6, "weekly")
+  );
+
+  const forecastArticlePages = FORECAST_ARTICLES.map((a) =>
+    articleSitemapEntry(a, 0.65, "weekly")
+  );
 
   // Dynamic KV content
-  let dynamicArticlePages: MetadataRoute.Sitemap = [];
+  let dynamicNewsPages: MetadataRoute.Sitemap = [];
+  let dynamicForecastPages: MetadataRoute.Sitemap = [];
   try {
     const [autoNews, dailyForecasts] = await Promise.all([
       loadAutoNews(),
       loadDailyForecasts(),
     ]);
 
-    const dynamicArticles = [
-      ...(autoNews?.articles ?? []),
-      ...dailyForecasts,
-    ].filter((a) => !staticArticleSlugs.has(a.slug));
-
-    const seen = new Set<string>();
-    dynamicArticlePages = dynamicArticles
+    const seenNews = new Set<string>();
+    dynamicNewsPages = (autoNews?.articles ?? [])
+      .filter((a) => !staticArticleSlugs.has(a.slug))
+      .filter((a) => a.isOriginal === true)
+      .filter((a) => !isForecastArticle(a))
       .filter((a) => {
-        if (seen.has(a.slug)) return false;
-        seen.add(a.slug);
+        if (seenNews.has(a.slug)) return false;
+        seenNews.add(a.slug);
         return true;
       })
-      .map((a) => ({
-        url: `${SITE_URL}/news/${a.slug}`,
-        lastModified: new Date(a.publishedAt),
-        changeFrequency: "daily" as const,
-        priority: 0.55,
-      }));
+      .map((a) => articleSitemapEntry(a, 0.55, "daily"));
+
+    const seenForecasts = new Set<string>();
+    dynamicForecastPages = dailyForecasts
+      .filter((a) => !staticArticleSlugs.has(a.slug))
+      .filter((a) => {
+        if (seenForecasts.has(a.slug)) return false;
+        seenForecasts.add(a.slug);
+        return true;
+      })
+      .map((a) => articleSitemapEntry(a, 0.65, "daily"));
   } catch {
     /* KV unavailable at build time */
   }
@@ -92,8 +112,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticPages,
     ...marketPages,
-    ...articlePages,
-    ...dynamicArticlePages,
+    ...newsArticlePages,
+    ...forecastArticlePages,
+    ...dynamicNewsPages,
+    ...dynamicForecastPages,
     ...educationPages,
   ];
 }

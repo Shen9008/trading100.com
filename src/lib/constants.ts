@@ -7,7 +7,7 @@ export const SITE_NAME = "Trading 100";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://trading100.com";
 export const SITE_DESCRIPTION =
-  "Live market data, financial news, forecasts, and education for forex, crypto, commodities, indices, and stocks.";
+  "Trading 100 delivers live forex, crypto, gold, and stock market data with daily forecasts, financial news, and free trading education.";
 
 export const NAV_LINKS = [
   { label: "Markets", href: "/markets" },

@@ -80,7 +80,7 @@ export default async function ForecastArticlePage({ params }: ForecastPageProps)
 
   return (
     <>
-      <JsonLd data={articleJsonLd(forecast)} />
+      <JsonLd data={articleJsonLd(forecast, `/forecasts/${forecast.slug}`)} />
       <JsonLd
         data={breadcrumbJsonLd(
           breadcrumbs([

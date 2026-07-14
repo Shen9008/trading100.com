@@ -23,3 +23,10 @@ export function isForecastArticle(article: Article): boolean {
 export function forecastArticlePath(slug: string): string {
   return `/forecasts/${slug}`;
 }
+
+/** Canonical public URL path for any article (news or forecast). */
+export function articlePublicPath(article: Article): string {
+  return isForecastArticle(article)
+    ? forecastArticlePath(article.slug)
+    : `/news/${article.slug}`;
+}

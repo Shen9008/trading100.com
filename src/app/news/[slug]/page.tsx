@@ -42,6 +42,8 @@ export async function generateMetadata({
     ? forecastArticlePath(article.slug)
     : `/news/${article.slug}`;
 
+  const isSyndicated = article.isOriginal === false;
+
   return buildMetadata({
     title: article.title,
     description: article.excerpt,
@@ -53,6 +55,8 @@ export async function generateMetadata({
     modifiedTime: article.publishedAt,
     authors: [article.author],
     section: article.category,
+    noIndex: isSyndicated,
+    noIndexFollow: isSyndicated,
   });
 }
 

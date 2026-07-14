@@ -6,14 +6,19 @@ import type { ArticleCategory } from "@/lib/data/articles";
 export const DEFAULT_OG_IMAGE = BRAND_OG_DEFAULT;
 
 export const HOME_KEYWORDS = [
+  "Trading 100",
   "live market data",
   "forex rates",
   "crypto prices",
+  "gold price",
   "stock market news",
+  "market forecasts",
+  "forex forecast",
+  "bitcoin forecast",
   "trading education",
   "economic calendar",
   "currency converter",
-  "market forecasts",
+  "technical analysis",
 ];
 
 export const MARKETS_KEYWORDS = [

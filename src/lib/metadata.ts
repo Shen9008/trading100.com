@@ -8,6 +8,8 @@ type PageMeta = {
   path?: string;
   ogImage?: string;
   noIndex?: boolean;
+  /** When noIndex is true, allow crawlers to follow outbound links (e.g. syndicated news). */
+  noIndexFollow?: boolean;
   keywords?: string[];
   ogType?: "website" | "article";
   publishedTime?: string;
@@ -30,6 +32,7 @@ export function buildMetadata({
   path = "",
   ogImage,
   noIndex = false,
+  noIndexFollow = false,
   keywords,
   ogType = "website",
   publishedTime,
@@ -78,7 +81,7 @@ export function buildMetadata({
       images: [imageUrl],
     },
     robots: noIndex
-      ? { index: false, follow: false }
+      ? { index: false, follow: noIndexFollow }
       : {
           index: true,
           follow: true,

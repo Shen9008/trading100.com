@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildMetadataWithCanonical } from "@/lib/metadata";
 import { getAutoPostedNews, getWireHeadlines } from "@/lib/api/wire-news";
-import { getLatestArticles } from "@/lib/data/articles";
+import { getLatestArticles, type Article } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { PageShell } from "@/components/layout/PageShell";
@@ -16,6 +16,13 @@ import { getNewsCategorySeo } from "@/lib/seo/page-seo";
 export const revalidate = 300;
 
 const PER_PAGE = 10;
+
+const NEWS_CATEGORIES = new Set(["forex", "crypto", "stocks", "commodities", "indices"]);
+
+function filterByCategory(articles: Article[], category?: string): Article[] {
+  if (!category || !NEWS_CATEGORIES.has(category)) return articles;
+  return articles.filter((a) => a.category === category);
+}
 
 type NewsPageProps = {
   searchParams: { page?: string; category?: string };
@@ -56,16 +63,21 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
     getWireHeadlines(15),
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(autoNews.length / PER_PAGE));
+  const filteredAutoNews = filterByCategory(autoNews, category);
+  const filteredEditorial = filterByCategory(editorialArticles, category);
 
-  if (page > totalPages && autoNews.length > 0) {
+  const totalPages = Math.max(1, Math.ceil(filteredAutoNews.length / PER_PAGE));
+
+  if (page > totalPages && filteredAutoNews.length > 0) {
     notFound();
   }
 
-  const paginatedNews = autoNews.slice(
+  const paginatedNews = filteredAutoNews.slice(
     (page - 1) * PER_PAGE,
     page * PER_PAGE
   );
+
+  const categorySeo = category ? getNewsCategorySeo(category) : null;
 
   const breadcrumbItems = breadcrumbs([
     { name: "Home", path: "/" },
@@ -76,14 +88,23 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const shellDescription =
     page > 1
       ? `Page ${page} of ${totalPages} — browse older auto-syndicated market headlines.`
-      : "Auto-syndicated market news plus original analysis from Trading 100.";
+      : categorySeo
+        ? categorySeo.description
+        : "Auto-syndicated market news plus original analysis from Trading 100.";
+
+  const pageTitle =
+    page > 1
+      ? `Financial News — Page ${page}`
+      : categorySeo
+        ? categorySeo.title
+        : "Financial News";
 
   return (
     <>
       <JsonLd data={breadcrumbJsonLd(breadcrumbItems)} />
 
       <PageShell
-        title={page > 1 ? `Financial News — Page ${page}` : "Financial News"}
+        title={pageTitle}
         description={shellDescription}
         eyebrow="Newsroom"
         variant="news"
@@ -117,7 +138,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
               <NewsFeedPagination
                 page={page}
                 totalPages={totalPages}
-                totalItems={autoNews.length}
+                totalItems={filteredAutoNews.length}
                 perPage={PER_PAGE}
                 category={category}
                 className="mb-4"
@@ -132,7 +153,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
               <NewsFeedPagination
                 page={page}
                 totalPages={totalPages}
-                totalItems={autoNews.length}
+                totalItems={filteredAutoNews.length}
                 perPage={PER_PAGE}
                 category={category}
                 className="mt-4"
@@ -160,7 +181,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                 eyebrow="Original"
               />
               <GlassCard padding={false} className="overflow-hidden px-4 sm:px-6">
-                {editorialArticles.slice(0, PER_PAGE).map((article) => (
+                {filteredEditorial.slice(0, PER_PAGE).map((article) => (
                   <ArticleCard key={article.slug} article={article} />
                 ))}
               </GlassCard>
@@ -212,7 +233,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
           </>
         )}
 
-        {!process.env.FINNHUB_API_KEY && autoNews.length === 0 && (
+        {!process.env.FINNHUB_API_KEY && filteredAutoNews.length === 0 && (
           <p className="mt-6 rounded-xl border border-dashed border-white/10 p-4 text-sm text-muted-foreground">
             Add{" "}
             <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-brand">

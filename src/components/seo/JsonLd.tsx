@@ -41,29 +41,27 @@ export function websiteJsonLd() {
       name: SITE_NAME,
       url: SITE_URL,
     },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/markets?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
   };
 }
 
-export function articleJsonLd(article: {
-  title: string;
-  excerpt: string;
-  author: string;
-  publishedAt: string;
-  image: string;
-  slug: string;
-  category?: string;
-}) {
+export function articleJsonLd(
+  article: {
+    title: string;
+    excerpt: string;
+    author: string;
+    publishedAt: string;
+    image: string;
+    slug: string;
+    category?: string;
+  },
+  path?: string
+) {
+  const articlePath = path ?? `/news/${article.slug}`;
+  const isForecast = articlePath.startsWith("/forecasts/");
+
   return {
     "@context": "https://schema.org",
-    "@type": "NewsArticle",
+    "@type": isForecast ? "Article" : "NewsArticle",
     headline: article.title,
     description: article.excerpt,
     author: {
@@ -73,8 +71,8 @@ export function articleJsonLd(article: {
     datePublished: article.publishedAt,
     dateModified: article.publishedAt,
     image: article.image,
-    url: seoUrl(`/news/${article.slug}`),
-    mainEntityOfPage: seoUrl(`/news/${article.slug}`),
+    url: seoUrl(articlePath),
+    mainEntityOfPage: seoUrl(articlePath),
     articleSection: article.category,
     publisher: {
       "@type": "Organization",

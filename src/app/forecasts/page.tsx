@@ -54,11 +54,17 @@ export default async function ForecastsPage({ searchParams }: ForecastsPageProps
 
       <PageShell
         title="Market Forecasts"
-        description="In-house outlooks and scenario analysis. For educational purposes only."
+        description="Daily forex, crypto, gold, and stock index forecasts with technical levels, bull/bear scenarios, and educational outlooks."
         eyebrow="Outlook"
         variant="forecasts"
         live
       >
+        <p className="mb-6 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+          Browse in-house market forecasts updated daily. Each outlook covers key
+          support and resistance levels, multi-timeframe analysis, and scenario
+          planning for major forex pairs, Bitcoin, gold (XAU/USD), and global
+          indices — for educational purposes only.
+        </p>
         <div className="mb-8 flex flex-wrap gap-2">
           {FILTERS.map((f) => (
             <Link
