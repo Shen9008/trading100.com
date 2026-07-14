@@ -1,6 +1,6 @@
 ---
 name: daily-instrument-analysis
-description: Autonomous daily subagent for Trading 100 — produces 5 SEO-optimized forecast/analysis articles (800+ words) on trending instruments using the standardized template, saves drafts for review, and optionally publishes to KV via API.
+description: Autonomous daily subagent for Trading 100 — produces 5 SEO-optimized forecast/analysis articles (~1,000 words) on trending instruments using the standardized template, saves drafts for review, and optionally publishes to KV via API.
 ---
 
 # Daily Instrument Analysis Subagent
@@ -32,7 +32,7 @@ Your **sole job** is to autonomously produce **5 daily forecast/analysis article
 1. **Source live data** — for each candidate instrument, complete `forecast-data-sourcing-workflow.md` Steps 1–5 (price, range, chart context, levels, indicators, catalyst). Cross-check against a second source.
 2. **Select 5 instruments** — apply selection rules below; if any pick lacks a clear catalyst or reliable price data, flag it and pick an alternative.
 3. **Check prior runs** — read `content/drafts/forecasts/_last-run.json` (if exists) and scan recent slugs on `/forecasts` to avoid repeating instruments.
-4. **Fill template** — 800–1,100 words each, one file per instrument, using `forecast-analysis-template.mdx`.
+4. **Fill template** — **~1,000 words each** (minimum 950, maximum 1,050), one file per instrument, using `forecast-analysis-template.mdx`. Expand **Technical Analysis** and **Fundamental Analysis** until the body reaches target length.
 5. **Save drafts** — `content/drafts/forecasts/[slug].mdx`
 6. **Update manifest** — write `content/drafts/forecasts/_last-run.json`
 7. **Output summary table** — instrument | slug | word count | primary keyword | price source | catalyst source.
@@ -91,7 +91,7 @@ Complete **every row** for each instrument. See `content/templates/forecast-data
 
 ---
 
-## 3. Mandatory article structure (800+ words)
+## 3. Mandatory article structure (~1,000 words)
 
 Fill `content/templates/forecast-analysis-template.mdx` — sections **in this order**:
 
@@ -100,17 +100,17 @@ Fill `content/templates/forecast-analysis-template.mdx` — sections **in this o
 | **SEO Title** | `[Instrument] Forecast Today: [Angle] Analysis & Key Levels` — 55–60 characters |
 | **Meta Description** | 150–160 characters; primary keyword; states technical + fundamental coverage |
 | **H1** | Mirrors title; primary keyword included naturally |
-| **Intro** | 80–120 words: **current price up front** (live data), why today matters, what article covers |
-| **H2: Price Action Overview** | ~150 words: session range, trend shape from sourced chart context |
-| **H2: Technical Analysis** | ~200–250 words: structure, pattern, MA context |
+| **Intro** | 100–120 words: **current price up front** (live data), why today matters, what article covers |
+| **H2: Price Action Overview** | ~175 words: session range, trend shape from sourced chart context, cross-asset read-through |
+| **H2: Technical Analysis** | ~275–300 words: structure, pattern, MA context, multi-timeframe notes |
 | **H3: Key Support and Resistance Levels** | Bullet list only — each level sourced in Step 2 |
-| **H3: Indicator Signals** | Sourced RSI/MA/MACD reading + interpretation |
-| **H2: Fundamental Analysis** | ~150–200 words: sourced catalyst, market interpretation, upcoming event |
-| **H2: Forecast / Outlook** | ~150 words: conditional bullish vs bearish scenarios — **not** "buy/sell now" |
-| **H2: FAQ** | 2–3 Q&As (~80–100 words total); instrument-specific People Also Ask phrasing |
+| **H3: Indicator Signals** | 2–3 sourced RSI/MA/MACD readings + interpretation (~120 words) |
+| **H2: Fundamental Analysis** | ~220–250 words: sourced catalyst, market interpretation, upcoming event, positioning context |
+| **H2: Forecast / Outlook** | ~175 words: conditional bullish vs bearish scenarios — **not** "buy/sell now" |
+| **H2: FAQ** | 3 Q&As (~120 words total); instrument-specific People Also Ask phrasing |
 | **Disclaimer** | Standard risk disclaimer — not financial advice |
 
-**Total: 800–1,100 words.** Chart placeholder: `[CHART: INSTRUMENT TF showing resistance at X and support at Y]`.
+**Total: ~950–1,050 words (target ~1,000).** Chart placeholder: `[CHART: INSTRUMENT TF showing resistance at X and support at Y]`.
 
 ---
 

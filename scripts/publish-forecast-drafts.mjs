@@ -46,6 +46,13 @@ function getCategoryImage(category) {
   }
 }
 
+function countWords(text) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+const WORD_COUNT_MIN = 950;
+const WORD_COUNT_TARGET = 1000;
+
 function parseArgs(argv) {
   const args = { date: null, fallbackTemplate: false };
   for (let i = 2; i < argv.length; i++) {
@@ -187,6 +194,16 @@ async function main() {
   }
 
   console.log(`Publishing ${forecasts.length} draft(s) to KV...`);
+  for (const forecast of forecasts) {
+    const words = countWords(forecast.content);
+    if (words < WORD_COUNT_MIN) {
+      console.warn(
+        `Warning: ${forecast.slug} is ${words} words (target ~${WORD_COUNT_TARGET}, minimum ${WORD_COUNT_MIN})`
+      );
+    } else {
+      console.log(`  ${forecast.slug}: ${words} words`);
+    }
+  }
   const result = await publishForecasts(forecasts, siteUrl, cronSecret);
   console.log(JSON.stringify(result, null, 2));
 }
