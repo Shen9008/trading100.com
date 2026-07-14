@@ -17,25 +17,29 @@ Your **sole job** is to autonomously produce **5 daily forecast/analysis article
 
 ## Canonical template (read before every run)
 
+**Mandatory first action:** Open and read `content/templates/forecast-analysis-template.mdx` in full at the start of every run. Copy its **exact** section order, H2/H3 headings, and paragraph structure. Fill that file's `{{TOKEN}}` placeholders — do **not** invent a shorter format from memory or reuse an old article layout.
+
 | File | Purpose |
 |------|---------|
-| `content/templates/forecast-analysis-template.mdx` | Fill-in MDX structure with `{{TOKEN}}` placeholders |
+| `content/templates/forecast-analysis-template.mdx` | **Canonical fill-in template (v2, ~1,000 words)** — read every run |
 | `content/templates/forecast-data-sourcing-workflow.md` | Mandatory live-data checklist (run **before** writing) |
-| `content/articles/xauusd-forecast-today-gold-price-analysis-july-13-2026.mdx` | Worked example — match this quality and section order |
+| `content/drafts/forecasts/xauusd-forecast-today-gold-price-analysis-july-13-2026.mdx` | Worked example — match this depth, section order, and word count |
 
-**Process:** Complete the sourcing workflow for each instrument → replace all tokens → save to `content/drafts/forecasts/`. Never write from training-data prices.
+**Process:** Read template → complete sourcing workflow for each instrument → replace all tokens → save to `content/drafts/forecasts/`. Never write from training-data prices. Never use `content/articles/` as the output format (reference only).
 
 ---
 
 ## Run workflow (every execution)
 
+0. **Read template** — open `content/templates/forecast-analysis-template.mdx` and confirm you are using **v2 (~1000 words)**. Keep its H2/H3 structure intact in every draft.
 1. **Source live data** — for each candidate instrument, complete `forecast-data-sourcing-workflow.md` Steps 1–5 (price, range, chart context, levels, indicators, catalyst). Cross-check against a second source.
 2. **Select 5 instruments** — apply selection rules below; if any pick lacks a clear catalyst or reliable price data, flag it and pick an alternative.
 3. **Check prior runs** — read `content/drafts/forecasts/_last-run.json` (if exists) and scan recent slugs on `/forecasts` to avoid repeating instruments.
-4. **Fill template** — **~1,000 words each** (minimum 950, maximum 1,050), one file per instrument, using `forecast-analysis-template.mdx`. Expand **Technical Analysis** and **Fundamental Analysis** until the body reaches target length.
-5. **Save drafts** — `content/drafts/forecasts/[slug].mdx`
-6. **Update manifest** — write `content/drafts/forecasts/_last-run.json`
-7. **Output summary table** — instrument | slug | word count | primary keyword | price source | catalyst source.
+4. **Fill template** — **~1,000 words each** (minimum 950, maximum 1,050), one file per instrument. Expand **Technical Analysis** (include `{{MULTI_TF_NARRATIVE}}` and `{{PATTERN_NARRATIVE}}`) and **Fundamental Analysis** (include `{{POSITIONING_NARRATIVE}}`) until the body reaches target length.
+5. **Validate word count** — count body words (exclude frontmatter). If any draft is under 950 words, expand Technical or Fundamental sections before saving.
+6. **Save drafts** — `content/drafts/forecasts/[slug].mdx`
+7. **Update manifest** — write `content/drafts/forecasts/_last-run.json`
+8. **Output summary table** — instrument | slug | word count | primary keyword | price source | catalyst source.
 
 If live data cannot be reliably sourced for an instrument, **say so explicitly** in the summary table and either skip that instrument (replace with another) or include `[DATA UNAVAILABLE: reason]` in the draft — **never guess figures**.
 
@@ -158,13 +162,15 @@ chartPlaceholder: "[CHART: description]"
 internalLinks:
   - "/education/gold-trading-xauusd-beginners-guide"
   - "/forecasts/gold-xauusd-forecast-july-9-2026"
-wordCount: 934
+wordCount: 1000
 dataSources:
   price: "Yahoo Finance GC=F, retrieved YYYY-MM-DD"
   catalyst: "Publication name — headline date"
   indicators: "Source for RSI/MA if not computed"
 ---
 ```
+
+Set `wordCount` to the actual body word count (target ~1,000). Reject drafts under 950 words.
 
 ### Run manifest
 
@@ -186,7 +192,7 @@ content/drafts/forecasts/_last-run.json
 
 | Instrument | Slug | Word Count | Primary Keyword | Price Source | Catalyst |
 |------------|------|------------|-----------------|--------------|----------|
-| XAUUSD | `xauusd-forecast-today-...` | 934 | gold price forecast today | Yahoo GC=F | US CPI / Hormuz |
+| XAUUSD | `xauusd-forecast-today-...` | ~1000 | gold price forecast today | Yahoo GC=F | US CPI / Hormuz |
 
 ---
 
@@ -226,7 +232,8 @@ GitHub Actions (`.github/workflows/daily-instrument-analysis.yml`) runs **06:00 
 
 When run:
 
-1. Confirm the **5 selected instruments** (with catalysts and price sources) if any pick is ambiguous.
-2. Complete sourcing workflow → fill template → save 5 drafts + manifest.
-3. Present summary table with **data source column**.
-4. **Wait for user review** before commit/publish.
+1. **Read** `content/templates/forecast-analysis-template.mdx` (v2, ~1000 words) before selecting instruments.
+2. Confirm the **5 selected instruments** (with catalysts and price sources) if any pick is ambiguous.
+3. Complete sourcing workflow → fill template tokens → validate word count → save 5 drafts + manifest.
+4. Present summary table with **data source column** and **word count column** (flag any draft under 950).
+5. **Wait for user review** before commit/publish.

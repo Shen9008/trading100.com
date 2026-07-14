@@ -89,7 +89,11 @@ Source or derive from current setup — **never copy stale training values**.
 |-------|---------------|
 | Primary indicator + reading | `{{INDICATOR_PRIMARY}}` |
 | What it implies | `{{INDICATOR_INTERPRETATION}}` |
-| Secondary (optional) | `{{INDICATOR_SECONDARY}}` |
+| `{{INDICATOR_SECONDARY}}` | Secondary indicator block |
+| Multi-timeframe narrative | `{{MULTI_TF_NARRATIVE}}` |
+| Pattern recognition | `{{PATTERN_NARRATIVE}}` |
+| Positioning into event | `{{POSITIONING_NARRATIVE}}` |
+| Outlook context sentence | `{{OUTLOOK_CONTEXT}}` |
 
 If RSI/MA cannot be verified, write: *"RSI reading unavailable from primary API; defer to price structure at {{SUPPORT_1}} / {{RESISTANCE_1}}."*
 
@@ -123,8 +127,12 @@ Use web search or wire headlines. Cross-check date matches `{{DATE}}`.
 
 ## Step 7 — Quality gate (before save)
 
+- [ ] Read `content/templates/forecast-analysis-template.mdx` (v2) and matched its exact section order
 - [ ] Every number in the article appears in Steps 1–4 notes
-- [ ] 800–1,100 words (update `wordCount` in frontmatter)
+- [ ] **~950–1,050 words** (target ~1,000; update `wordCount` in frontmatter with actual count)
+- [ ] Technical Analysis includes multi-timeframe + pattern paragraphs
+- [ ] Fundamental Analysis includes positioning-into-event paragraph
+- [ ] 3 FAQ items present
 - [ ] Primary keyword in title, description, H1, first 100 words, one H2
 - [ ] 1–2 verified internal links
 - [ ] One `[CHART: ...]` placeholder with specific levels

@@ -4,9 +4,12 @@
 # =============================================================================
 # INSTRUCTIONS FOR AGENT:
 # 1. Complete forecast-data-sourcing-workflow.md BEFORE replacing tokens.
-# 2. Replace every {{TOKEN}}; delete HTML comments when filling.
-# 3. Save filled instances to: content/drafts/forecasts/{{INSTRUMENT_SLUG}}-forecast-today-{{ANGLE_SLUG}}-analysis-{{DATE}}.mdx
-# 4. Do NOT publish or commit unless the user explicitly asks.
+# 2. READ this file in full at the start of every run — do not write from memory.
+# 3. Replace every {{TOKEN}}; delete HTML comments when filling.
+# 4. Target ~1,000 words per article (950–1,050). See section comments for budgets.
+# 5. Save filled instances to: content/drafts/forecasts/{{INSTRUMENT_SLUG}}-forecast-today-{{ANGLE_SLUG}}-analysis-{{DATE}}.mdx
+# 6. Do NOT publish or commit unless the user explicitly asks.
+# TEMPLATE VERSION: v2 (~1000 words) — 2026-07-14
 # =============================================================================
 
 title: "{{INSTRUMENT}} Forecast Today: {{ANGLE}} Analysis & Key Levels"
@@ -63,6 +66,10 @@ On the {{TIMEFRAME}} chart, {{INSTRUMENT}} is {{TREND_DESCRIPTION}} between **{{
 
 Price action relative to moving averages: {{MA_POSITION_NARRATIVE}}. Structure suggests {{BIAS_NEUTRAL_OR_DIRECTIONAL}} until {{RESISTANCE_1}} or {{SUPPORT_1}} breaks with conviction.
 
+Multi-timeframe alignment: on the 4-hour chart, watch whether the Asia-session low holds on the first European push — failure there often triggers stop-loss cascades toward the next listed support. {{MULTI_TF_NARRATIVE}}
+
+Pattern recognition this week: {{PATTERN_NARRATIVE}}
+
 ### Key Support and Resistance Levels
 
 <!-- Bullets ONLY here. Each level must match Step 3 of sourcing workflow. -->
@@ -92,6 +99,8 @@ Price action relative to moving averages: {{MA_POSITION_NARRATIVE}}. Structure s
 
 Markets are interpreting {{CATALYST_HEADLINE}} through the lens of {{MACRO_CHANNEL}} — for example rates, USD liquidity, inflation pass-through, or risk appetite. The next scheduled catalyst is **{{UPCOMING_EVENT}}**, which could reset positioning if the print surprises.
 
+Positioning into **{{UPCOMING_EVENT}}**: {{POSITIONING_NARRATIVE}}
+
 For background on trading this market, see our [{{INTERNAL_LINK_1_ANCHOR}}]({{INTERNAL_LINK_1}}). Prior scenario work: [{{INTERNAL_LINK_2_ANCHOR}}]({{INTERNAL_LINK_2}}).
 
 ## Forecast / Outlook
@@ -102,7 +111,7 @@ For background on trading this market, see our [{{INTERNAL_LINK_1_ANCHOR}}]({{IN
 
 **Bearish scenario:** Failure to hold **{{SUPPORT_1}}** opens a move toward **{{SUPPORT_2}}**, particularly if {{BEARISH_CONDITION}}.
 
-**Base case:** {{INSTRUMENT}} consolidates between **{{SUPPORT_1}}** and **{{RESISTANCE_1}}** into {{UPCOMING_EVENT}}, with headline-driven intraday spikes. Reduce size ahead of binary macro prints.
+**Base case:** {{INSTRUMENT}} consolidates between **{{SUPPORT_1}}** and **{{RESISTANCE_1}}** into {{UPCOMING_EVENT}}, with headline-driven intraday spikes. Reduce size ahead of binary macro prints. {{OUTLOOK_CONTEXT}}
 
 ## FAQ
 
