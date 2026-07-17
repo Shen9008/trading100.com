@@ -1,0 +1,61 @@
+name: Daily Instrument Analysis (Backup)
+
+# Backup safety net if the 06:00 UTC run fails or is skipped.
+# Only publishes when today's forecasts are missing from KV.
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  backup-forecasts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check forecast status
+        id: status
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://trading100.com' }}
+        run: |
+          set -euo pipefail
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET GitHub secret is required"
+            exit 1
+          fi
+
+          HTTP_CODE=$(curl -s -o status.json -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/daily-forecasts?status=1")
+
+          echo "Status response ($HTTP_CODE):"
+          cat status.json
+          echo ""
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            exit 1
+          fi
+
+          HAS_TODAY=$(python3 -c "import json; print('true' if json.load(open('status.json')).get('hasToday') else 'false')")
+          echo "hasToday=$HAS_TODAY" >> "$GITHUB_OUTPUT"
+
+      - name: Publish missing forecasts
+        if: steps.status.outputs.hasToday != 'true'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://trading100.com' }}
+        run: |
+          set -euo pipefail
+          echo "Today's forecasts missing — running backup publish..."
+          node scripts/ensure-daily-forecasts.mjs --fallback-template
+
+      - name: Already up to date
+        if: steps.status.outputs.hasToday == 'true'
+        run: echo "Today's forecasts already published — backup skipped."

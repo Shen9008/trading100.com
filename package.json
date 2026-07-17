@@ -10,6 +10,7 @@
     "preview": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && wrangler deploy",
     "publish-forecasts": "node scripts/publish-forecast-drafts.mjs",
+    "ensure-forecasts": "node scripts/ensure-daily-forecasts.mjs --fallback-template",
     "pages:build": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
     "pages:deploy": "npm run deploy"
   },

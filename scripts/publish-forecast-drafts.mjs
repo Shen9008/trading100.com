@@ -170,7 +170,7 @@ async function main() {
   const siteUrl =
     process.env.SITE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://trading100.spartasoftofficial.workers.dev";
+    "https://trading100.com";
 
   if (!cronSecret) {
     console.error("CRON_SECRET environment variable is required");

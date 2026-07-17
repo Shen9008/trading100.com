@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Article } from "@/lib/data/articles";
-import { generateDailyForecasts, DAILY_INSTRUMENT_IDS } from "@/lib/services/daily-forecast-generator";
-import { saveDailyForecasts } from "@/lib/kv/forecasts-store";
+import {
+  generateDailyForecasts,
+  DAILY_INSTRUMENT_IDS,
+} from "@/lib/services/daily-forecast-generator";
+import {
+  loadDailyForecasts,
+  loadLatestDailyForecasts,
+  saveDailyForecasts,
+} from "@/lib/kv/forecasts-store";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +36,54 @@ function isValidArticle(value: unknown): value is Article {
     typeof article.publishedAt === "string" &&
     typeof article.image === "string"
   );
+}
+
+function utcToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function forecastMatchesToday(article: Article, today: string): boolean {
+  const publishedDay = article.publishedAt.slice(0, 10);
+  if (publishedDay === today) return true;
+  return article.slug.includes(today);
+}
+
+export async function GET(request: NextRequest) {
+  if (request.nextUrl.searchParams.get("status") === "1") {
+    const today = utcToday();
+    const latest = await loadLatestDailyForecasts();
+    const archive = await loadDailyForecasts();
+    const todaysForecasts = archive.filter((f) => forecastMatchesToday(f, today));
+
+    return NextResponse.json({
+      ok: true,
+      today,
+      target: DAILY_INSTRUMENT_IDS.length,
+      count: todaysForecasts.length,
+      hasToday: todaysForecasts.length >= DAILY_INSTRUMENT_IDS.length,
+      generatedAt: latest?.generatedAt ?? null,
+      archiveTotal: archive.length,
+      slugs: todaysForecasts.map((f) => f.slug),
+      source: todaysForecasts.some((f) => f.slug.includes("-auto-"))
+        ? "template"
+        : todaysForecasts.length > 0
+          ? "drafts"
+          : null,
+    });
+  }
+
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    return await generateTemplateForecasts();
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Generation failed", detail: String(error) },
+      { status: 500 }
+    );
+  }
 }
 
 async function publishDraftForecasts(forecasts: Article[]) {
@@ -71,21 +126,6 @@ async function generateTemplateForecasts() {
     slugs: forecasts.map((f) => f.slug),
     generatedAt: new Date().toISOString(),
   });
-}
-
-export async function GET(request: NextRequest) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  try {
-    return await generateTemplateForecasts();
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Generation failed", detail: String(error) },
-      { status: 500 }
-    );
-  }
 }
 
 export async function POST(request: NextRequest) {
