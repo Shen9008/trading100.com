@@ -18,7 +18,7 @@ export function finnhubToArticle(item: FinnhubNewsItem): Article {
   const excerpt = item.summary?.trim() || item.headline;
   const content = `${excerpt}
 
-Read the full story at the original publisher: ${item.url}
+[Read the full story at ${item.source}](${item.url})
 
 *Syndicated market news from ${item.source}. Trading 100 does not own this content.*`;
 

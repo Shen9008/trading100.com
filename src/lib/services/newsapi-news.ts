@@ -31,7 +31,7 @@ export function newsapiToArticle(item: NewsApiArticle): Article {
 
   const content = `${excerpt}
 
-${body ? `${body}\n\n` : ""}Read the full story at the original publisher: ${item.url}
+${body ? `${body}\n\n` : ""}[Read the full story at ${sourceName}](${item.url})
 
 *Syndicated market news from ${sourceName}. Trading 100 does not own this content.*`;
 

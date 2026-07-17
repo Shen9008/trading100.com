@@ -47,7 +47,7 @@ export function marketauxToArticle(item: MarketauxArticle): Article {
 
 ${item.snippet ? `${item.snippet}\n\n` : ""}${entityNote}
 
-Read the full story at the original publisher: ${item.url}
+[Read the full story at ${item.source}](${item.url})
 
 *Syndicated market news from ${item.source}. Trading 100 does not own this content.*`;
 

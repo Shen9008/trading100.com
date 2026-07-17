@@ -59,7 +59,7 @@ export function rssToArticle(item: RssFeedItem): Article {
 
   const content = `${item.description || item.title}
 
-Read the full story at the original publisher: ${item.link}
+[Read the full story at ${item.source}](${item.link})
 
 *Syndicated market news from ${item.source}. Trading 100 does not own this content.*`;
 
