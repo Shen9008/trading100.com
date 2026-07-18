@@ -3,6 +3,9 @@ import { DAILY_INSTRUMENT_IDS } from "@/lib/services/daily-forecast-generator";
 
 export const DAILY_FORECAST_TARGET = DAILY_INSTRUMENT_IDS.length;
 
+/** First calendar day the 5-article daily automation is required (after static seed content). */
+export const DAILY_AUTOMATION_START = "2026-07-11";
+
 const MONTH_NAMES = [
   "january",
   "february",
@@ -62,12 +65,14 @@ export function utcDateDaysAgo(daysAgo: number): string {
 export function findMissingDates(
   articles: Article[],
   daysBack: number,
-  target = DAILY_FORECAST_TARGET
+  target = DAILY_FORECAST_TARGET,
+  onlyOnOrAfter = DAILY_AUTOMATION_START
 ): string[] {
   const missing: string[] = [];
 
   for (let daysAgo = daysBack - 1; daysAgo >= 0; daysAgo -= 1) {
     const date = utcDateDaysAgo(daysAgo);
+    if (date < onlyOnOrAfter) continue;
     if (!hasFullDailyBatch(articles, date, target)) {
       missing.push(date);
     }
