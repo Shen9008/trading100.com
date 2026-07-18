@@ -3,6 +3,7 @@ import { EDUCATION_GUIDES_PART1 } from "./education-guides-part1";
 import { EDUCATION_GUIDES_PART2 } from "./education-guides-part2";
 import { EDUCATION_GUIDES_PART3 } from "./education-guides-part3";
 import { EDUCATION_GUIDES_PART4 } from "./education-guides-part4";
+import { EDUCATION_GUIDES_PART5 } from "./education-guides-part5";
 import type { EducationGuide } from "./education-types";
 
 export type { EducationGuide } from "./education-types";
@@ -159,6 +160,7 @@ const EXTENDED_EDUCATION_GUIDES: EducationGuide[] = [
   ...EDUCATION_GUIDES_PART2,
   ...EDUCATION_GUIDES_PART3,
   ...EDUCATION_GUIDES_PART4,
+  ...EDUCATION_GUIDES_PART5,
 ];
 
 export const ALL_EDUCATION_GUIDES: EducationGuide[] = [

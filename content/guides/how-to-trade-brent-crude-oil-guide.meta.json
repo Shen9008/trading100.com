@@ -1,0 +1,31 @@
+{
+  "slug": "how-to-trade-brent-crude-oil-guide",
+  "title": "How to Trade Brent Crude Oil: Complete Oil Trading Guide",
+  "excerpt": "Learn how to trade Brent crude oil: benchmark structure, ICE futures specs, EIA inventory catalysts, Brent vs WTI, and practical steps for oil traders.",
+  "readTime": "22 min",
+  "level": "Beginner",
+  "publishedAt": "2026-07-12T00:00:00Z",
+  "imageKey": "commodities",
+  "faqs": [
+    {
+      "question": "What is the difference between Brent and WTI crude oil?",
+      "answer": "Brent is a seaborne North Sea benchmark used to price much of the world's exported crude. WTI is a U.S. landlocked benchmark centered on delivery at Cushing, Oklahoma. They share macro drivers but can diverge on logistics, quality, and regional supply shocks."
+    },
+    {
+      "question": "How much does one tick move in Brent futures?",
+      "answer": "ICE Brent Crude futures use a minimum fluctuation of $0.01 per barrel. With a standard contract size of 1,000 barrels, one tick equals $10 per contract before fees and margin."
+    },
+    {
+      "question": "When is the EIA weekly oil inventory report?",
+      "answer": "The U.S. Energy Information Administration publishes its Weekly Petroleum Status Report on Wednesdays at 10:30 a.m. Eastern Time, except when adjusted for certain holidays. Oil markets often react quickly to inventory surprises versus analyst expectations."
+    },
+    {
+      "question": "Is oil trading suitable for beginners?",
+      "answer": "Oil can be educational to study because catalysts are well documented, but price gaps and event risk are significant. Beginners should learn contract specs, start with small size or demo accounts, and treat inventory and OPEC headlines as high-volatility windows."
+    },
+    {
+      "question": "What moves Brent crude prices the most?",
+      "answer": "Supply disruptions, OPEC+ policy signals, global demand expectations, U.S. inventory surprises, the U.S. dollar, and geopolitical risk in key producing or transit regions are recurring drivers. During major supply shocks, spot headlines can override routine weekly data."
+    }
+  ]
+}

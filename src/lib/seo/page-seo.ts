@@ -183,6 +183,7 @@ const EDUCATION_SLUG_KEYWORDS: Record<string, string[]> = {
   "forex-vs-stocks-vs-crypto-guide": ["forex vs stocks vs crypto", "forex or stocks for beginners", "crypto vs forex trading", "which market should I trade", "asset class comparison trading"],
   "what-is-xagusd-silver-trading-guide": ["what is XAGUSD", "silver trading for beginners", "XAG USD meaning", "COMEX silver futures", "how to trade silver"],
   "how-to-trade-nasdaq-100-index-guide": ["how to trade the Nasdaq 100", "Nasdaq 100 trading for beginners", "NDX index explained", "E-mini Nasdaq 100 futures", "NQ futures trading"],
+  "how-to-trade-brent-crude-oil-guide": ["how to trade oil", "Brent crude trading", "Brent vs WTI", "crude oil futures", "oil trading for beginners"],
 };
 
 export function getInstrumentSeo(

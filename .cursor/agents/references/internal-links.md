@@ -38,6 +38,7 @@ Use only these verified paths when adding internal links in daily forecast draft
 - `/education/forex-vs-stocks-vs-crypto-guide`
 - `/education/what-is-xagusd-silver-trading-guide`
 - `/education/how-to-trade-nasdaq-100-index-guide`
+- `/education/how-to-trade-brent-crude-oil-guide`
 
 ## News (`/news/[slug]`)
 
@@ -63,6 +64,6 @@ Use only these verified paths when adding internal links in daily forecast draft
 | BTC / ETH | `/education/cryptocurrency-trading-beginners-guide`, `/news/bitcoin-halving-aftermath-2026` |
 | S&P 500 / Nasdaq | `/education/how-to-trade-sp500-index-trading-guide`, `/education/how-to-trade-nasdaq-100-index-guide`, `/news/fed-rate-outlook-q2-2026` |
 | Silver / XAGUSD | `/education/what-is-xagusd-silver-trading-guide`, `/forecasts/silver-xagusd-forecast-july-10-2026` |
-| Oil / Brent | `/forecasts/brent-crude-oil-forecast-july-9-2026` |
+| Oil / Brent | `/education/how-to-trade-brent-crude-oil-guide`, `/forecasts/brent-crude-oil-forecast-july-9-2026` |
 
 Before linking, grep `src/lib/data/` or this file — **never invent slugs**.
