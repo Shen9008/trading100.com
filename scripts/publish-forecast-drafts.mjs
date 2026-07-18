@@ -86,6 +86,27 @@ function mdxToArticle(frontmatter, body) {
   };
 }
 
+function isoDateToProseFragment(isoDate) {
+  const [year, month, day] = isoDate.split("-");
+  const monthNames = [
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+  ];
+  const monthIndex = Number(month) - 1;
+  if (monthIndex < 0 || monthIndex > 11) return isoDate;
+  return `${monthNames[monthIndex]}-${Number(day)}-${year}`;
+}
+
 function loadDraftsForDate(targetDate) {
   const manifestPath = path.join(DRAFTS_DIR, "_last-run.json");
   let slugs = [];
@@ -98,9 +119,14 @@ function loadDraftsForDate(targetDate) {
   }
 
   if (slugs.length === 0) {
+    const proseDate = isoDateToProseFragment(targetDate);
     const files = fs
       .readdirSync(DRAFTS_DIR)
-      .filter((f) => f.endsWith(".mdx") && f.includes(targetDate));
+      .filter(
+        (f) =>
+          f.endsWith(".mdx") &&
+          (f.includes(targetDate) || f.includes(proseDate))
+      );
 
     slugs = files.map((f) => f.replace(/\.mdx$/, ""));
   }

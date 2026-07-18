@@ -93,7 +93,11 @@ async function readLatest(kv: KVNamespace): Promise<DailyForecastsPayload | null
 
 export async function saveDailyForecasts(forecasts: Article[]): Promise<void> {
   const kv = await getKV();
-  if (!kv) return;
+  if (!kv) {
+    throw new Error(
+      "FORECASTS_KV binding unavailable — forecast publish did not persist"
+    );
+  }
 
   const latestPayload: DailyForecastsPayload = {
     generatedAt: new Date().toISOString(),

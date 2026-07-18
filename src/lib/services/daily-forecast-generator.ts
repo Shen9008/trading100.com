@@ -20,8 +20,27 @@ export const DAILY_INSTRUMENT_IDS = [
   "usd-jpy",
 ] as const;
 
-function todaySlug(prefix: string): string {
-  return `${prefix}-auto-${new Date().toISOString().slice(0, 10)}`;
+function dateSlug(prefix: string, isoDate?: string): string {
+  const date = isoDate ?? new Date().toISOString().slice(0, 10);
+  return `${prefix}-auto-${date}`;
+}
+
+export type GenerateDailyForecastsOptions = {
+  /** Publish as a specific UTC calendar day (YYYY-MM-DD). */
+  asOfDate?: string;
+};
+
+export function stampForecastsForDate(
+  forecasts: Article[],
+  isoDate: string
+): Article[] {
+  const publishedAt = `${isoDate}T06:00:00.000Z`;
+
+  return forecasts.map((forecast) => ({
+    ...forecast,
+    publishedAt,
+    slug: forecast.slug.replace(/-auto-\d{4}-\d{2}-\d{2}$/, `-auto-${isoDate}`),
+  }));
 }
 
 function formatUsd(n: number, decimals = 2): string {
@@ -188,7 +207,7 @@ async function generateBitcoin(
   const dateLabel = now.slice(0, 10);
 
   return {
-    slug: todaySlug("bitcoin"),
+    slug: dateSlug("bitcoin"),
     title: `Bitcoin Forecast Today: BTC Price Analysis & Key Levels`,
     excerpt: `Bitcoin price forecast for ${dateLabel}: BTC ${dir} at $${formatUsd(btc.current_price, 0)}, ETF flows, yield sensitivity, and support/resistance levels.`,
     content: buildForecastContent({
@@ -259,7 +278,7 @@ async function generateEurUsd(
   const resDn = (eurusd * 0.988).toFixed(4);
 
   return {
-    slug: todaySlug("eur-usd"),
+    slug: dateSlug("eur-usd"),
     title: "EUR/USD Forecast Today: Euro Dollar Analysis & Key Levels",
     excerpt: `EUR/USD forecast for ${dateLabel}: euro dollar near ${eurusd.toFixed(4)}, ECB reference data, Fed pricing, and support/resistance levels for cable traders.`,
     content: buildForecastContent({
@@ -327,7 +346,7 @@ async function generateUsdJpy(
   const dateLabel = now.slice(0, 10);
 
   return {
-    slug: todaySlug("usd-jpy"),
+    slug: dateSlug("usd-jpy"),
     title: "USD/JPY Forecast Today: Yen Analysis & Key Levels",
     excerpt: `USD/JPY forecast for ${dateLabel}: dollar-yen near ${usdjpy.toFixed(2)}, yield spread focus, intervention watch zone, and technical levels.`,
     content: buildForecastContent({
@@ -403,7 +422,7 @@ async function generateGold(now: string, macroNote: string): Promise<Article> {
   const bearTarget = price ? formatUsd(price * 0.96, 0) : "lower support zone";
 
   return {
-    slug: todaySlug("gold-xauusd"),
+    slug: dateSlug("gold-xauusd"),
     title: price
       ? `XAUUSD Forecast Today: Gold Price Analysis & Key Levels`
       : `XAUUSD Forecast Today: Gold Price Analysis & Key Levels`,
@@ -505,7 +524,7 @@ async function generateSp500(
   const dateLabel = now.slice(0, 10);
 
   return {
-    slug: todaySlug("sp500"),
+    slug: dateSlug("sp500"),
     title: "S&P 500 Forecast Today: Index Analysis & Key Levels",
     excerpt: `S&P 500 forecast for ${dateLabel}: index near ${price.toFixed(2)}, mega-cap tech cushion vs macro headwinds, and key support/resistance levels.`,
     content: buildForecastContent({
@@ -802,7 +821,7 @@ function fallbackForecast(
 
   const t = templates[id];
   return {
-    slug: todaySlug(id === "gold-xauusd" ? "gold-xauusd" : id),
+    slug: dateSlug(id === "gold-xauusd" ? "gold-xauusd" : id),
     title: t.title,
     excerpt: t.excerpt,
     content: t.content,
@@ -814,8 +833,12 @@ function fallbackForecast(
   };
 }
 
-export async function generateDailyForecasts(): Promise<Article[]> {
-  const now = new Date().toISOString();
+export async function generateDailyForecasts(
+  options?: GenerateDailyForecastsOptions
+): Promise<Article[]> {
+  const now = options?.asOfDate
+    ? `${options.asOfDate}T06:00:00.000Z`
+    : new Date().toISOString();
   const headline = await getTopHeadline();
   const macroNote = headline
     ? `Today's dominant headline: "${headline.slice(0, 120)}${headline.length > 120 ? "…" : ""}".`
@@ -841,6 +864,10 @@ export async function generateDailyForecasts(): Promise<Article[]> {
     } catch {
       forecasts.push(fallbackForecast(id, now, macroNote));
     }
+  }
+
+  if (options?.asOfDate) {
+    return stampForecastsForDate(forecasts, options.asOfDate);
   }
 
   return forecasts;

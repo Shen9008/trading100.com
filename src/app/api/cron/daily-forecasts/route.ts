@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Article } from "@/lib/data/articles";
+import { FORECAST_ARTICLES } from "@/lib/data/forecasts";
+import {
+  countForecastsForDate,
+  DAILY_FORECAST_TARGET,
+  findMissingDates,
+  forecastMatchesDate,
+  hasFullDailyBatch,
+  mergeArticlesBySlug,
+} from "@/lib/forecasts/daily-coverage";
 import {
   generateDailyForecasts,
   DAILY_INSTRUMENT_IDS,
@@ -11,6 +20,8 @@ import {
 } from "@/lib/kv/forecasts-store";
 
 export const dynamic = "force-dynamic";
+
+const DEFAULT_BACKFILL_DAYS = 14;
 
 function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -42,33 +53,62 @@ function utcToday(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function forecastMatchesToday(article: Article, today: string): boolean {
-  const publishedDay = article.publishedAt.slice(0, 10);
-  if (publishedDay === today) return true;
-  return article.slug.includes(today);
+function parseIsoDate(value: string | null): string | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  return value;
+}
+
+async function getAllKnownForecasts(): Promise<Article[]> {
+  const archive = await loadDailyForecasts();
+  return mergeArticlesBySlug(archive, FORECAST_ARTICLES);
+}
+
+function buildStatusPayload(
+  allArticles: Article[],
+  lookbackDays: number
+) {
+  const today = utcToday();
+  const missingDates = findMissingDates(allArticles, lookbackDays);
+  const todaysForecasts = allArticles.filter((f) =>
+    forecastMatchesDate(f, today)
+  );
+
+  return {
+    ok: true,
+    today,
+    target: DAILY_FORECAST_TARGET,
+    count: todaysForecasts.length,
+    hasToday: hasFullDailyBatch(allArticles, today),
+    lookbackDays,
+    missingDates,
+    hasGaps: missingDates.length > 0,
+    archiveTotal: allArticles.length,
+    slugs: todaysForecasts.map((f) => f.slug),
+    source: todaysForecasts.some((f) => f.slug.includes("-auto-"))
+      ? "template"
+      : todaysForecasts.length > 0
+        ? "drafts"
+        : null,
+  };
 }
 
 export async function GET(request: NextRequest) {
   if (request.nextUrl.searchParams.get("status") === "1") {
-    const today = utcToday();
+    const lookbackDays = Number(
+      request.nextUrl.searchParams.get("lookback") ?? DEFAULT_BACKFILL_DAYS
+    );
+    const safeLookback =
+      Number.isFinite(lookbackDays) && lookbackDays > 0
+        ? Math.min(Math.floor(lookbackDays), 30)
+        : DEFAULT_BACKFILL_DAYS;
+
     const latest = await loadLatestDailyForecasts();
-    const archive = await loadDailyForecasts();
-    const todaysForecasts = archive.filter((f) => forecastMatchesToday(f, today));
+    const allArticles = await getAllKnownForecasts();
+    const status = buildStatusPayload(allArticles, safeLookback);
 
     return NextResponse.json({
-      ok: true,
-      today,
-      target: DAILY_INSTRUMENT_IDS.length,
-      count: todaysForecasts.length,
-      hasToday: todaysForecasts.length >= DAILY_INSTRUMENT_IDS.length,
+      ...status,
       generatedAt: latest?.generatedAt ?? null,
-      archiveTotal: archive.length,
-      slugs: todaysForecasts.map((f) => f.slug),
-      source: todaysForecasts.some((f) => f.slug.includes("-auto-"))
-        ? "template"
-        : todaysForecasts.length > 0
-          ? "drafts"
-          : null,
     });
   }
 
@@ -77,7 +117,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return await generateTemplateForecasts();
+    const asOfDate = parseIsoDate(request.nextUrl.searchParams.get("date"));
+    return await generateTemplateForecasts(asOfDate ?? undefined);
   } catch (error) {
     return NextResponse.json(
       { error: "Generation failed", detail: String(error) },
@@ -113,8 +154,10 @@ async function publishDraftForecasts(forecasts: Article[]) {
   });
 }
 
-async function generateTemplateForecasts() {
-  const forecasts = await generateDailyForecasts();
+async function generateTemplateForecasts(asOfDate?: string) {
+  const forecasts = await generateDailyForecasts(
+    asOfDate ? { asOfDate } : undefined
+  );
   await saveDailyForecasts(forecasts);
 
   return NextResponse.json({
@@ -122,9 +165,50 @@ async function generateTemplateForecasts() {
     source: "template",
     generated: forecasts.length,
     target: DAILY_INSTRUMENT_IDS.length,
+    asOfDate: asOfDate ?? utcToday(),
     instruments: DAILY_INSTRUMENT_IDS,
     slugs: forecasts.map((f) => f.slug),
     generatedAt: new Date().toISOString(),
+  });
+}
+
+async function backfillMissingDates(daysBack: number) {
+  const safeDays =
+    Number.isFinite(daysBack) && daysBack > 0
+      ? Math.min(Math.floor(daysBack), 30)
+      : DEFAULT_BACKFILL_DAYS;
+
+  const filled: string[] = [];
+  const skipped: string[] = [];
+
+  for (let pass = 0; pass < safeDays; pass += 1) {
+    const allArticles = await getAllKnownForecasts();
+    const missingDates = findMissingDates(allArticles, safeDays);
+    const nextDate = missingDates[0];
+
+    if (!nextDate) break;
+
+    const beforeCount = countForecastsForDate(allArticles, nextDate);
+    if (beforeCount >= DAILY_FORECAST_TARGET) {
+      skipped.push(nextDate);
+      continue;
+    }
+
+    const forecasts = await generateDailyForecasts({ asOfDate: nextDate });
+    await saveDailyForecasts(forecasts);
+    filled.push(nextDate);
+  }
+
+  const finalArticles = await getAllKnownForecasts();
+  const remainingMissing = findMissingDates(finalArticles, safeDays);
+
+  return NextResponse.json({
+    ok: remainingMissing.length === 0,
+    backfillDays: safeDays,
+    filled,
+    skipped,
+    remainingMissing,
+    hasGaps: remainingMissing.length > 0,
   });
 }
 
@@ -132,6 +216,21 @@ export async function POST(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const backfillDaysParam = request.nextUrl.searchParams.get("backfill-days");
+  if (backfillDaysParam !== null) {
+    try {
+      const days = Number(backfillDaysParam || DEFAULT_BACKFILL_DAYS);
+      return await backfillMissingDates(days);
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Backfill failed", detail: String(error) },
+        { status: 500 }
+      );
+    }
+  }
+
+  const asOfDate = parseIsoDate(request.nextUrl.searchParams.get("date"));
 
   const contentType = request.headers.get("content-type") ?? "";
   if (contentType.includes("application/json")) {
@@ -149,7 +248,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    return await generateTemplateForecasts();
+    return await generateTemplateForecasts(asOfDate ?? undefined);
   } catch (error) {
     return NextResponse.json(
       { error: "Generation failed", detail: String(error) },

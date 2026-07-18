@@ -1,14 +1,13 @@
-name: Daily Instrument Analysis (Backup)
+name: Daily Instrument Analysis (Midday Gap Check)
 
-# Backup safety net if the 06:00 UTC run fails or is skipped.
-# Only publishes when today's forecasts are missing from KV.
+# Extra safety net: backfill any missing forecast days even if today's batch exists.
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "0 12 * * *"
   workflow_dispatch:
 
 jobs:
-  backup-forecasts:
+  gap-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,7 +18,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Check forecast status
+      - name: Check forecast coverage
         id: status
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
@@ -33,7 +32,7 @@ jobs:
 
           HTTP_CODE=$(curl -s -o status.json -w "%{http_code}" \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "$SITE_URL/api/cron/daily-forecasts?status=1")
+            "$SITE_URL/api/cron/daily-forecasts?status=1&lookback=14")
 
           echo "Status response ($HTTP_CODE):"
           cat status.json
@@ -43,19 +42,18 @@ jobs:
             exit 1
           fi
 
-          HAS_TODAY=$(python3 -c "import json; d=json.load(open('status.json')); missing=d.get('missingDates') or []; print('true' if d.get('hasToday') and len(missing)==0 else 'false')")
-          echo "hasToday=$HAS_TODAY" >> "$GITHUB_OUTPUT"
+          NEEDS_BACKFILL=$(python3 -c "import json; d=json.load(open('status.json')); missing=d.get('missingDates') or []; print('true' if (not d.get('hasToday')) or len(missing)>0 else 'false')")
+          echo "needsBackfill=$NEEDS_BACKFILL" >> "$GITHUB_OUTPUT"
 
-      - name: Publish missing forecasts
-        if: steps.status.outputs.hasToday != 'true'
+      - name: Backfill forecast gaps
+        if: steps.status.outputs.needsBackfill == 'true'
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: ${{ vars.SITE_URL || 'https://trading100.com' }}
         run: |
           set -euo pipefail
-          echo "Forecast gaps detected — running backup publish + backfill..."
           node scripts/ensure-daily-forecasts.mjs --fallback-template --lookback-days 14
 
-      - name: Already up to date
-        if: steps.status.outputs.hasToday == 'true'
-        run: echo "Today's forecasts already published — backup skipped."
+      - name: Coverage complete
+        if: steps.status.outputs.needsBackfill != 'true'
+        run: echo "14-day forecast coverage is complete — midday check skipped."

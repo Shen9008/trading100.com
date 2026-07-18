@@ -33,4 +33,4 @@ jobs:
             exit 1
           fi
 
-          node scripts/ensure-daily-forecasts.mjs --fallback-template
+          node scripts/ensure-daily-forecasts.mjs --fallback-template --lookback-days 14

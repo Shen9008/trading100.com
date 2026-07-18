@@ -1,0 +1,87 @@
+import type { Article } from "@/lib/data/articles";
+import { DAILY_INSTRUMENT_IDS } from "@/lib/services/daily-forecast-generator";
+
+export const DAILY_FORECAST_TARGET = DAILY_INSTRUMENT_IDS.length;
+
+const MONTH_NAMES = [
+  "january",
+  "february",
+  "march",
+  "april",
+  "may",
+  "june",
+  "july",
+  "august",
+  "september",
+  "october",
+  "november",
+  "december",
+] as const;
+
+/** Slug fragment for prose dates, e.g. 2026-07-13 → july-13-2026 */
+export function isoDateToProseSlugFragment(isoDate: string): string {
+  const [year, month, day] = isoDate.split("-");
+  const monthIndex = Number(month) - 1;
+  if (monthIndex < 0 || monthIndex > 11) return isoDate;
+  return `${MONTH_NAMES[monthIndex]}-${Number(day)}-${year}`;
+}
+
+export function forecastMatchesDate(article: Article, date: string): boolean {
+  if (article.publishedAt.slice(0, 10) === date) return true;
+  if (article.slug.includes(date)) return true;
+
+  const prose = isoDateToProseSlugFragment(date);
+  if (article.slug.includes(prose)) return true;
+
+  return false;
+}
+
+export function countForecastsForDate(
+  articles: Article[],
+  date: string
+): number {
+  return articles.filter((article) => forecastMatchesDate(article, date))
+    .length;
+}
+
+export function hasFullDailyBatch(
+  articles: Article[],
+  date: string,
+  target = DAILY_FORECAST_TARGET
+): boolean {
+  return countForecastsForDate(articles, date) >= target;
+}
+
+export function utcDateDaysAgo(daysAgo: number): string {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() - daysAgo);
+  return date.toISOString().slice(0, 10);
+}
+
+/** Returns ISO dates (oldest first) missing a full daily batch in the lookback window. */
+export function findMissingDates(
+  articles: Article[],
+  daysBack: number,
+  target = DAILY_FORECAST_TARGET
+): string[] {
+  const missing: string[] = [];
+
+  for (let daysAgo = daysBack - 1; daysAgo >= 0; daysAgo -= 1) {
+    const date = utcDateDaysAgo(daysAgo);
+    if (!hasFullDailyBatch(articles, date, target)) {
+      missing.push(date);
+    }
+  }
+
+  return missing;
+}
+
+export function mergeArticlesBySlug(...groups: Article[][]): Article[] {
+  const bySlug = new Map<string, Article>();
+  for (const group of groups) {
+    for (const article of group) {
+      bySlug.set(article.slug, article);
+    }
+  }
+  return Array.from(bySlug.values());
+}
