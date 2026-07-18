@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SiteContextLinks } from "@/components/layout/SiteContextLinks";
 import { AppBackground } from "@/components/layout/AppBackground";
 import { TickerTape } from "@/components/widgets/TickerTape";
 import { buildMetadata } from "@/lib/metadata";
@@ -71,6 +72,7 @@ export default function RootLayout({
         <Header />
         <TickerTape />
         <main className="flex-1">{children}</main>
+        <SiteContextLinks />
         <Footer />
       </body>
     </html>
