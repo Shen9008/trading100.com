@@ -1,0 +1,31 @@
+{
+  "slug": "what-is-xagusd-silver-trading-guide",
+  "title": "What Is XAGUSD? Complete Guide to Trading Silver",
+  "excerpt": "Learn what XAGUSD is, how silver is priced via spot CFDs and COMEX SI futures, key industrial and macro drivers, and practical steps for silver traders.",
+  "readTime": "22 min",
+  "level": "Beginner",
+  "publishedAt": "2026-07-18T00:00:00Z",
+  "imageKey": "commodities",
+  "faqs": [
+    {
+      "question": "What does XAGUSD mean?",
+      "answer": "XAGUSD is the market symbol for silver priced in U.S. dollars per troy ounce. XAG is the ISO code for silver; USD is the quote currency. Retail platforms may label it XAG/USD, SILVER, or similar, but the economic meaning is the same: the dollar cost of one troy ounce of silver."
+    },
+    {
+      "question": "How much is one tick worth on COMEX Silver (SI) futures?",
+      "answer": "The standard COMEX SI contract represents 5,000 troy ounces with a minimum price move of $0.005 per ounce, equal to $25 per contract per tick. A $1.00 move in the silver price equals $5,000 per SI contract before commissions and margin."
+    },
+    {
+      "question": "Why is silver more volatile than gold?",
+      "answer": "Silver's market is smaller, it has a large industrial demand component sensitive to economic cycles, and leveraged futures positioning can amplify swings. Gold relies more on investment and central-bank flows, which can dampen percentage moves during mixed macro environments."
+    },
+    {
+      "question": "What is the gold-silver ratio and why does it matter?",
+      "answer": "The gold-silver ratio divides the gold price by the silver price. It helps traders assess relative value — whether silver is cheap or expensive versus gold. It is a context tool, not a precise timing indicator; the ratio can stay elevated or depressed for long periods during structural shifts in industrial demand or monetary stress."
+    },
+    {
+      "question": "Is silver trading suitable for beginners?",
+      "answer": "Silver can be educational because catalysts are transparent and liquidity is generally strong during major sessions. The challenge is leverage and volatility: beginners should learn contract specifications, practice on demo accounts, size positions with explicit dollar risk, and study industrial drivers — not only gold-style macro narratives."
+    }
+  ]
+}

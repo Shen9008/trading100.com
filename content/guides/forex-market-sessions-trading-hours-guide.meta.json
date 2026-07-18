@@ -1,0 +1,31 @@
+{
+  "slug": "forex-market-sessions-trading-hours-guide",
+  "title": "Forex Market Sessions: Trading Hours Explained",
+  "excerpt": "Understand forex market sessions and trading hours: Sydney, Tokyo, London, and New York sessions, overlaps, liquidity, spreads, and how to match pairs to active hours.",
+  "readTime": "22 min",
+  "level": "Beginner",
+  "publishedAt": "2026-07-18T00:00:00Z",
+  "imageKey": "forex",
+  "faqs": [
+    {
+      "question": "What time does the forex market open and close?",
+      "answer": "The decentralized forex market is generally open from approximately 22:00 UTC Sunday through 22:00 UTC Friday. There is no single exchange close — activity rolls through Sydney, Tokyo, London, and New York as regional banks and liquidity providers come online."
+    },
+    {
+      "question": "Which forex session has the highest liquidity?",
+      "answer": "The London-New York overlap typically offers the deepest liquidity for major currency pairs such as EUR/USD and GBP/USD. London alone remains the largest FX trading centre globally, and adding New York hours stacks two of the world's biggest banking hubs on the same clock."
+    },
+    {
+      "question": "How do daylight saving time changes affect forex hours?",
+      "answer": "Forex session times are often quoted in UTC, but local business hours in Sydney, London, and New York shift when regions enter or exit daylight saving. For one to two weeks each spring and autumn, overlaps can appear to move by one hour until all regions adjust."
+    },
+    {
+      "question": "Should beginners trade during the Asian session?",
+      "answer": "Beginners can study the Asian session, especially for JPY, AUD, and NZD pairs, but spreads are often wider and ranges can be quieter outside Tokyo-London overlap. Many new traders focus first on one liquid window — often London or the London-New York overlap — before expanding hours."
+    },
+    {
+      "question": "Is forex open when stock markets are closed?",
+      "answer": "Yes. Forex trades over the counter nearly 24 hours on weekdays, while individual stock exchanges follow fixed local sessions and holidays. Weekend gaps in FX are limited to the Friday close through Sunday open, unlike equities that can sit closed for full calendar days."
+    }
+  ]
+}

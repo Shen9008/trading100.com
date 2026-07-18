@@ -33,6 +33,11 @@ Use only these verified paths when adding internal links in daily forecast draft
 - `/education/forex-position-sizing-lot-size-guide`
 - `/education/trading-psychology-discipline-guide`
 - `/education/how-to-trade-sp500-index-trading-guide`
+- `/education/what-is-usd-jpy-trading-guide`
+- `/education/forex-market-sessions-trading-hours-guide`
+- `/education/forex-vs-stocks-vs-crypto-guide`
+- `/education/what-is-xagusd-silver-trading-guide`
+- `/education/how-to-trade-nasdaq-100-index-guide`
 
 ## News (`/news/[slug]`)
 
@@ -54,9 +59,10 @@ Use only these verified paths when adding internal links in daily forecast draft
 | Instrument | Suggested internal links |
 |------------|-------------------------|
 | XAUUSD / Gold | `/education/gold-trading-xauusd-beginners-guide`, `/forecasts/gold-xauusd-forecast-july-9-2026` |
-| EUR/USD, GBP/USD, USD/JPY | `/education/how-to-trade-forex`, `/tools/economic-calendar` |
+| EUR/USD, GBP/USD, USD/JPY | `/education/how-to-trade-forex`, `/education/what-is-usd-jpy-trading-guide`, `/tools/economic-calendar` |
 | BTC / ETH | `/education/cryptocurrency-trading-beginners-guide`, `/news/bitcoin-halving-aftermath-2026` |
-| S&P 500 / Nasdaq | `/education/moving-average-trading-strategy-guide`, `/news/fed-rate-outlook-q2-2026` |
+| S&P 500 / Nasdaq | `/education/how-to-trade-sp500-index-trading-guide`, `/education/how-to-trade-nasdaq-100-index-guide`, `/news/fed-rate-outlook-q2-2026` |
+| Silver / XAGUSD | `/education/what-is-xagusd-silver-trading-guide`, `/forecasts/silver-xagusd-forecast-july-10-2026` |
 | Oil / Brent | `/forecasts/brent-crude-oil-forecast-july-9-2026` |
 
 Before linking, grep `src/lib/data/` or this file — **never invent slugs**.

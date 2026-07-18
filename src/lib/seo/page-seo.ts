@@ -178,6 +178,11 @@ const EDUCATION_SLUG_KEYWORDS: Record<string, string[]> = {
   "forex-position-sizing-lot-size-guide": ["forex position sizing", "lot size calculator", "pip value calculator", "margin forex"],
   "trading-psychology-discipline-guide": ["trading psychology", "emotional trading", "trading discipline", "fear and greed"],
   "how-to-trade-sp500-index-trading-guide": ["how to trade the S&P 500", "S&P 500 trading for beginners", "SPX index explained", "E-mini S&P 500 futures", "US stock index trading"],
+  "what-is-usd-jpy-trading-guide": ["what is USD/JPY", "USD/JPY trading for beginners", "trade the Japanese yen", "USD JPY pip value", "Bank of Japan forex"],
+  "forex-market-sessions-trading-hours-guide": ["forex market sessions", "forex trading hours", "London New York overlap", "Tokyo forex session", "when to trade forex"],
+  "forex-vs-stocks-vs-crypto-guide": ["forex vs stocks vs crypto", "forex or stocks for beginners", "crypto vs forex trading", "which market should I trade", "asset class comparison trading"],
+  "what-is-xagusd-silver-trading-guide": ["what is XAGUSD", "silver trading for beginners", "XAG USD meaning", "COMEX silver futures", "how to trade silver"],
+  "how-to-trade-nasdaq-100-index-guide": ["how to trade the Nasdaq 100", "Nasdaq 100 trading for beginners", "NDX index explained", "E-mini Nasdaq 100 futures", "NQ futures trading"],
 };
 
 export function getInstrumentSeo(

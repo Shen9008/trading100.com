@@ -1,0 +1,31 @@
+{
+  "slug": "what-is-usd-jpy-trading-guide",
+  "title": "What Is USD/JPY? Complete Guide to Trading the Japanese Yen",
+  "excerpt": "Learn what USD/JPY is, how yen quotes work, pip values, BoJ and Fed drivers, Tokyo session hours, and practical steps for beginners.",
+  "readTime": "22 min",
+  "level": "Beginner",
+  "publishedAt": "2026-07-18T00:00:00Z",
+  "imageKey": "forex",
+  "faqs": [
+    {
+      "question": "What does USD/JPY mean in forex?",
+      "answer": "USD/JPY is the exchange rate between the U.S. dollar and Japanese yen, quoted as how many yen one dollar buys. A rising pair indicates dollar strength or yen weakness; a falling pair indicates yen strength or dollar weakness. It is one of the most liquid pairs globally according to BIS 2022 survey data."
+    },
+    {
+      "question": "Why is the pip different on USD/JPY?",
+      "answer": "Major yen pairs use 0.01 as one standard pip — the second decimal — because yen-per-dollar quotes are numerically large. Most other majors use 0.0001 (fourth decimal). Always confirm pip size and value with your broker before sizing trades."
+    },
+    {
+      "question": "When is the best time to trade USD/JPY?",
+      "answer": "Regional yen liquidity is typically strongest during the Tokyo session (roughly 00:00 to 09:00 UTC). Many traders also focus on London–New York hours when U.S. economic data and Fed-related flows peak. Match your window to your strategy and reduce size in thin periods until you have evidence of edge."
+    },
+    {
+      "question": "Is USD/JPY good for beginners?",
+      "answer": "It can be, because spreads are often competitive and documentation is abundant. Challenges include two-decimal pip maths, central-bank tail risk, and safe-haven behaviour that contradicts simple carry logic. Start with education, demo trading, and micro lots."
+    },
+    {
+      "question": "What moves USD/JPY the most?",
+      "answer": "Recurring drivers include Bank of Japan and Federal Reserve policy, U.S.–Japan rate differentials, U.S. inflation and labour data, global risk sentiment, and occasional official yen commentary or intervention. Treat combined BoJ–Fed weeks as elevated-volatility periods."
+    }
+  ]
+}
