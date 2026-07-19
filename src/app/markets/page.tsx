@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 
 import { buildMetadata } from "@/lib/metadata";
 
@@ -19,6 +20,19 @@ import { SectionHeader } from "@/components/layout/SectionHeader";
 import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { countInstruments } from "@/lib/data/market-instruments";
 import { MARKETS_KEYWORDS } from "@/lib/seo/page-seo";
+
+const TradingViewMarketMovers = dynamic(
+  () =>
+    import("@/components/widgets/TradingViewMarketMovers").then(
+      (mod) => mod.TradingViewMarketMovers
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-[420px] animate-pulse rounded-xl bg-white/5" />
+    ),
+  }
+);
 
 export const metadata: Metadata = buildMetadata({
   title: "Live Markets — Forex, Crypto, Stocks & Commodities",
@@ -108,6 +122,28 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
           />
 
           <InstrumentDirectory defaultTab={defaultTab} />
+
+        </div>
+
+
+
+        <div className="mt-12">
+
+          <SectionHeader
+
+            title="Market Movers"
+
+            subtitle="Top gainers and losers across global markets — powered by TradingView"
+
+            eyebrow="Live Data"
+
+          />
+
+          <GlassCard className="p-4 sm:p-6">
+
+            <TradingViewMarketMovers />
+
+          </GlassCard>
 
         </div>
 
