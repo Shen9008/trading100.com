@@ -3,6 +3,7 @@ import type { Article } from "@/lib/data/articles";
 import { FORECAST_ARTICLES } from "@/lib/data/forecasts";
 import {
   countForecastsForDate,
+  DAILY_BATCH_SIZE,
   DAILY_FORECAST_TARGET,
   findMissingDates,
   forecastMatchesDate,
@@ -11,8 +12,12 @@ import {
 } from "@/lib/forecasts/daily-coverage";
 import {
   generateDailyForecasts,
-  DAILY_INSTRUMENT_IDS,
+  resolveDailyInstrumentIds,
 } from "@/lib/services/daily-forecast-generator";
+import {
+  getInstrumentsForDate,
+  selectDailyInstrumentsFromArchive,
+} from "@/lib/forecasts/instrument-rotation";
 import {
   loadDailyForecasts,
   loadLatestDailyForecasts,
@@ -72,6 +77,11 @@ function buildStatusPayload(
   const todaysForecasts = allArticles.filter((f) =>
     forecastMatchesDate(f, today)
   );
+  const instrumentsToday = getInstrumentsForDate(allArticles, today);
+  const plannedInstruments = selectDailyInstrumentsFromArchive(
+    allArticles,
+    today
+  );
 
   return {
     ok: true,
@@ -84,6 +94,9 @@ function buildStatusPayload(
     hasGaps: missingDates.length > 0,
     archiveTotal: allArticles.length,
     slugs: todaysForecasts.map((f) => f.slug),
+    instrumentsToday,
+    plannedInstruments,
+    instrumentPoolSize: 11,
     source: todaysForecasts.some((f) => f.slug.includes("-auto-"))
       ? "template"
       : todaysForecasts.length > 0
@@ -155,18 +168,26 @@ async function publishDraftForecasts(forecasts: Article[]) {
 }
 
 async function generateTemplateForecasts(asOfDate?: string) {
-  const forecasts = await generateDailyForecasts(
-    asOfDate ? { asOfDate } : undefined
-  );
-  await saveDailyForecasts(forecasts);
+  const isoDate = asOfDate ?? utcToday();
+  const archive = await getAllKnownForecasts();
+  const instruments = resolveDailyInstrumentIds({
+    asOfDate: isoDate,
+    archiveArticles: archive,
+  });
+  const forecasts = await generateDailyForecasts({
+    asOfDate: isoDate,
+    archiveArticles: archive,
+    instrumentIds: instruments,
+  });
+  await saveDailyForecasts(forecasts, { replaceDate: isoDate });
 
   return NextResponse.json({
     ok: true,
     source: "template",
     generated: forecasts.length,
-    target: DAILY_INSTRUMENT_IDS.length,
-    asOfDate: asOfDate ?? utcToday(),
-    instruments: DAILY_INSTRUMENT_IDS,
+    target: DAILY_BATCH_SIZE,
+    asOfDate: isoDate,
+    instruments,
     slugs: forecasts.map((f) => f.slug),
     generatedAt: new Date().toISOString(),
   });
@@ -194,8 +215,16 @@ async function backfillMissingDates(daysBack: number) {
       continue;
     }
 
-    const forecasts = await generateDailyForecasts({ asOfDate: nextDate });
-    await saveDailyForecasts(forecasts);
+    const instruments = resolveDailyInstrumentIds({
+      asOfDate: nextDate,
+      archiveArticles: allArticles,
+    });
+    const forecasts = await generateDailyForecasts({
+      asOfDate: nextDate,
+      archiveArticles: allArticles,
+      instrumentIds: instruments,
+    });
+    await saveDailyForecasts(forecasts, { replaceDate: nextDate });
     filled.push(nextDate);
   }
 

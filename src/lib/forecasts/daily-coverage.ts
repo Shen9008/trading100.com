@@ -1,7 +1,9 @@
 import type { Article } from "@/lib/data/articles";
-import { DAILY_INSTRUMENT_IDS } from "@/lib/services/daily-forecast-generator";
 
-export const DAILY_FORECAST_TARGET = DAILY_INSTRUMENT_IDS.length;
+/** Number of forecast articles published each calendar day. */
+export const DAILY_BATCH_SIZE = 5;
+
+export const DAILY_FORECAST_TARGET = DAILY_BATCH_SIZE;
 
 /** First calendar day the 5-article daily automation is required (after static seed content). */
 export const DAILY_AUTOMATION_START = "2026-07-11";

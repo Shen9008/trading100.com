@@ -1,4 +1,5 @@
 import type { Article } from "@/lib/data/articles";
+import { forecastMatchesDate } from "@/lib/forecasts/daily-coverage";
 
 const KV_KEY_LATEST = "forecasts:latest";
 const KV_KEY_ARCHIVE = "forecasts:archive";
@@ -91,7 +92,15 @@ async function readLatest(kv: KVNamespace): Promise<DailyForecastsPayload | null
   }
 }
 
-export async function saveDailyForecasts(forecasts: Article[]): Promise<void> {
+export type SaveDailyForecastsOptions = {
+  /** Replace template (-auto-) forecasts for this UTC date before merging. */
+  replaceDate?: string;
+};
+
+export async function saveDailyForecasts(
+  forecasts: Article[],
+  options?: SaveDailyForecastsOptions
+): Promise<void> {
   const kv = await getKV();
   if (!kv) {
     throw new Error(
@@ -108,7 +117,15 @@ export async function saveDailyForecasts(forecasts: Article[]): Promise<void> {
     expirationTtl: FORECAST_KV_TTL_SECONDS,
   });
 
-  const archived = mergeForecastArchive(await readArchive(kv), forecasts);
+  let archived = await readArchive(kv);
+  if (options?.replaceDate) {
+    archived = archived.filter(
+      (article) =>
+        !forecastMatchesDate(article, options.replaceDate!) ||
+        !article.slug.includes("-auto-")
+    );
+  }
+  archived = mergeForecastArchive(archived, forecasts);
   const archivePayload: ForecastArchivePayload = {
     updatedAt: new Date().toISOString(),
     forecasts: archived,

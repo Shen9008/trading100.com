@@ -3,6 +3,12 @@ import { STOCK_IMAGES } from "@/lib/constants/images";
 import { fetchCryptoMarkets } from "@/lib/api/coingecko";
 import { fetchLatestRates } from "@/lib/api/frankfurter";
 import { fetchFinnhubQuote } from "@/lib/api/finnhub";
+import {
+  type DailyInstrumentId,
+  getInstrumentDefinition,
+  selectDailyInstruments,
+  selectDailyInstrumentsFromArchive,
+} from "@/lib/forecasts/instrument-rotation";
 
 const IMAGES = {
   crypto: STOCK_IMAGES.crypto,
@@ -11,14 +17,7 @@ const IMAGES = {
   commodities: STOCK_IMAGES.gold,
 };
 
-/** Five most-traded instruments refreshed every day by the analysis subagent. */
-export const DAILY_INSTRUMENT_IDS = [
-  "bitcoin",
-  "eur-usd",
-  "gold-xauusd",
-  "sp500",
-  "usd-jpy",
-] as const;
+export { DAILY_BATCH_SIZE } from "@/lib/forecasts/daily-coverage";
 
 function dateSlug(prefix: string, isoDate?: string): string {
   const date = isoDate ?? new Date().toISOString().slice(0, 10);
@@ -28,7 +27,25 @@ function dateSlug(prefix: string, isoDate?: string): string {
 export type GenerateDailyForecastsOptions = {
   /** Publish as a specific UTC calendar day (YYYY-MM-DD). */
   asOfDate?: string;
+  /** Existing archive — used to avoid repeating yesterday's instruments. */
+  archiveArticles?: Article[];
+  /** Pre-selected instrument batch (skips rotation when provided). */
+  instrumentIds?: DailyInstrumentId[];
 };
+
+export function resolveDailyInstrumentIds(
+  options: Pick<
+    GenerateDailyForecastsOptions,
+    "asOfDate" | "archiveArticles" | "instrumentIds"
+  >
+): DailyInstrumentId[] {
+  const isoDate = options.asOfDate ?? new Date().toISOString().slice(0, 10);
+  if (options.instrumentIds?.length) return options.instrumentIds;
+  if (options.archiveArticles?.length) {
+    return selectDailyInstrumentsFromArchive(options.archiveArticles, isoDate);
+  }
+  return selectDailyInstruments({ isoDate });
+}
 
 export function stampForecastsForDate(
   forecasts: Article[],
@@ -584,23 +601,226 @@ Index-level moves remain narrow — mega-cap tech absorbs macro shocks better th
   };
 }
 
+async function generateEthereum(
+  now: string,
+  macroNote: string
+): Promise<Article | null> {
+  const markets = await fetchCryptoMarkets();
+  const eth = markets.find((c) => c.id === "ethereum");
+  if (!eth) return null;
+
+  const ch = eth.price_change_percentage_24h;
+  const dateLabel = now.slice(0, 10);
+
+  return {
+    slug: dateSlug("ethereum"),
+    title: "Ethereum Forecast Today: ETH Price Analysis & Key Levels",
+    excerpt: `Ethereum forecast for ${dateLabel}: ETH near $${formatUsd(eth.current_price, 0)}, layer-2 activity, ETF narrative, and key levels.`,
+    content: buildForecastContent({
+      intro: `Ethereum is trading near **$${formatUsd(eth.current_price, 0)}** on ${dateLabel}. This ethereum forecast today covers ETH spot action, technical structure, and macro sensitivity to rates and crypto beta flows.`,
+      priceAction: expandPriceAction(`${macroNote}\n\nETH 24h change: ${ch >= 0 ? "+" : ""}${ch.toFixed(2)}%. Range: $${formatUsd(eth.low_24h, 0)} – $${formatUsd(eth.high_24h, 0)}.`),
+      technical: expandTechnical("ETH is tracking BTC beta with occasional outperformance when layer-2 activity and staking flows accelerate.", "Ethereum"),
+      keyLevels: [
+        `**Resistance:** $${formatUsd(eth.high_24h, 0)}`,
+        `**Support:** $${formatUsd(eth.low_24h, 0)}`,
+        `**Pivot:** $${formatUsd(eth.current_price, 0)}`,
+      ],
+      chartPlaceholder: "[CHART: ETH/USD daily structure]",
+      fundamentals: expandFundamentals("ETH responds to BTC flows, stablecoin activity, and regulatory headlines around staking products.", "US CPI"),
+      bullish: "Risk-on crypto rotation lifts ETH toward session highs if BTC holds support.",
+      bearish: "Macro de-risking drags ETH toward range lows with BTC.",
+      baseCase: expandOutlook("ETH trades as high-beta crypto inside the broader BTC range."),
+      faq: [{ question: "Does ETH always follow Bitcoin?", answer: "Often, but layer-2 usage and ETF narratives can create short-term divergence." }],
+      disclaimer: "*Educational forecast only — not financial advice.*",
+    }),
+    category: "crypto",
+    author: "Trading 100 Desk",
+    publishedAt: now,
+    image: IMAGES.crypto,
+    isOriginal: true,
+  };
+}
+
+async function generateGbpUsd(now: string, macroNote: string): Promise<Article | null> {
+  const rates = await fetchLatestRates("USD", ["GBP"]);
+  const gbpusd = 1 / rates.rates.GBP;
+  const dateLabel = now.slice(0, 10);
+  return {
+    slug: dateSlug("gbp-usd"),
+    title: "GBP/USD Forecast Today: Cable Analysis & Key Levels",
+    excerpt: `GBP/USD forecast for ${dateLabel}: cable near ${gbpusd.toFixed(4)} with BoE–Fed divergence in focus.`,
+    content: buildForecastContent({
+      intro: `GBP/USD (cable) is near **${gbpusd.toFixed(4)}** on ${now.slice(0, 10)}. This GBP/USD forecast today maps cable levels, BoE vs Fed pricing, and conditional scenarios.`,
+      priceAction: expandPriceAction(`${macroNote}\n\nCable references ECB fix date ${rates.date}.`),
+      technical: expandTechnical("Cable is range-bound unless UK inflation or US data shifts rate expectations sharply.", "GBP/USD"),
+      keyLevels: [
+        `**Resistance:** ${(gbpusd * 1.01).toFixed(4)}`,
+        `**Support:** ${(gbpusd * 0.99).toFixed(4)}`,
+        `**Pivot:** ${gbpusd.toFixed(4)}`,
+      ],
+      chartPlaceholder: "[CHART: GBP/USD daily]",
+      fundamentals: expandFundamentals("UK growth and BoE guidance compete with USD safe-haven flows on geopolitical headlines.", "UK CPI"),
+      bullish: "Soft USD data lifts cable toward upper range.",
+      bearish: "USD bid on hot US inflation breaks cable support.",
+      baseCase: expandOutlook("Cable oscillates inside a 1% band around fair value."),
+      faq: [{ question: "Why is GBP/USD called cable?", answer: "Historic transatlantic telegraph cables carried FX quotes between London and New York." }],
+      disclaimer: "*Educational forecast only — not financial advice.*",
+    }),
+    category: "forex",
+    author: "Trading 100 Desk",
+    publishedAt: now,
+    image: IMAGES.forex,
+    isOriginal: true,
+  };
+}
+
+async function generateAudUsd(now: string, macroNote: string): Promise<Article | null> {
+  const rates = await fetchLatestRates("USD", ["AUD"]);
+  const audusd = 1 / rates.rates.AUD;
+  return {
+    slug: dateSlug("aud-usd"),
+    title: "AUD/USD Forecast Today: Aussie Dollar Analysis & Key Levels",
+    excerpt: `AUD/USD forecast for ${now.slice(0, 10)}: aussie near ${audusd.toFixed(4)} as China demand and risk sentiment matter.`,
+    content: buildForecastContent({
+      intro: `AUD/USD is trading near **${audusd.toFixed(4)}** on ${now.slice(0, 10)}. This AUD/USD forecast today covers the aussie's risk-beta profile, commodity linkage, and key levels.`,
+      priceAction: expandPriceAction(`${macroNote}\n\nAUD is sensitive to iron ore sentiment and APAC risk appetite.`),
+      technical: expandTechnical("AUD/USD often tracks global equity tone; failures at prior highs invite mean reversion.", "AUD/USD"),
+      keyLevels: [
+        `**Resistance:** ${(audusd * 1.01).toFixed(4)}`,
+        `**Support:** ${(audusd * 0.99).toFixed(4)}`,
+        `**Pivot:** ${audusd.toFixed(4)}`,
+      ],
+      chartPlaceholder: "[CHART: AUD/USD daily]",
+      fundamentals: expandFundamentals("China growth expectations and RBA guidance remain the dominant fundamental drivers.", "RBA meetings"),
+      bullish: "Risk-on APAC session lifts AUD toward resistance.",
+      bearish: "USD strength and China growth fears weigh on the aussie.",
+      baseCase: expandOutlook("AUD trades as a risk proxy inside its recent band."),
+      faq: [{ question: "Why is AUD called a risk proxy?", answer: "Commodity exports and carry appeal tie AUD to global growth sentiment." }],
+      disclaimer: "*Educational forecast only — not financial advice.*",
+    }),
+    category: "forex",
+    author: "Trading 100 Desk",
+    publishedAt: now,
+    image: IMAGES.forex,
+    isOriginal: true,
+  };
+}
+
+async function generateSilver(now: string, macroNote: string): Promise<Article> {
+  const yahoo = await fetchYahooPrice("SI=F");
+  const price = yahoo?.price;
+  const ch = yahoo?.changePct ?? 0;
+  return {
+    slug: dateSlug("silver-xagusd"),
+    title: "XAGUSD Forecast Today: Silver Price Analysis & Key Levels",
+    excerpt: `Silver forecast for ${now.slice(0, 10)}: XAG/USD ${price ? `near $${formatUsd(price, 2)}` : "in focus"} with industrial and precious-metal drivers.`,
+    content: buildForecastContent({
+      intro: `Silver (XAG/USD) is ${price ? `near **$${formatUsd(price, 2)}/oz**` : "in focus"} on ${now.slice(0, 10)}. This silver forecast today covers dual industrial/precious-metal drivers and key levels.`,
+      priceAction: expandPriceAction(`${macroNote}\n\n${price ? `Spot change: ${ch >= 0 ? "+" : ""}${ch.toFixed(2)}%.` : "Silver tracks gold with higher beta to industrial demand."}`),
+      technical: expandTechnical("Silver often amplifies gold moves; watch gold-silver ratio for relative value.", "silver (XAG/USD)"),
+      keyLevels: price
+        ? [`**Resistance:** $${formatUsd(price * 1.02, 2)}`, `**Support:** $${formatUsd(price * 0.98, 2)}`, `**Pivot:** $${formatUsd(price, 2)}`]
+        : ["**Resistance:** prior swing high", "**Support:** prior breakout zone", "**Pivot:** mid-range"],
+      chartPlaceholder: "[CHART: XAG/USD daily]",
+      fundamentals: expandFundamentals("Solar demand and USD rates influence silver alongside traditional haven flows.", "US CPI"),
+      bullish: "Gold strength and industrial demand lift silver beta.",
+      bearish: "Higher real yields compress precious metals complex.",
+      baseCase: expandOutlook("Silver trades with gold directionally but with higher volatility."),
+      faq: [{ question: "Why is silver more volatile than gold?", answer: "Smaller market depth and larger industrial demand component amplify moves." }],
+      disclaimer: "*Educational forecast only — not financial advice.*",
+    }),
+    category: "commodities",
+    author: "Trading 100 Desk",
+    publishedAt: now,
+    image: IMAGES.commodities,
+    isOriginal: true,
+  };
+}
+
+async function generateBrent(now: string, macroNote: string): Promise<Article> {
+  const yahoo = await fetchYahooPrice("BZ=F");
+  const price = yahoo?.price;
+  const ch = yahoo?.changePct ?? 0;
+  return {
+    slug: dateSlug("brent-crude"),
+    title: "Brent Crude Forecast Today: Oil Price Analysis & Key Levels",
+    excerpt: `Brent crude forecast for ${now.slice(0, 10)}: oil ${price ? `near $${formatUsd(price, 2)}/bbl` : "watching supply risk"} and macro cross-asset impact.`,
+    content: buildForecastContent({
+      intro: `Brent crude is ${price ? `near **$${formatUsd(price, 2)}/bbl**` : "in focus"} on ${now.slice(0, 10)}. This Brent crude forecast today covers supply risk, inventory context, and inflation pass-through.`,
+      priceAction: expandPriceAction(`${macroNote}\n\n${price ? `Session change: ${ch >= 0 ? "+" : ""}${ch.toFixed(2)}%.` : "Oil remains sensitive to Middle East headlines and OPEC guidance."}`),
+      technical: expandTechnical("Oil respects prior week highs/lows and round numbers such as $80.", "Brent crude"),
+      keyLevels: price
+        ? [`**Resistance:** $${formatUsd(price * 1.02, 2)}`, `**Support:** $${formatUsd(price * 0.98, 2)}`, `**Pivot:** $${formatUsd(price, 2)}`]
+        : ["**Resistance:** prior swing high", "**Support:** prior breakout zone", "**Pivot:** mid-range"],
+      chartPlaceholder: "[CHART: Brent daily]",
+      fundamentals: expandFundamentals("Geopolitical supply risk and EIA inventory surprises remain primary catalysts.", "EIA weekly report"),
+      bullish: "Supply disruption headlines extend war premium.",
+      bearish: "Demand fears and USD strength cap crude rallies.",
+      baseCase: expandOutlook("Brent holds event-driven volatility inside a defined weekly range."),
+      faq: [{ question: "Why does oil move inflation expectations?", answer: "Energy pass-through affects CPI forecasts and Fed hike pricing." }],
+      disclaimer: "*Educational forecast only — not financial advice.*",
+    }),
+    category: "commodities",
+    author: "Trading 100 Desk",
+    publishedAt: now,
+    image: IMAGES.commodities,
+    isOriginal: true,
+  };
+}
+
+async function generateNasdaq(now: string, macroNote: string): Promise<Article | null> {
+  const yahoo = await fetchYahooPrice("^NDX");
+  const price = yahoo?.price;
+  const ch = yahoo?.changePct ?? 0;
+  if (!price) return null;
+  return {
+    slug: dateSlug("nasdaq-100"),
+    title: "Nasdaq 100 Forecast Today: Index Analysis & Key Levels",
+    excerpt: `Nasdaq 100 forecast for ${now.slice(0, 10)}: NDX near ${price.toFixed(2)} with mega-cap tech leadership in focus.`,
+    content: buildForecastContent({
+      intro: `The Nasdaq 100 is trading near **${price.toFixed(2)}** on ${now.slice(0, 10)} (${ch >= 0 ? "+" : ""}${ch.toFixed(2)}%). This Nasdaq 100 forecast today covers tech leadership, rates sensitivity, and key index levels.`,
+      priceAction: expandPriceAction(`${macroNote}\n\nMega-cap growth names continue to dominate index direction.`),
+      technical: expandTechnical("NDX is more rate-sensitive than the broad S&P 500 due to duration-heavy tech weighting.", "the Nasdaq 100"),
+      keyLevels: [
+        `**Resistance:** ${(price * 1.02).toFixed(2)}`,
+        `**Support:** ${(price * 0.97).toFixed(2)}`,
+        `**Pivot:** ${price.toFixed(2)}`,
+      ],
+      chartPlaceholder: "[CHART: Nasdaq 100 daily]",
+      fundamentals: expandFundamentals("AI capex narratives and mega-cap earnings support the index while yields cap multiples.", "mega-cap earnings"),
+      bullish: "Soft yields and strong megacap guidance extend the uptrend.",
+      bearish: "Rate spikes or growth scares break short-term support.",
+      baseCase: expandOutlook("NDX consolidates with tech leadership intact."),
+      faq: [{ question: "Why is Nasdaq more rate-sensitive?", answer: "Long-duration growth stocks discount future earnings more aggressively." }],
+      disclaimer: "*For informational purposes only — not financial advice.*",
+    }),
+    category: "indices",
+    author: "Trading 100 Desk",
+    publishedAt: now,
+    image: IMAGES.indices,
+    isOriginal: true,
+  };
+}
+
 /** Fallback analysis when live data is unavailable for an instrument. */
 function fallbackForecast(
-  id: (typeof DAILY_INSTRUMENT_IDS)[number],
+  id: DailyInstrumentId,
   now: string,
   macroNote: string
 ): Article {
   const dateLabel = now.slice(0, 10);
 
-  const templates: Record<
-    (typeof DAILY_INSTRUMENT_IDS)[number],
-    {
-      title: string;
-      category: ArticleCategory;
-      image: string;
-      content: string;
-      excerpt: string;
-    }
+  const templates: Partial<
+    Record<
+      DailyInstrumentId,
+      {
+        title: string;
+        category: ArticleCategory;
+        image: string;
+        content: string;
+        excerpt: string;
+      }
+    >
   > = {
     bitcoin: {
       title: "Bitcoin Forecast Today: BTC Price Analysis & Key Levels",
@@ -817,11 +1037,158 @@ function fallbackForecast(
           "*Educational forecast only — not a recommendation to trade forex or CFDs.*",
       }),
     },
+    ethereum: {
+      title: "Ethereum Forecast Today: ETH Price Analysis & Key Levels",
+      category: "crypto",
+      image: IMAGES.crypto,
+      excerpt: `Ethereum forecast for ${dateLabel}: ETH consolidates with BTC beta and layer-2 activity in focus.`,
+      content: buildForecastContent({
+        intro: `Ethereum is consolidating on ${dateLabel} as traders weigh BTC direction against ETH-specific staking and L2 narratives.`,
+        priceAction: `${macroNote}\n\nETH typically trades as high-beta crypto relative to Bitcoin.`,
+        technical: "Daily RSI near 50 reflects neutral momentum inside the broader crypto range.",
+        keyLevels: ["**Resistance:** prior range high", "**Support:** prior range low", "**Pivot:** mid-range"],
+        chartPlaceholder: "[CHART: ETH/USD daily]",
+        fundamentals: "Regulatory clarity on staking products and BTC ETF flows remain key ETH drivers.",
+        bullish: "BTC breakout with improving altcoin breadth lifts ETH.",
+        bearish: "Macro de-risking drags ETH below range support.",
+        baseCase: "ETH tracks BTC inside the active consolidation band.",
+        faq: [{ question: "Does ETH always follow BTC?", answer: "Often, but ETH-specific narratives can create short-term divergence." }],
+        disclaimer: "*Educational forecast only — not financial advice.*",
+      }),
+    },
+    "gbp-usd": {
+      title: "GBP/USD Forecast Today: Cable Analysis & Key Levels",
+      category: "forex",
+      image: IMAGES.forex,
+      excerpt: `GBP/USD forecast for ${dateLabel}: cable range-bound as BoE vs Fed pricing stays in focus.`,
+      content: buildForecastContent({
+        intro: `GBP/USD is range-bound on ${dateLabel} as cable traders watch UK and US inflation data.`,
+        priceAction: `${macroNote}\n\nCable remains sensitive to UK growth surprises and USD safe-haven flows.`,
+        technical: "RSI near 50 suggests equilibrium until the next macro catalyst.",
+        keyLevels: ["**Resistance:** prior monthly high", "**Support:** prior monthly low", "**Pivot:** 20-day MA"],
+        chartPlaceholder: "[CHART: GBP/USD daily]",
+        fundamentals: "BoE guidance versus Fed hike pricing caps large directional moves.",
+        bullish: "Soft US data lifts cable toward range resistance.",
+        bearish: "USD bid on strong US data breaks cable support.",
+        baseCase: "Range trade until UK or US data surprises arrive.",
+        faq: [{ question: "What moves cable fastest?", answer: "UK inflation surprises and BoE communication shifts." }],
+        disclaimer: "*Educational forecast only — not financial advice.*",
+      }),
+    },
+    "aud-usd": {
+      title: "AUD/USD Forecast Today: Aussie Dollar Analysis & Key Levels",
+      category: "forex",
+      image: IMAGES.forex,
+      excerpt: `AUD/USD forecast for ${dateLabel}: aussie tracks risk sentiment and China growth expectations.`,
+      content: buildForecastContent({
+        intro: `AUD/USD is trading as a risk proxy on ${dateLabel}, linked to APAC sentiment and commodity demand.`,
+        priceAction: `${macroNote}\n\nAUD often lags or leads equity risk tone by a session.`,
+        technical: "Failures at prior highs invite mean reversion inside the weekly range.",
+        keyLevels: ["**Resistance:** prior swing high", "**Support:** prior swing low", "**Pivot:** mid-range"],
+        chartPlaceholder: "[CHART: AUD/USD daily]",
+        fundamentals: "China data and RBA guidance remain the dominant fundamental inputs.",
+        bullish: "Risk-on APAC flows lift AUD.",
+        bearish: "USD strength and growth fears weigh on the aussie.",
+        baseCase: "AUD oscillates with global risk appetite.",
+        faq: [{ question: "Why is AUD risk-sensitive?", answer: "Commodity exports and carry appeal tie it to growth sentiment." }],
+        disclaimer: "*Educational forecast only — not financial advice.*",
+      }),
+    },
+    "silver-xagusd": {
+      title: "XAGUSD Forecast Today: Silver Price Analysis & Key Levels",
+      category: "commodities",
+      image: IMAGES.commodities,
+      excerpt: `Silver forecast for ${dateLabel}: XAG/USD balances industrial demand against precious-metal flows.`,
+      content: buildForecastContent({
+        intro: `Silver is balancing industrial demand against precious-metal flows on ${dateLabel}.`,
+        priceAction: `${macroNote}\n\nSilver often amplifies gold moves with higher beta.`,
+        technical: "Watch the gold-silver ratio for relative value signals.",
+        keyLevels: ["**Resistance:** prior swing high", "**Support:** prior breakout zone", "**Pivot:** mid-range"],
+        chartPlaceholder: "[CHART: XAG/USD daily]",
+        fundamentals: "Solar demand and real yields influence silver alongside gold.",
+        bullish: "Gold strength lifts silver beta.",
+        bearish: "Higher yields compress the precious metals complex.",
+        baseCase: "Silver trades directionally with gold but more volatile.",
+        faq: [{ question: "Why is silver more volatile?", answer: "Smaller market and larger industrial component." }],
+        disclaimer: "*Educational forecast only — not financial advice.*",
+      }),
+    },
+    "brent-crude": {
+      title: "Brent Crude Forecast Today: Oil Price Analysis & Key Levels",
+      category: "commodities",
+      image: IMAGES.commodities,
+      excerpt: `Brent crude forecast for ${dateLabel}: oil watches supply risk and inflation pass-through.`,
+      content: buildForecastContent({
+        intro: `Brent crude is in focus on ${dateLabel} as markets weigh supply risk against demand concerns.`,
+        priceAction: `${macroNote}\n\nOil remains headline-driven around OPEC guidance and inventory data.`,
+        technical: "Prior week highs/lows and round numbers frame the active range.",
+        keyLevels: ["**Resistance:** prior week high", "**Support:** prior week low", "**Pivot:** last close"],
+        chartPlaceholder: "[CHART: Brent daily]",
+        fundamentals: "EIA inventory surprises and geopolitical supply risk dominate.",
+        bullish: "Supply disruption headlines extend risk premium.",
+        bearish: "Demand fears and USD strength cap rallies.",
+        baseCase: "Brent holds elevated but range-bound trade.",
+        faq: [{ question: "Why does oil affect Fed pricing?", answer: "Energy pass-through influences inflation expectations." }],
+        disclaimer: "*Educational forecast only — not financial advice.*",
+      }),
+    },
+    "nasdaq-100": {
+      title: "Nasdaq 100 Forecast Today: Index Analysis & Key Levels",
+      category: "indices",
+      image: IMAGES.indices,
+      excerpt: `Nasdaq 100 forecast for ${dateLabel}: NDX led by mega-cap tech with rates sensitivity elevated.`,
+      content: buildForecastContent({
+        intro: `The Nasdaq 100 is grinding on ${dateLabel} as mega-cap tech offsets macro headwinds.`,
+        priceAction: `${macroNote}\n\nNDX remains more rate-sensitive than the broad S&P 500.`,
+        technical: "50-day MA is near-term support; RSI near 50–55 reflects neutral momentum.",
+        keyLevels: ["**Resistance:** prior swing high", "**Support:** 50-day MA", "**Pivot:** last close"],
+        chartPlaceholder: "[CHART: Nasdaq 100 daily]",
+        fundamentals: "AI capex and megacap earnings support the index; yields cap multiples.",
+        bullish: "Soft yields extend tech leadership.",
+        bearish: "Rate spikes trigger growth de-rating.",
+        baseCase: "NDX consolidates with tech anchoring the tape.",
+        faq: [{ question: "Why is Nasdaq rate-sensitive?", answer: "Long-duration growth stocks discount future earnings heavily." }],
+        disclaimer: "*For informational purposes only — not financial advice.*",
+      }),
+    },
   };
 
-  const t = templates[id];
+  const def = getInstrumentDefinition(id);
+  const t = templates[id] ?? {
+    title: `${def.label} Forecast Today: Analysis & Key Levels`,
+    category:
+      def.category === "forex"
+        ? "forex"
+        : def.category === "crypto"
+          ? "crypto"
+          : def.category === "indices"
+            ? "indices"
+            : "commodities",
+    image:
+      def.category === "forex"
+        ? IMAGES.forex
+        : def.category === "crypto"
+          ? IMAGES.crypto
+          : def.category === "indices"
+            ? IMAGES.indices
+            : IMAGES.commodities,
+    excerpt: `${def.label} forecast for ${dateLabel}: session outlook and key levels.`,
+    content: buildForecastContent({
+      intro: `${def.label} is in focus on ${dateLabel}. This forecast outlines technical levels and macro drivers for educational purposes only.`,
+      priceAction: macroNote,
+      technical: "Monitor prior session highs/lows and the 20-day moving average for near-term structure.",
+      keyLevels: ["**Resistance:** prior swing high", "**Support:** prior swing low", "**Pivot:** mid-range"],
+      chartPlaceholder: `[CHART: ${def.label} daily]`,
+      fundamentals: "Macro catalysts and cross-asset flows remain the primary drivers.",
+      bullish: "Break above resistance with supportive macro data.",
+      bearish: "Loss of support on risk-off flows.",
+      baseCase: "Range trade until the next scheduled catalyst.",
+      faq: [{ question: `What moves ${def.label} today?`, answer: "Macro data, USD direction, and sector-specific headlines." }],
+      disclaimer: "*Educational forecast only — not financial advice.*",
+    }),
+  };
   return {
-    slug: dateSlug(id === "gold-xauusd" ? "gold-xauusd" : id),
+    slug: dateSlug(def.slugPrefix),
     title: t.title,
     excerpt: t.excerpt,
     content: t.content,
@@ -836,28 +1203,39 @@ function fallbackForecast(
 export async function generateDailyForecasts(
   options?: GenerateDailyForecastsOptions
 ): Promise<Article[]> {
-  const now = options?.asOfDate
-    ? `${options.asOfDate}T06:00:00.000Z`
-    : new Date().toISOString();
+  const isoDate = options?.asOfDate ?? new Date().toISOString().slice(0, 10);
+  const now = `${isoDate}T06:00:00.000Z`;
+  const instrumentIds = resolveDailyInstrumentIds({
+    asOfDate: isoDate,
+    archiveArticles: options?.archiveArticles,
+    instrumentIds: options?.instrumentIds,
+  });
+
   const headline = await getTopHeadline();
   const macroNote = headline
     ? `Today's dominant headline: "${headline.slice(0, 120)}${headline.length > 120 ? "…" : ""}".`
     : "Macro sentiment is driven by rates, USD strength, and energy prices.";
 
   const generators: Record<
-    (typeof DAILY_INSTRUMENT_IDS)[number],
+    DailyInstrumentId,
     () => Promise<Article | null>
   > = {
     bitcoin: () => generateBitcoin(now, macroNote),
+    ethereum: () => generateEthereum(now, macroNote),
     "eur-usd": () => generateEurUsd(now, macroNote),
-    "gold-xauusd": () => generateGold(now, macroNote).then((a) => a),
-    sp500: () => generateSp500(now, macroNote),
+    "gbp-usd": () => generateGbpUsd(now, macroNote),
     "usd-jpy": () => generateUsdJpy(now, macroNote),
+    "aud-usd": () => generateAudUsd(now, macroNote),
+    "gold-xauusd": () => generateGold(now, macroNote).then((a) => a),
+    "silver-xagusd": () => generateSilver(now, macroNote).then((a) => a),
+    "brent-crude": () => generateBrent(now, macroNote).then((a) => a),
+    sp500: () => generateSp500(now, macroNote),
+    "nasdaq-100": () => generateNasdaq(now, macroNote),
   };
 
   const forecasts: Article[] = [];
 
-  for (const id of DAILY_INSTRUMENT_IDS) {
+  for (const id of instrumentIds) {
     try {
       const article = await generators[id]();
       forecasts.push(article ?? fallbackForecast(id, now, macroNote));
