@@ -1,59 +1,68 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { TICKER_SYMBOLS } from "@/lib/constants";
+import { TICKER_TAPE_SYMBOLS } from "@/lib/constants";
 
-declare global {
-  interface Window {
-    TradingView?: {
-      widget: new (config: Record<string, unknown>) => void;
-    };
+const SCRIPT_SRC =
+  "https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js";
+
+function loadTickerTapeScript(): Promise<void> {
+  if (customElements.get("tv-ticker-tape")) {
+    return Promise.resolve();
   }
+
+  const existing = document.querySelector(
+    `script[src="${SCRIPT_SRC}"]`
+  ) as HTMLScriptElement | null;
+
+  if (existing) {
+    return customElements.whenDefined("tv-ticker-tape").then(() => undefined);
+  }
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.type = "module";
+    script.src = SCRIPT_SRC;
+    script.async = true;
+    script.onload = () => {
+      customElements
+        .whenDefined("tv-ticker-tape")
+        .then(() => resolve())
+        .catch(reject);
+    };
+    script.onerror = () =>
+      reject(new Error("Failed to load TradingView ticker tape widget"));
+    document.head.appendChild(script);
+  });
 }
 
 export function TickerTape() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const loadedRef = useRef(false);
 
   useEffect(() => {
-    if (loadedRef.current || !containerRef.current) return;
+    let cancelled = false;
 
-    const initWidget = () => {
-      if (!containerRef.current || !window.TradingView) return;
-      containerRef.current.innerHTML = "";
-      new window.TradingView.widget({
-        container_id: containerRef.current.id,
-        symbols: TICKER_SYMBOLS.map((s) => ({ proName: s, title: s.split(":")[1] ?? s })),
-        showSymbolLogo: true,
-        colorTheme: "dark",
-        isTransparent: true,
-        displayMode: "adaptive",
-        locale: "en",
+    loadTickerTapeScript()
+      .then(() => {
+        if (cancelled || !containerRef.current) return;
+
+        containerRef.current.innerHTML = "";
+        const widget = document.createElement("tv-ticker-tape");
+        widget.setAttribute("symbols", TICKER_TAPE_SYMBOLS);
+        containerRef.current.appendChild(widget);
+      })
+      .catch(() => {
+        /* Widget failed to load — leave container empty */
       });
-      loadedRef.current = true;
-    };
-
-    if (window.TradingView) {
-      initWidget();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src =
-      "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
-    script.async = true;
-    script.onload = initWidget;
-    document.body.appendChild(script);
 
     return () => {
-      loadedRef.current = false;
+      cancelled = true;
     };
   }, []);
 
   return (
     <div className="ticker-tape-container">
       <div
-        id="tradingview-ticker-tape"
         ref={containerRef}
         className="h-12 w-full"
         aria-label="Live market ticker"
