@@ -34,6 +34,32 @@ const TradingViewMarketMovers = dynamic(
   }
 );
 
+const TradingViewForexTable = dynamic(
+  () =>
+    import("@/components/widgets/TradingViewForexTable").then(
+      (mod) => mod.TradingViewForexTable
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-[360px] animate-pulse rounded-xl bg-white/5" />
+    ),
+  }
+);
+
+const TradingViewMarketData = dynamic(
+  () =>
+    import("@/components/widgets/TradingViewMarketData").then(
+      (mod) => mod.TradingViewMarketData
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-[480px] animate-pulse rounded-xl bg-white/5" />
+    ),
+  }
+);
+
 export const metadata: Metadata = buildMetadata({
   title: "Live Markets — Forex, Crypto, Stocks & Commodities",
   description:
@@ -142,6 +168,50 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
           <GlassCard className="p-4 sm:p-6">
 
             <TradingViewMarketMovers />
+
+          </GlassCard>
+
+        </div>
+
+
+
+        <div className="mt-12">
+
+          <SectionHeader
+
+            title="Sector Performance"
+
+            subtitle="Indices, commodities, stocks, and forex — live performance view"
+
+            eyebrow="Market Data"
+
+          />
+
+          <GlassCard className="p-4 sm:p-6">
+
+            <TradingViewMarketData />
+
+          </GlassCard>
+
+        </div>
+
+
+
+        <div className="mt-12">
+
+          <SectionHeader
+
+            title="Forex Cross Rates"
+
+            subtitle="Major currency crosses and live FX matrix — powered by TradingView"
+
+            eyebrow="Currencies"
+
+          />
+
+          <GlassCard className="p-4 sm:p-6">
+
+            <TradingViewForexTable />
 
           </GlassCard>
 
