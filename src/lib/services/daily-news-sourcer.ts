@@ -3,12 +3,12 @@ import type { WireHeadline } from "@/lib/api/wire-types";
 import { fetchAllRssItems } from "@/lib/api/rss-feeds";
 import { rssToArticle, rssToNewsApiArticle } from "@/lib/services/rss-news";
 import {
+  mergeAndPersistNews,
   syncNewsFromApis,
   syncNewsFromFinnhub,
   syncNewsFromPayload,
 } from "@/lib/services/news-sync";
 import type { NewsSyncResult } from "@/lib/services/news-sync";
-import { saveAutoNews, saveWireCache } from "@/lib/kv/forecasts-store";
 
 export const DAILY_NEWS_COUNT = 15;
 
@@ -46,21 +46,8 @@ async function persistMerged(
   source: NewsSyncResult["source"]
 ): Promise<NewsSyncResult> {
   const wire = articlesToWire(articles);
-  const fetchedAt = new Date().toISOString();
-  await saveAutoNews({ fetchedAt, articles });
-  await saveWireCache({
-    fetchedAt,
-    items: wire.map((item) => ({
-      id: item.id,
-      headline: item.headline,
-      summary: item.summary,
-      source: item.source,
-      url: item.url,
-      datetime: item.datetime,
-      image: item.image,
-    })),
-  });
-  return { articles, wire, source, fetchedAt };
+  const persisted = await mergeAndPersistNews(articles, wire);
+  return { ...persisted, source };
 }
 
 /** Daily news subagent: source 15 finance articles (Finnhub primary, RSS/API fallback). */

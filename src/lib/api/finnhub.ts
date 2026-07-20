@@ -42,9 +42,9 @@ export async function fetchFinnhubNews(
   return res.json();
 }
 
-/** Merges finance-relevant Finnhub categories for daily news batches. */
+/** Merges finance-relevant Finnhub categories, newest first. */
 export async function fetchFinnhubFinanceNews(
-  limit = 25
+  limit = 100
 ): Promise<FinnhubNewsItem[]> {
   const seen = new Set<number>();
   const merged: FinnhubNewsItem[] = [];
@@ -55,11 +55,11 @@ export async function fetchFinnhubFinanceNews(
       if (seen.has(item.id)) continue;
       seen.add(item.id);
       merged.push(item);
-      if (merged.length >= limit) return merged;
     }
   }
 
-  return merged;
+  merged.sort((a, b) => b.datetime - a.datetime);
+  return merged.slice(0, limit);
 }
 
 export async function fetchFinnhubQuote(symbol: string): Promise<FinnhubQuote | null> {

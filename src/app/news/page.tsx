@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildMetadataWithCanonical } from "@/lib/metadata";
 import { getAutoPostedNews, getWireHeadlines } from "@/lib/api/wire-news";
+import { MAX_AUTO_NEWS_ARCHIVE } from "@/lib/services/news-sync";
 import { getLatestArticles, type Article } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
@@ -58,7 +59,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const isHubPage = page === 1;
 
   const [autoNews, editorialArticles, wireHeadlines] = await Promise.all([
-    getAutoPostedNews(100),
+    getAutoPostedNews(MAX_AUTO_NEWS_ARCHIVE),
     Promise.resolve(getLatestArticles(50)),
     getWireHeadlines(15),
   ]);

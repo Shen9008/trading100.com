@@ -3,10 +3,17 @@ import type { WireHeadline } from "@/lib/api/wire-types";
 import { loadAutoNews, loadWireCache } from "@/lib/kv/forecasts-store";
 import { resolveImageUrl } from "@/lib/constants/images";
 import { fetchFinnhubNews } from "@/lib/api/finnhub";
-import { syncNewsFromApis } from "@/lib/services/news-sync";
+import {
+  MAX_AUTO_NEWS_ARCHIVE,
+  NEWS_SYNC_BATCH_SIZE,
+  syncNewsFromApis,
+} from "@/lib/services/news-sync";
 
 /** Background refresh when KV cache is older than this (GitHub Actions syncs every 30 min). */
 const REFRESH_AFTER_MS = 30 * 60 * 1000;
+
+/** Below this count, block on sync so pagination has enough articles right away. */
+const MIN_ARCHIVE_SIZE = 40;
 
 function normalizeArticle(article: Article): Article {
   return {
@@ -20,18 +27,25 @@ function shouldBackgroundRefresh(fetchedAt: string | undefined): boolean {
   return Date.now() - new Date(fetchedAt).getTime() > REFRESH_AFTER_MS;
 }
 
-export async function getAutoPostedNews(limit = 20): Promise<Article[]> {
+export async function getAutoPostedNews(
+  limit = MAX_AUTO_NEWS_ARCHIVE
+): Promise<Article[]> {
   const cached = await loadAutoNews();
+  const safeLimit = Math.min(Math.max(limit, 1), MAX_AUTO_NEWS_ARCHIVE);
 
   if (cached?.articles?.length) {
-    if (shouldBackgroundRefresh(cached.fetchedAt)) {
-      syncNewsFromApis(25).catch(() => {});
+    const needsBackfill = cached.articles.length < MIN_ARCHIVE_SIZE;
+    if (needsBackfill || shouldBackgroundRefresh(cached.fetchedAt)) {
+      const fresh = await syncNewsFromApis(NEWS_SYNC_BATCH_SIZE);
+      return fresh.articles.slice(0, safeLimit).map(normalizeArticle);
     }
-    return cached.articles.slice(0, limit).map(normalizeArticle);
+    return cached.articles.slice(0, safeLimit).map(normalizeArticle);
   }
 
-  const fresh = await syncNewsFromApis(Math.max(limit, 25));
-  return fresh.articles.slice(0, limit).map(normalizeArticle);
+  const fresh = await syncNewsFromApis(
+    Math.max(safeLimit, NEWS_SYNC_BATCH_SIZE)
+  );
+  return fresh.articles.slice(0, safeLimit).map(normalizeArticle);
 }
 
 export async function getAutoNewsBySlug(
@@ -41,7 +55,7 @@ export async function getAutoNewsBySlug(
   const fromCache = cached?.articles.find((a) => a.slug === slug);
   if (fromCache) return normalizeArticle(fromCache);
 
-  const fresh = await syncNewsFromApis(30);
+  const fresh = await syncNewsFromApis(NEWS_SYNC_BATCH_SIZE);
   return fresh.articles.find((a) => a.slug === slug);
 }
 
@@ -62,7 +76,7 @@ export async function getWireHeadlines(limit = 15): Promise<WireHeadline[]> {
 
   if (cached?.items?.length) {
     if (shouldBackgroundRefresh(cached.fetchedAt)) {
-      syncNewsFromApis(25).catch(() => {});
+      syncNewsFromApis(NEWS_SYNC_BATCH_SIZE).catch(() => {});
     }
     return cached.items.slice(0, limit).map((item) => ({
       id: String(item.id),
@@ -78,12 +92,14 @@ export async function getWireHeadlines(limit = 15): Promise<WireHeadline[]> {
   const autoNews = await loadAutoNews();
   if (autoNews?.articles?.length) {
     if (shouldBackgroundRefresh(autoNews.fetchedAt)) {
-      syncNewsFromApis(25).catch(() => {});
+      syncNewsFromApis(NEWS_SYNC_BATCH_SIZE).catch(() => {});
     }
     return autoNews.articles.slice(0, limit).map(articleToWire);
   }
 
-  const { wire } = await syncNewsFromApis(Math.max(limit, 25));
+  const { wire } = await syncNewsFromApis(
+    Math.max(limit, NEWS_SYNC_BATCH_SIZE)
+  );
   if (wire.length > 0) return wire.slice(0, limit);
 
   const finnhub = await fetchFinnhubNews("general");

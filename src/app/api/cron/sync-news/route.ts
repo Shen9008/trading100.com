@@ -5,6 +5,7 @@ import {
   loadWireCache,
 } from "@/lib/kv/forecasts-store";
 import {
+  NEWS_SYNC_BATCH_SIZE,
   syncNewsFromApis,
   syncNewsFromPayload,
 } from "@/lib/services/news-sync";
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
     const result =
       raw.length > 0
         ? await syncNewsFromPayload(raw)
-        : await syncNewsFromApis(25);
+        : await syncNewsFromApis(NEWS_SYNC_BATCH_SIZE);
 
     if (result.articles.length === 0) {
       return NextResponse.json(
