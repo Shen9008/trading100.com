@@ -22,6 +22,7 @@ import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 import { extractFaqItems, parseMarkdownSections } from "@/lib/markdown/parse-sections";
 import type { HeroVariant } from "@/lib/hero/variants";
 import type { ArticleCategory } from "@/lib/data/articles";
+import { TradingViewTickers } from "@/components/widgets/TradingViewTickers";
 
 type ForecastPageProps = {
   params: { slug: string };
@@ -93,6 +94,7 @@ export default async function ForecastArticlePage({ params }: ForecastPageProps)
       {faqs.length > 0 && <JsonLd data={faqJsonLd(faqs)} />}
 
       <article className="mx-auto max-w-4xl px-4 py-8 lg:px-6">
+        <TradingViewTickers />
         <Link href="/forecasts" className="text-sm text-brand hover:underline">
           ← All Forecasts
         </Link>

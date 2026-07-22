@@ -7,6 +7,7 @@ import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { PageShell } from "@/components/layout/PageShell";
 import { cn } from "@/lib/utils";
 import { getForecastFilterSeo } from "@/lib/seo/page-seo";
+import { TradingViewTickers } from "@/components/widgets/TradingViewTickers";
 
 const FILTERS: { id: ForecastAssetFilter; label: string }[] = [
   { id: "all", label: "All" },
@@ -59,6 +60,7 @@ export default async function ForecastsPage({ searchParams }: ForecastsPageProps
         variant="forecasts"
         live
       >
+        <TradingViewTickers />
         <p className="mb-6 max-w-3xl text-sm leading-relaxed text-muted-foreground">
           Browse in-house market forecasts updated daily. Each outlook covers key
           support and resistance levels, multi-timeframe analysis, and scenario

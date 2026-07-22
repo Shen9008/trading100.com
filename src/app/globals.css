@@ -498,6 +498,10 @@
   @apply w-full overflow-hidden rounded-2xl border border-white/[0.06] bg-card/90 backdrop-blur-sm;
 }
 
+.forecast-tickers-container {
+  @apply overflow-hidden rounded-xl border border-white/[0.06] bg-card/90 backdrop-blur-sm;
+}
+
 .tabs-scroll-mobile {
   @apply -mx-4 flex-nowrap justify-start overflow-x-auto px-4;
   -webkit-overflow-scrolling: touch;
