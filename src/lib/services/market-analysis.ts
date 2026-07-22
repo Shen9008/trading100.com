@@ -203,6 +203,28 @@ export function analyzeBars(
   };
 }
 
+function utcToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function chartRangeForDate(asOfDate?: string): string {
+  if (!asOfDate || asOfDate >= utcToday()) return "1mo";
+  return "3mo";
+}
+
+export function filterBarsThroughDate(
+  bars: ChartBar[],
+  asOfDate?: string
+): ChartBar[] {
+  if (!asOfDate) return bars;
+  const filtered = bars.filter((bar) => bar.date <= asOfDate);
+  return filtered.length >= 5 ? filtered : bars;
+}
+
+function isHistoricalDate(asOfDate?: string): boolean {
+  return Boolean(asOfDate && asOfDate < utcToday());
+}
+
 export async function fetchYahooChart(
   symbol: string,
   range = "1mo"
@@ -261,8 +283,18 @@ export async function fetchYahooChart(
 async function enrichCryptoSnapshot(
   id: "bitcoin" | "ethereum",
   label: string,
-  bars: ChartBar[]
+  bars: ChartBar[],
+  asOfDate?: string
 ): Promise<MarketSnapshot | null> {
+  if (isHistoricalDate(asOfDate)) {
+    return analyzeBars(
+      bars,
+      id,
+      label,
+      `Yahoo Finance (${YAHOO_SYMBOLS[id]}) daily bars through ${asOfDate}`
+    );
+  }
+
   const markets = await fetchCryptoMarkets();
   const coin = markets.find((c) => c.id === id);
   if (!coin) {
@@ -284,8 +316,18 @@ async function enrichForexSnapshot(
   id: "eur-usd" | "gbp-usd" | "usd-jpy" | "aud-usd",
   label: string,
   bars: ChartBar[],
-  currency: "EUR" | "GBP" | "JPY" | "AUD"
+  currency: "EUR" | "GBP" | "JPY" | "AUD",
+  asOfDate?: string
 ): Promise<MarketSnapshot | null> {
+  if (isHistoricalDate(asOfDate)) {
+    return analyzeBars(
+      bars,
+      id,
+      label,
+      `Yahoo Finance (${YAHOO_SYMBOLS[id]}) daily bars through ${asOfDate}`
+    );
+  }
+
   const rates = await fetchLatestRates("USD", [currency]);
   let priceOverride: number | undefined;
 
@@ -318,8 +360,18 @@ async function enrichForexSnapshot(
 }
 
 async function enrichGoldSnapshot(
-  bars: ChartBar[]
+  bars: ChartBar[],
+  asOfDate?: string
 ): Promise<MarketSnapshot | null> {
+  if (isHistoricalDate(asOfDate)) {
+    return analyzeBars(
+      bars,
+      "gold-xauusd",
+      "Gold (XAU/USD)",
+      `Yahoo Finance (GC=F) daily bars through ${asOfDate}`
+    );
+  }
+
   const gld = await fetchFinnhubQuote("GLD");
   const yahooLast = bars.at(-1)?.close;
   const price = yahooLast ?? (gld?.c ? gld.c * 10 : null);
@@ -343,8 +395,18 @@ async function enrichGoldSnapshot(
 async function enrichIndexSnapshot(
   id: "sp500" | "nasdaq-100",
   label: string,
-  bars: ChartBar[]
+  bars: ChartBar[],
+  asOfDate?: string
 ): Promise<MarketSnapshot | null> {
+  if (isHistoricalDate(asOfDate)) {
+    return analyzeBars(
+      bars,
+      id,
+      label,
+      `Yahoo Finance (${YAHOO_SYMBOLS[id]}) daily bars through ${asOfDate}`
+    );
+  }
+
   if (id === "sp500") {
     const spy = await fetchFinnhubQuote("SPY");
     if (spy?.c && spy.c > 0) {
@@ -369,46 +431,52 @@ async function enrichIndexSnapshot(
 
 export async function getInstrumentSnapshot(
   instrumentId: DailyInstrumentId,
-  label: string
+  label: string,
+  asOfDate?: string
 ): Promise<MarketSnapshot | null> {
   const symbol = YAHOO_SYMBOLS[instrumentId];
-  const bars = await fetchYahooChart(symbol);
+  const rawBars = await fetchYahooChart(symbol, chartRangeForDate(asOfDate));
+  const bars = filterBarsThroughDate(rawBars, asOfDate);
 
   if (bars.length === 0) return null;
 
   switch (instrumentId) {
     case "bitcoin":
-      return enrichCryptoSnapshot("bitcoin", label, bars);
+      return enrichCryptoSnapshot("bitcoin", label, bars, asOfDate);
     case "ethereum":
-      return enrichCryptoSnapshot("ethereum", label, bars);
+      return enrichCryptoSnapshot("ethereum", label, bars, asOfDate);
     case "eur-usd":
-      return enrichForexSnapshot("eur-usd", label, bars, "EUR");
+      return enrichForexSnapshot("eur-usd", label, bars, "EUR", asOfDate);
     case "gbp-usd":
-      return enrichForexSnapshot("gbp-usd", label, bars, "GBP");
+      return enrichForexSnapshot("gbp-usd", label, bars, "GBP", asOfDate);
     case "usd-jpy":
-      return enrichForexSnapshot("usd-jpy", label, bars, "JPY");
+      return enrichForexSnapshot("usd-jpy", label, bars, "JPY", asOfDate);
     case "aud-usd":
-      return enrichForexSnapshot("aud-usd", label, bars, "AUD");
+      return enrichForexSnapshot("aud-usd", label, bars, "AUD", asOfDate);
     case "gold-xauusd":
-      return enrichGoldSnapshot(bars);
+      return enrichGoldSnapshot(bars, asOfDate);
     case "silver-xagusd":
       return analyzeBars(
         bars,
         instrumentId,
         label,
-        `Yahoo Finance (${symbol})`
+        isHistoricalDate(asOfDate)
+          ? `Yahoo Finance (${symbol}) daily bars through ${asOfDate}`
+          : `Yahoo Finance (${symbol})`
       );
     case "brent-crude":
       return analyzeBars(
         bars,
         instrumentId,
         label,
-        `Yahoo Finance (${symbol})`
+        isHistoricalDate(asOfDate)
+          ? `Yahoo Finance (${symbol}) daily bars through ${asOfDate}`
+          : `Yahoo Finance (${symbol})`
       );
     case "sp500":
-      return enrichIndexSnapshot("sp500", label, bars);
+      return enrichIndexSnapshot("sp500", label, bars, asOfDate);
     case "nasdaq-100":
-      return enrichIndexSnapshot("nasdaq-100", label, bars);
+      return enrichIndexSnapshot("nasdaq-100", label, bars, asOfDate);
     default:
       return null;
   }

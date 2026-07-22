@@ -98,7 +98,12 @@ async function generateInstrumentForecast(
   const headline = await getRelevantHeadline(instrumentId);
 
   try {
-    const snapshot = await getInstrumentSnapshot(instrumentId, def.label);
+    const isoDate = now.slice(0, 10);
+    const snapshot = await getInstrumentSnapshot(
+      instrumentId,
+      def.label,
+      isoDate
+    );
     if (snapshot) {
       return buildForecastFromSnapshot(snapshot, now, headline);
     }

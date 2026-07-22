@@ -5,6 +5,7 @@ import {
   countForecastsForDate,
   DAILY_BATCH_SIZE,
   DAILY_FORECAST_TARGET,
+  findAutoForecastDates,
   findMissingDates,
   forecastMatchesDate,
   hasFullDailyBatch,
@@ -17,6 +18,7 @@ import {
 import {
   getInstrumentsForDate,
   selectDailyInstrumentsFromArchive,
+  type DailyInstrumentId,
 } from "@/lib/forecasts/instrument-rotation";
 import {
   loadDailyForecasts,
@@ -167,18 +169,33 @@ async function publishDraftForecasts(forecasts: Article[]) {
   });
 }
 
-async function generateTemplateForecasts(asOfDate?: string) {
-  const isoDate = asOfDate ?? utcToday();
-  const archive = await getAllKnownForecasts();
-  const instruments = resolveDailyInstrumentIds({
-    asOfDate: isoDate,
-    archiveArticles: archive,
-  });
+async function generateForecastsForDate(
+  isoDate: string,
+  archive: Article[]
+): Promise<{ forecasts: Article[]; instruments: DailyInstrumentId[] }> {
+  const existingInstruments = getInstrumentsForDate(archive, isoDate);
+  const instruments =
+    existingInstruments.length >= DAILY_BATCH_SIZE
+      ? existingInstruments.slice(0, DAILY_BATCH_SIZE)
+      : resolveDailyInstrumentIds({
+          asOfDate: isoDate,
+          archiveArticles: archive,
+        });
   const forecasts = await generateDailyForecasts({
     asOfDate: isoDate,
     archiveArticles: archive,
     instrumentIds: instruments,
   });
+  return { forecasts, instruments };
+}
+
+async function generateTemplateForecasts(asOfDate?: string) {
+  const isoDate = asOfDate ?? utcToday();
+  const archive = await getAllKnownForecasts();
+  const { forecasts, instruments } = await generateForecastsForDate(
+    isoDate,
+    archive
+  );
   await saveDailyForecasts(forecasts, { replaceDate: isoDate });
 
   return NextResponse.json({
@@ -189,6 +206,37 @@ async function generateTemplateForecasts(asOfDate?: string) {
     asOfDate: isoDate,
     instruments,
     slugs: forecasts.map((f) => f.slug),
+    generatedAt: new Date().toISOString(),
+  });
+}
+
+async function refreshAutoForecasts(daysBack: number) {
+  const safeDays =
+    Number.isFinite(daysBack) && daysBack > 0
+      ? Math.min(Math.floor(daysBack), 30)
+      : DEFAULT_BACKFILL_DAYS;
+
+  const refreshed: string[] = [];
+  const slugs: string[] = [];
+
+  let archive = await getAllKnownForecasts();
+  const dates = findAutoForecastDates(archive, safeDays);
+
+  for (const isoDate of dates) {
+    const { forecasts } = await generateForecastsForDate(isoDate, archive);
+    await saveDailyForecasts(forecasts, { replaceDate: isoDate });
+    refreshed.push(isoDate);
+    slugs.push(...forecasts.map((f) => f.slug));
+    archive = await getAllKnownForecasts();
+  }
+
+  return NextResponse.json({
+    ok: true,
+    source: "refresh",
+    refreshDays: safeDays,
+    refreshed,
+    articlesUpdated: slugs.length,
+    slugs,
     generatedAt: new Date().toISOString(),
   });
 }
@@ -215,15 +263,7 @@ async function backfillMissingDates(daysBack: number) {
       continue;
     }
 
-    const instruments = resolveDailyInstrumentIds({
-      asOfDate: nextDate,
-      archiveArticles: allArticles,
-    });
-    const forecasts = await generateDailyForecasts({
-      asOfDate: nextDate,
-      archiveArticles: allArticles,
-      instrumentIds: instruments,
-    });
+    const { forecasts } = await generateForecastsForDate(nextDate, allArticles);
     await saveDailyForecasts(forecasts, { replaceDate: nextDate });
     filled.push(nextDate);
   }
@@ -254,6 +294,19 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       return NextResponse.json(
         { error: "Backfill failed", detail: String(error) },
+        { status: 500 }
+      );
+    }
+  }
+
+  const refreshDaysParam = request.nextUrl.searchParams.get("refresh-days");
+  if (refreshDaysParam !== null) {
+    try {
+      const days = Number(refreshDaysParam || DEFAULT_BACKFILL_DAYS);
+      return await refreshAutoForecasts(days);
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Refresh failed", detail: String(error) },
         { status: 500 }
       );
     }

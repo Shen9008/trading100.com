@@ -92,3 +92,23 @@ export function mergeArticlesBySlug(...groups: Article[][]): Article[] {
   }
   return Array.from(bySlug.values());
 }
+
+/** ISO dates (oldest first) that have template (-auto-) forecasts in the lookback window. */
+export function findAutoForecastDates(
+  articles: Article[],
+  daysBack: number,
+  onlyOnOrAfter = DAILY_AUTOMATION_START
+): string[] {
+  const earliest = utcDateDaysAgo(Math.max(daysBack - 1, 0));
+  const start = earliest > onlyOnOrAfter ? earliest : onlyOnOrAfter;
+  const dates = new Set<string>();
+
+  for (const article of articles) {
+    if (!article.slug.includes("-auto-")) continue;
+    const date = article.publishedAt.slice(0, 10);
+    if (date < start) continue;
+    dates.add(date);
+  }
+
+  return Array.from(dates).sort();
+}
