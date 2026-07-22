@@ -13,6 +13,7 @@ import { SectionHeader } from "@/components/layout/SectionHeader";
 import { NewsFeedPagination } from "@/components/news/NewsFeedPagination";
 import { formatRelativeTime } from "@/lib/utils";
 import { getNewsCategorySeo } from "@/lib/seo/page-seo";
+import { TradingViewTickers } from "@/components/widgets/TradingViewTickers";
 
 export const revalidate = 300;
 
@@ -111,6 +112,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
         variant="news"
         live={isHubPage}
       >
+        <TradingViewTickers />
         {page > 1 && (
           <div className="mb-8">
             <Link

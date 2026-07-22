@@ -11,6 +11,7 @@ import { JsonLd, breadcrumbJsonLd, faqJsonLd, breadcrumbs, learningResourceJsonL
 import { EducationContent } from "@/components/education/EducationContent";
 import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 import { getEducationKeywords } from "@/lib/seo/page-seo";
+import { TradingViewTickers } from "@/components/widgets/TradingViewTickers";
 
 type EducationArticleProps = {
   params: { slug: string };
@@ -66,6 +67,7 @@ export default function EducationArticlePage({ params }: EducationArticleProps) 
       {guide.faqs && <JsonLd data={faqJsonLd(guide.faqs)} />}
 
       <article className="mx-auto max-w-4xl px-4 py-8 lg:px-6">
+        <TradingViewTickers />
         <Link href="/education" className="text-sm text-brand hover:underline">
           ← All Guides
         </Link>

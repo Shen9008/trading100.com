@@ -17,6 +17,7 @@ import { getArticleKeywords } from "@/lib/seo/page-seo";
 import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 import type { HeroVariant } from "@/lib/hero/variants";
 import { forecastArticlePath, isForecastArticle } from "@/lib/forecasts/paths";
+import { TradingViewTickers } from "@/components/widgets/TradingViewTickers";
 
 type ArticlePageProps = {
   params: { slug: string };
@@ -95,6 +96,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       />
 
       <article className="mx-auto max-w-4xl px-4 py-8 lg:px-6">
+        <TradingViewTickers />
         <Link href="/news" className="text-sm text-brand hover:underline">
           ← Back to News
         </Link>

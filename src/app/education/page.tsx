@@ -7,6 +7,7 @@ import { PageShell } from "@/components/layout/PageShell";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen } from "lucide-react";
 import { EDUCATION_KEYWORDS } from "@/lib/seo/page-seo";
+import { TradingViewTickers } from "@/components/widgets/TradingViewTickers";
 
 export const metadata: Metadata = buildMetadata({
   title: "Trading Education — Free Guides & Tutorials",
@@ -36,6 +37,7 @@ export default function EducationPage() {
         eyebrow="Academy"
         variant="education"
       >
+        <TradingViewTickers />
         <div className="grid gap-4 sm:grid-cols-2">
           {guides.map((guide) => (
             <Link
