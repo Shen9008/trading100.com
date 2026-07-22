@@ -4,7 +4,6 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SiteContextLinks } from "@/components/layout/SiteContextLinks";
 import { AppBackground } from "@/components/layout/AppBackground";
-import { TickerTape } from "@/components/widgets/TickerTape";
 import { buildMetadata } from "@/lib/metadata";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
 import {
@@ -70,7 +69,6 @@ export default function RootLayout({
       >
         <AppBackground />
         <Header />
-        <TickerTape />
         <main className="flex-1">{children}</main>
         <SiteContextLinks />
         <Footer />
