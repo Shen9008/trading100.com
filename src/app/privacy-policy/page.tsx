@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/metadata";
 import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
+import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = buildMetadata({
   title: "Privacy Policy",
@@ -12,6 +13,15 @@ export const metadata: Metadata = buildMetadata({
 
 export default function PrivacyPolicyPage() {
   return (
+    <>
+      <JsonLd
+        data={breadcrumbJsonLd(
+          breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: "Privacy Policy", path: "/privacy-policy" },
+          ])
+        )}
+      />
     <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
       <PageHeroBanner
         title="Privacy Policy"
@@ -66,5 +76,6 @@ export default function PrivacyPolicyPage() {
       </div>
       </div>
     </div>
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { MarkdownBody, MarkdownContent } from "@/components/content/MarkdownContent";
 import { renderInline } from "@/lib/markdown/render-inline";
 import {
@@ -6,7 +7,25 @@ import {
   extractOutlookScenarios,
   parseMarkdownSections,
 } from "@/lib/markdown/parse-sections";
+import type { ForecastChartConfig } from "@/lib/forecasts/chart-symbols";
+import { stripChartPlaceholders } from "@/lib/forecasts/chart-symbols";
 import { cn } from "@/lib/utils";
+
+const ForecastChartEmbed = dynamic(
+  () =>
+    import("@/components/forecasts/ForecastChartEmbed").then(
+      (module) => module.ForecastChartEmbed
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="my-6 h-[360px] animate-pulse rounded-xl border border-white/[0.08] bg-white/[0.03] lg:h-[480px]"
+        aria-hidden
+      />
+    ),
+  }
+);
 
 function ForecastToc({
   sections,
@@ -139,6 +158,10 @@ function isFaqSection(title: string): boolean {
   return /^faq$/i.test(title.trim());
 }
 
+function isTechnicalSection(title: string): boolean {
+  return /technical analysis/i.test(title);
+}
+
 function splitKeyLevelsFromBody(body: string): {
   before: string;
   levels: string[];
@@ -146,7 +169,7 @@ function splitKeyLevelsFromBody(body: string): {
 } {
   const headerMatch = body.match(/\n### Key (?:Support and Resistance )?Levels[^\n]*\n/);
   if (!headerMatch) {
-    return { before: body, levels: [], after: "" };
+    return { before: stripChartPlaceholders(body), levels: [], after: "" };
   }
 
   const headerIndex = body.indexOf(headerMatch[0]);
@@ -158,13 +181,31 @@ function splitKeyLevelsFromBody(body: string): {
     : rest.split(/\n(?=### )/)[0] ?? rest;
   const levels = extractKeyLevels(levelsPart.trim());
   const after = chartMatch
-    ? rest.slice(chartMatch.index! + 1).trim()
+    ? rest.slice(chartMatch.index! + chartMatch[0].length).trim()
     : rest.slice(levelsPart.length).trim();
 
-  return { before, levels, after };
+  return { before: stripChartPlaceholders(before), levels, after: stripChartPlaceholders(after) };
 }
 
-function renderSectionBody(title: string, body: string) {
+function ForecastChartSection({
+  chart,
+}: {
+  chart: ForecastChartConfig;
+}) {
+  return (
+    <ForecastChartEmbed
+      symbol={chart.symbol}
+      interval={chart.interval}
+      caption={chart.caption}
+    />
+  );
+}
+
+function renderSectionBody(
+  title: string,
+  body: string,
+  chart: ForecastChartConfig | null
+) {
   if (isOutlookSection(title)) {
     const scenarios = extractOutlookScenarios(body);
     const remainder = body
@@ -201,14 +242,16 @@ function renderSectionBody(title: string, body: string) {
   }
 
   const { before, levels, after } = splitKeyLevelsFromBody(body);
+  const showChart = chart && isTechnicalSection(title);
 
   return (
     <>
       {before && <MarkdownBody content={before} />}
       {levels.length > 0 && <KeyLevelsCard levels={levels} />}
+      {showChart && <ForecastChartSection chart={chart} />}
       {after && <MarkdownBody content={after} />}
-      {!before && levels.length === 0 && !after && (
-        <MarkdownBody content={body} />
+      {!before && levels.length === 0 && !after && !showChart && (
+        <MarkdownBody content={stripChartPlaceholders(body)} />
       )}
     </>
   );
@@ -216,10 +259,15 @@ function renderSectionBody(title: string, body: string) {
 
 type ForecastArticleContentProps = {
   content: string;
+  chart: ForecastChartConfig | null;
 };
 
-export function ForecastArticleContent({ content }: ForecastArticleContentProps) {
-  const { intro, sections } = parseMarkdownSections(content);
+export function ForecastArticleContent({
+  content,
+  chart,
+}: ForecastArticleContentProps) {
+  const sanitizedContent = stripChartPlaceholders(content);
+  const { intro, sections } = parseMarkdownSections(sanitizedContent);
   const tocSections = sections.filter((s) => !isFaqSection(s.title));
 
   return (
@@ -242,7 +290,9 @@ export function ForecastArticleContent({ content }: ForecastArticleContentProps)
             <h2 className="text-xl font-bold tracking-tight text-foreground">
               {section.title}
             </h2>
-            <div className="mt-4">{renderSectionBody(section.title, section.body)}</div>
+            <div className="mt-4">
+              {renderSectionBody(section.title, section.body, chart)}
+            </div>
           </section>
         ))}
       </div>

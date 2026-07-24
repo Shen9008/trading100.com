@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/metadata";
 import { DisclaimerBanner } from "@/components/layout/DisclaimerBanner";
 import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
+import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = buildMetadata({
   title: "Disclaimer — Risk Disclosure",
@@ -13,6 +14,15 @@ export const metadata: Metadata = buildMetadata({
 
 export default function DisclaimerPage() {
   return (
+    <>
+      <JsonLd
+        data={breadcrumbJsonLd(
+          breadcrumbs([
+            { name: "Home", path: "/" },
+            { name: "Disclaimer", path: "/disclaimer" },
+          ])
+        )}
+      />
     <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
       <PageHeroBanner
         title="Disclaimer"
@@ -74,5 +84,6 @@ export default function DisclaimerPage() {
       </div>
       </div>
     </div>
+    </>
   );
 }

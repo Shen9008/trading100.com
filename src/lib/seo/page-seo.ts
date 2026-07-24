@@ -1,9 +1,9 @@
-import { BRAND_OG_DEFAULT } from "@/lib/constants/brand";
 import { STOCK_IMAGES } from "@/lib/constants/images";
 import type { AssetClassId } from "@/lib/constants";
 import type { ArticleCategory } from "@/lib/data/articles";
 
-export const DEFAULT_OG_IMAGE = BRAND_OG_DEFAULT;
+/** Absolute URL — public/og-default.webp may be absent in some deploys */
+export const DEFAULT_OG_IMAGE = STOCK_IMAGES.forex;
 
 export const HOME_KEYWORDS = [
   "Trading 100",
@@ -224,6 +224,82 @@ export function getEducationKeywords(slug: string): string[] {
 
 export function getForecastFilterSeo(filter?: string) {
   return FORECAST_FILTER_SEO[filter ?? "all"] ?? FORECAST_FILTER_SEO.all;
+}
+
+const MARKETS_TAB_SEO: Record<
+  string,
+  { title: string; description: string; keywords: string[]; ogImage: string }
+> = {
+  currencies: {
+    title: "Live Forex & Currency Prices",
+    description:
+      "Live forex rates for EUR/USD, GBP/USD, USD/JPY, and 40+ currency pairs. Real-time FX quotes with TradingView charts.",
+    keywords: ["forex rates", "currency prices", "EUR USD live", "FX quotes", "major currency pairs"],
+    ogImage: STOCK_IMAGES.forex,
+  },
+  commodities: {
+    title: "Live Commodity Prices — Gold, Oil & Metals",
+    description:
+      "Live gold (XAU/USD), crude oil, silver, and energy commodity prices with interactive charts and market data.",
+    keywords: ["gold price live", "oil price", "commodity prices", "XAU USD", "crude oil chart"],
+    ogImage: STOCK_IMAGES.commodities,
+  },
+  crypto: {
+    title: "Live Cryptocurrency Prices — Bitcoin & Altcoins",
+    description:
+      "Real-time Bitcoin, Ethereum, and altcoin prices. Live crypto market data with TradingView charts and 24h changes.",
+    keywords: ["bitcoin price live", "crypto prices", "ethereum price", "altcoin market", "crypto chart"],
+    ogImage: STOCK_IMAGES.crypto,
+  },
+  indices: {
+    title: "Live Stock Index Prices — S&P 500, Nasdaq & Dow",
+    description:
+      "Live stock index quotes for S&P 500, Nasdaq 100, Dow Jones, and global indices with real-time TradingView charts.",
+    keywords: ["S&P 500 live", "Nasdaq price", "stock index quotes", "Dow Jones live", "index chart"],
+    ogImage: STOCK_IMAGES.indices,
+  },
+  stocks: {
+    title: "Live Stock Prices — US Equities & Mega-Cap Tech",
+    description:
+      "Real-time US stock quotes for Apple, Nvidia, Tesla, and 100+ equities. Live equity prices with TradingView charts.",
+    keywords: ["stock prices live", "US stocks", "equity quotes", "NVDA price", "AAPL chart"],
+    ogImage: STOCK_IMAGES.stocks,
+  },
+  etfs: {
+    title: "Live ETF Prices — SPY, QQQ & Sector Funds",
+    description:
+      "Real-time ETF quotes for SPY, QQQ, sector ETFs, and index funds. Live exchange-traded fund prices and charts.",
+    keywords: ["ETF prices live", "SPY price", "QQQ chart", "sector ETF", "index fund quotes"],
+    ogImage: STOCK_IMAGES.indices,
+  },
+};
+
+export function getMarketsTabSeo(tab?: string) {
+  const defaultSeo = {
+    title: "Live Markets — Forex, Crypto, Stocks & Commodities",
+    description:
+      "Live prices for currencies, commodities, crypto, indices, stocks, and ETFs. Browse 250+ instruments with real-time TradingView charts and market data.",
+    keywords: MARKETS_KEYWORDS,
+    ogImage: STOCK_IMAGES.forex,
+    path: "/markets" as const,
+  };
+
+  if (!tab) return defaultSeo;
+
+  const cfg = MARKETS_TAB_SEO[tab];
+  if (!cfg) return defaultSeo;
+
+  return {
+    ...cfg,
+    path: `/markets?tab=${tab}` as const,
+  };
+}
+
+export function getArticleImageAlt(article: {
+  title: string;
+  category: string;
+}): string {
+  return `${article.title} — ${article.category} article`;
 }
 
 export function getNewsCategorySeo(category?: string) {

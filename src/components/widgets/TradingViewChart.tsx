@@ -7,12 +7,15 @@ type TradingViewChartProps = {
   symbol: string;
   height?: number;
   mobileHeight?: number;
+  /** TradingView interval: D = daily, W = weekly */
+  interval?: "D" | "W";
 };
 
 export function TradingViewChart({
   symbol,
   height,
   mobileHeight,
+  interval = "D",
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -31,7 +34,7 @@ export function TradingViewChart({
     script.innerHTML = JSON.stringify({
       autosize: true,
       symbol,
-      interval: "D",
+      interval,
       timezone: "Etc/UTC",
       theme: "dark",
       style: "1",
@@ -43,7 +46,7 @@ export function TradingViewChart({
       height: widgetHeight,
     });
     containerRef.current.appendChild(script);
-  }, [symbol, widgetHeight]);
+  }, [symbol, widgetHeight, interval]);
 
   return (
     <div className="tv-widget-container" style={{ height: widgetHeight }}>

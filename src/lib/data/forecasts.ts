@@ -965,6 +965,71 @@ function categoryToForecastTags(
   }
 }
 
+function countArticleWords(content: string): number {
+  return content.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function inferInstrumentKeyFromSlug(slug: string): string | null {
+  const autoMatch = slug.match(
+    /^(bitcoin|ethereum|eur-usd|gbp-usd|usd-jpy|aud-usd|gold-xauusd|silver-xagusd|brent-crude|sp500|nasdaq-100)-auto-/
+  );
+  if (autoMatch) return autoMatch[1];
+
+  if (slug.includes("bitcoin") || slug.includes("btc")) return "bitcoin";
+  if (slug.includes("ethereum") || slug.includes("eth")) return "ethereum";
+  if (slug.includes("eur-usd") || slug.includes("eurusd")) return "eur-usd";
+  if (slug.includes("gbp-usd") || slug.includes("gbpusd") || slug.includes("cable"))
+    return "gbp-usd";
+  if (slug.includes("usd-jpy") || slug.includes("usdjpy")) return "usd-jpy";
+  if (slug.includes("aud-usd") || slug.includes("audusd")) return "aud-usd";
+  if (slug.includes("gold") || slug.includes("xauusd")) return "gold-xauusd";
+  if (slug.includes("silver") || slug.includes("xagusd")) return "silver-xagusd";
+  if (slug.includes("brent") || slug.includes("crude") || slug.includes("oil"))
+    return "brent-crude";
+  if (slug.includes("nasdaq")) return "nasdaq-100";
+  if (slug.includes("sp500") || slug.includes("s-p")) return "sp500";
+
+  return null;
+}
+
+function getForecastDedupeKey(article: Article): string | null {
+  const instrument = inferInstrumentKeyFromSlug(article.slug);
+  if (!instrument) return null;
+  const date = article.publishedAt.slice(0, 10);
+  return `${instrument}:${date}`;
+}
+
+function dedupeForecastsByInstrumentDate(articles: Article[]): Article[] {
+  const winners = new Map<string, Article>();
+
+  for (const article of articles) {
+    const key = getForecastDedupeKey(article);
+    if (!key) {
+      winners.set(`unique:${article.slug}`, article);
+      continue;
+    }
+
+    const existing = winners.get(key);
+    if (!existing) {
+      winners.set(key, article);
+      continue;
+    }
+
+    const existingWords = countArticleWords(existing.content);
+    const candidateWords = countArticleWords(article.content);
+    const existingIsAuto = existing.slug.includes("-auto-");
+    const candidateIsAuto = article.slug.includes("-auto-");
+
+    const keepCandidate =
+      candidateWords > existingWords + 50 ||
+      (candidateWords >= existingWords - 20 && existingIsAuto && !candidateIsAuto);
+
+    winners.set(key, keepCandidate ? article : existing);
+  }
+
+  return Array.from(winners.values());
+}
+
 function getForecastTags(article: Article): ForecastAssetFilter[] {
   if (FORECAST_TAGS[article.slug]) return FORECAST_TAGS[article.slug];
 
@@ -979,10 +1044,10 @@ async function mergeForecasts(): Promise<Article[]> {
   const dynamic = await loadDailyForecasts();
   const dynamicSlugs = new Set(dynamic.map((f) => f.slug));
 
-  const merged = [
+  const merged = dedupeForecastsByInstrumentDate([
     ...dynamic,
     ...FORECAST_ARTICLES.filter((f) => !dynamicSlugs.has(f.slug)),
-  ];
+  ]);
 
   return merged.sort(
     (a, b) =>
@@ -1004,10 +1069,24 @@ export async function getForecastBySlug(
   const dynamic = await (
     await import("@/lib/kv/forecasts-store")
   ).loadDailyForecasts();
-  return (
-    dynamic.find((f) => f.slug === slug) ??
-    FORECAST_ARTICLES.find((f) => f.slug === slug)
+  const dynamicSlugs = new Set(dynamic.map((f) => f.slug));
+  const merged = dedupeForecastsByInstrumentDate([
+    ...dynamic,
+    ...FORECAST_ARTICLES.filter((f) => !dynamicSlugs.has(f.slug)),
+  ]);
+
+  const direct = merged.find((f) => f.slug === slug);
+  if (direct) return direct;
+
+  const autoDateMatch = slug.match(
+    /^(bitcoin|ethereum|eur-usd|gbp-usd|usd-jpy|aud-usd|gold-xauusd|silver-xagusd|brent-crude|sp500|nasdaq-100)-auto-(\d{4}-\d{2}-\d{2})$/
   );
+  if (autoDateMatch) {
+    const key = `${autoDateMatch[1]}:${autoDateMatch[2]}`;
+    return merged.find((f) => getForecastDedupeKey(f) === key);
+  }
+
+  return undefined;
 }
 
 export async function getLatestForecasts(limit = 5): Promise<Article[]> {

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Article, ArticleCategory } from "@/lib/data/articles";
 import { articlePublicPath } from "@/lib/forecasts/paths";
+import { getArticleImageAlt } from "@/lib/seo/page-seo";
 import { ArrowUpRight } from "lucide-react";
 
 const CATEGORY_VARIANT: Record<
@@ -36,7 +37,7 @@ export function ArticleCard({ article, href }: ArticleCardProps) {
         <ArticleImage
           src={article.image}
           category={article.category}
-          alt=""
+          alt={getArticleImageAlt(article)}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="104px"

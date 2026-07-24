@@ -75,6 +75,38 @@ export async function fetchFinnhubQuote(symbol: string): Promise<FinnhubQuote | 
   return res.json();
 }
 
+export type FinnhubCandleResponse = {
+  c: number[];
+  h: number[];
+  l: number[];
+  o: number[];
+  s: string;
+  t: number[];
+};
+
+export async function fetchFinnhubCandles(
+  symbol: string,
+  days = 60
+): Promise<FinnhubCandleResponse | null> {
+  const apiKey = process.env.FINNHUB_API_KEY;
+  if (!apiKey) return null;
+
+  const to = Math.floor(Date.now() / 1000);
+  const from = to - days * 24 * 60 * 60;
+
+  try {
+    const res = await fetch(
+      `https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(symbol)}&resolution=D&from=${from}&to=${to}&token=${apiKey}`,
+      { next: { revalidate: 300 } }
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as FinnhubCandleResponse;
+    return data.s === "ok" ? data : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchStockQuotes(
   symbols: string[]
 ): Promise<(FinnhubQuote & { symbol: string })[]> {

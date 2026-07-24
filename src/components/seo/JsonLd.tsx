@@ -2,6 +2,11 @@ import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { BRAND_LOGO } from "@/lib/constants/brand";
 import { seoUrl } from "@/lib/seo/urls";
 
+function schemaImageUrl(src: string): string {
+  if (src.startsWith("http://") || src.startsWith("https://")) return src;
+  return seoUrl(src.startsWith("/") ? src : `/${src}`);
+}
+
 type JsonLdProps = {
   data: Record<string, unknown> | Record<string, unknown>[];
 };
@@ -41,6 +46,14 @@ export function websiteJsonLd() {
       name: SITE_NAME,
       url: SITE_URL,
     },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/markets?tab={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   };
 }
 
@@ -70,7 +83,7 @@ export function articleJsonLd(
     },
     datePublished: article.publishedAt,
     dateModified: article.publishedAt,
-    image: article.image,
+    image: schemaImageUrl(article.image),
     url: seoUrl(articlePath),
     mainEntityOfPage: seoUrl(articlePath),
     articleSection: article.category,
@@ -99,7 +112,7 @@ export function learningResourceJsonLd(guide: {
     name: guide.title,
     description: guide.excerpt,
     url: seoUrl(`/education/${guide.slug}`),
-    image: guide.image,
+    image: schemaImageUrl(guide.image),
     datePublished: guide.publishedAt,
     educationalLevel: guide.level,
     learningResourceType: "Guide",
@@ -137,6 +150,33 @@ export function breadcrumbJsonLd(items: { name: string; url: string }[]) {
       name: item.name,
       item: item.url.startsWith("http") ? item.url : seoUrl(item.url),
     })),
+  };
+}
+
+export function webApplicationJsonLd(app: {
+  name: string;
+  description: string;
+  url: string;
+  applicationCategory?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: app.name,
+    description: app.description,
+    url: app.url.startsWith("http") ? app.url : seoUrl(app.url),
+    applicationCategory: app.applicationCategory ?? "FinanceApplication",
+    operatingSystem: "Any",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    provider: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
   };
 }
 

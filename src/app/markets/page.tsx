@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 
-import { buildMetadata } from "@/lib/metadata";
+import { buildMetadataWithCanonical } from "@/lib/metadata";
 
 import { ASSET_CLASSES } from "@/lib/constants";
 
@@ -19,7 +19,7 @@ import { SectionHeader } from "@/components/layout/SectionHeader";
 
 import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
 import { countInstruments } from "@/lib/data/market-instruments";
-import { MARKETS_KEYWORDS } from "@/lib/seo/page-seo";
+import { getMarketsTabSeo } from "@/lib/seo/page-seo";
 
 const TradingViewMarketMovers = dynamic(
   () =>
@@ -60,21 +60,23 @@ const TradingViewMarketData = dynamic(
   }
 );
 
-export const metadata: Metadata = buildMetadata({
-  title: "Live Markets — Forex, Crypto, Stocks & Commodities",
-  description:
-    "Live prices for currencies, commodities, crypto, indices, stocks, and ETFs. Browse 250+ instruments with real-time TradingView charts and market data.",
-  path: "/markets",
-  keywords: MARKETS_KEYWORDS,
-});
-
-
-
 type MarketsPageProps = {
-
   searchParams: { tab?: string };
-
 };
+
+export async function generateMetadata({
+  searchParams,
+}: MarketsPageProps): Promise<Metadata> {
+  const seo = getMarketsTabSeo(searchParams.tab);
+  return buildMetadataWithCanonical({
+    title: seo.title,
+    description: seo.description,
+    path: seo.path,
+    canonicalPath: "/markets",
+    keywords: seo.keywords,
+    ogImage: seo.ogImage,
+  });
+}
 
 
 

@@ -30,3 +30,51 @@ export async function fetchCryptoMarkets(): Promise<CoinGeckoMarket[]> {
 
   return res.json();
 }
+
+export async function fetchCoinGeckoDailyBars(
+  coinId: "bitcoin" | "ethereum",
+  days = 30
+): Promise<
+  { date: string; open: number; high: number; low: number; close: number }[]
+> {
+  try {
+    const res = await fetch(
+      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
+      { next: { revalidate: 300 } }
+    );
+    if (!res.ok) return [];
+
+    const json = (await res.json()) as {
+      prices?: [number, number][];
+    };
+    const prices = json.prices ?? [];
+    if (prices.length < 5) return [];
+
+    const bars: {
+      date: string;
+      open: number;
+      high: number;
+      low: number;
+      close: number;
+    }[] = [];
+
+    for (let i = 0; i < prices.length; i++) {
+      const [ts, close] = prices[i];
+      const prevClose = i > 0 ? prices[i - 1][1] : close;
+      const nextClose = i < prices.length - 1 ? prices[i + 1][1] : close;
+      const high = Math.max(prevClose, close, nextClose);
+      const low = Math.min(prevClose, close, nextClose);
+      bars.push({
+        date: new Date(ts).toISOString().slice(0, 10),
+        open: prevClose,
+        high,
+        low,
+        close,
+      });
+    }
+
+    return bars;
+  } catch {
+    return [];
+  }
+}

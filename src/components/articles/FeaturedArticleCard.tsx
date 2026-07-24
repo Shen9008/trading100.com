@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Article, ArticleCategory } from "@/lib/data/articles";
 import { forecastArticlePath, isForecastArticle } from "@/lib/forecasts/paths";
+import { getArticleImageAlt } from "@/lib/seo/page-seo";
 import { ArrowUpRight } from "lucide-react";
 
 const CATEGORY_VARIANT: Record<
@@ -51,7 +52,7 @@ export function FeaturedArticleCard({
           <ArticleImage
             src={article.image}
             category={article.category}
-            alt=""
+            alt={getArticleImageAlt(article)}
             fill
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
             sizes={featured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 100vw, 33vw"}

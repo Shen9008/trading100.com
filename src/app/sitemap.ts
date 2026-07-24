@@ -9,6 +9,8 @@ import { loadAutoNews } from "@/lib/kv/forecasts-store";
 import { loadDailyForecasts } from "@/lib/kv/forecasts-store";
 import { articlePublicPath, isForecastArticle } from "@/lib/forecasts/paths";
 
+export const revalidate = 3600;
+
 function articleSitemapEntry(
   article: Article,
   priority: number,

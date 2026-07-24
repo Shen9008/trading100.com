@@ -57,7 +57,9 @@ const SLUG_PATTERNS: { id: DailyInstrumentId; patterns: RegExp[] }[] = [
   { id: "nasdaq-100", patterns: [/nasdaq-100/i, /nasdaq100/i, /\bndx\b/i] },
 ];
 
-export function inferInstrumentFromArticle(article: Article): DailyInstrumentId | null {
+export function inferInstrumentFromArticle(
+  article: Pick<Article, "slug" | "title" | "excerpt">
+): DailyInstrumentId | null {
   for (const item of INSTRUMENT_POOL) {
     if (article.slug.startsWith(`${item.slugPrefix}-`)) {
       return item.id;

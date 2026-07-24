@@ -63,6 +63,7 @@ export function PageHeroBanner({
               <Image
                 src={bgImage}
                 alt=""
+                aria-hidden
                 fill
                 className="object-cover opacity-35"
                 priority
@@ -73,6 +74,7 @@ export function PageHeroBanner({
               <img
                 src={bgImage}
                 alt=""
+                aria-hidden
                 className="h-full w-full object-cover opacity-35"
               />
             )}

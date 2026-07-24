@@ -121,8 +121,17 @@ export async function GET(request: NextRequest) {
     const allArticles = await getAllKnownForecasts();
     const status = buildStatusPayload(allArticles, safeLookback);
 
+    const autoDates = findAutoForecastDates(allArticles, safeLookback);
+    const autoSlugs = isAuthorized(request)
+      ? allArticles
+          .filter((article) => article.slug.includes("-auto-"))
+          .map((article) => article.slug)
+      : undefined;
+
     return NextResponse.json({
       ...status,
+      autoDates,
+      autoSlugs,
       generatedAt: latest?.generatedAt ?? null,
     });
   }

@@ -22,11 +22,14 @@ import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 import { extractFaqItems, parseMarkdownSections } from "@/lib/markdown/parse-sections";
 import type { HeroVariant } from "@/lib/hero/variants";
 import type { ArticleCategory } from "@/lib/data/articles";
+import { resolveForecastChart } from "@/lib/forecasts/chart-symbols";
 import { TradingViewTickers } from "@/components/widgets/TradingViewTickers";
 
 type ForecastPageProps = {
   params: { slug: string };
 };
+
+export const revalidate = 300;
 
 function categoryToHeroVariant(category: ArticleCategory): HeroVariant {
   const map: Partial<Record<ArticleCategory, HeroVariant>> = {
@@ -78,6 +81,7 @@ export default async function ForecastArticlePage({ params }: ForecastPageProps)
   const { sections } = parseMarkdownSections(forecast.content);
   const faqSection = sections.find((s) => /^faq$/i.test(s.title.trim()));
   const faqs = faqSection ? extractFaqItems(faqSection.body) : [];
+  const chart = resolveForecastChart(forecast);
 
   return (
     <>
@@ -109,7 +113,7 @@ export default async function ForecastArticlePage({ params }: ForecastPageProps)
         />
 
         <div className="mt-8">
-          <ForecastArticleContent content={forecast.content} />
+          <ForecastArticleContent content={forecast.content} chart={chart} />
         </div>
 
         <DisclaimerBanner compact />

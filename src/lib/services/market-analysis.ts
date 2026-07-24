@@ -1,7 +1,7 @@
 import type { DailyInstrumentId } from "@/lib/forecasts/instrument-rotation";
-import { fetchCryptoMarkets } from "@/lib/api/coingecko";
+import { fetchCryptoMarkets, fetchCoinGeckoDailyBars } from "@/lib/api/coingecko";
 import { fetchLatestRates } from "@/lib/api/frankfurter";
-import { fetchFinnhubQuote } from "@/lib/api/finnhub";
+import { fetchFinnhubCandles, fetchFinnhubQuote } from "@/lib/api/finnhub";
 
 export type ChartBar = {
   date: string;
@@ -51,6 +51,26 @@ const YAHOO_SYMBOLS: Record<DailyInstrumentId, string> = {
   "brent-crude": "BZ=F",
   sp500: "^GSPC",
   "nasdaq-100": "^NDX",
+};
+
+const FINNHUB_SYMBOLS: Partial<Record<DailyInstrumentId, string>> = {
+  bitcoin: "BINANCE:BTCUSDT",
+  ethereum: "BINANCE:ETHUSDT",
+  "eur-usd": "OANDA:EUR_USD",
+  "gbp-usd": "OANDA:GBP_USD",
+  "usd-jpy": "OANDA:USD_JPY",
+  "aud-usd": "OANDA:AUD_USD",
+  "gold-xauusd": "OANDA:XAU_USD",
+  "silver-xagusd": "OANDA:XAG_USD",
+  sp500: "SPY",
+  "nasdaq-100": "QQQ",
+};
+
+const YAHOO_FETCH_HEADERS = {
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  Accept: "application/json,text/plain,*/*",
+  "Accept-Language": "en-US,en;q=0.9",
 };
 
 const PRICE_FORMAT: Record<
@@ -229,10 +249,25 @@ export async function fetchYahooChart(
   symbol: string,
   range = "1mo"
 ): Promise<ChartBar[]> {
+  const hosts = ["query1.finance.yahoo.com", "query2.finance.yahoo.com"];
+
+  for (const host of hosts) {
+    const bars = await fetchYahooChartFromHost(host, symbol, range);
+    if (bars.length >= 5) return bars;
+  }
+
+  return [];
+}
+
+async function fetchYahooChartFromHost(
+  host: string,
+  symbol: string,
+  range: string
+): Promise<ChartBar[]> {
   try {
     const res = await fetch(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=${range}`,
-      { headers: { "User-Agent": "Trading100/1.0" }, next: { revalidate: 300 } }
+      `https://${host}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=${range}`,
+      { headers: YAHOO_FETCH_HEADERS, next: { revalidate: 300 } }
     );
     if (!res.ok) return [];
 
@@ -278,6 +313,62 @@ export async function fetchYahooChart(
   } catch {
     return [];
   }
+}
+
+function finnhubCandlesToBars(candles: {
+  c: number[];
+  h: number[];
+  l: number[];
+  o: number[];
+  t: number[];
+}): ChartBar[] {
+  const bars: ChartBar[] = [];
+  for (let i = 0; i < candles.t.length; i++) {
+    bars.push({
+      date: new Date(candles.t[i] * 1000).toISOString().slice(0, 10),
+      open: candles.o[i],
+      high: candles.h[i],
+      low: candles.l[i],
+      close: candles.c[i],
+    });
+  }
+  return bars.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+async function fetchFinnhubDailyBars(
+  instrumentId: DailyInstrumentId,
+  range: string
+): Promise<ChartBar[]> {
+  const symbol = FINNHUB_SYMBOLS[instrumentId];
+  if (!symbol) return [];
+
+  const days = range === "3mo" ? 90 : 45;
+  const candles = await fetchFinnhubCandles(symbol, days);
+  if (!candles) return [];
+  return finnhubCandlesToBars(candles);
+}
+
+async function fetchCoinGeckoBarsForInstrument(
+  instrumentId: DailyInstrumentId,
+  range: string
+): Promise<ChartBar[]> {
+  if (instrumentId !== "bitcoin" && instrumentId !== "ethereum") return [];
+  const days = range === "3mo" ? 90 : 30;
+  return fetchCoinGeckoDailyBars(instrumentId, days);
+}
+
+export async function fetchChartBars(
+  instrumentId: DailyInstrumentId,
+  range = "1mo"
+): Promise<ChartBar[]> {
+  const yahooSymbol = YAHOO_SYMBOLS[instrumentId];
+  const yahooBars = await fetchYahooChart(yahooSymbol, range);
+  if (yahooBars.length >= 5) return yahooBars;
+
+  const finnhubBars = await fetchFinnhubDailyBars(instrumentId, range);
+  if (finnhubBars.length >= 5) return finnhubBars;
+
+  return fetchCoinGeckoBarsForInstrument(instrumentId, range);
 }
 
 async function enrichCryptoSnapshot(
@@ -435,7 +526,7 @@ export async function getInstrumentSnapshot(
   asOfDate?: string
 ): Promise<MarketSnapshot | null> {
   const symbol = YAHOO_SYMBOLS[instrumentId];
-  const rawBars = await fetchYahooChart(symbol, chartRangeForDate(asOfDate));
+  const rawBars = await fetchChartBars(instrumentId, chartRangeForDate(asOfDate));
   const bars = filterBarsThroughDate(rawBars, asOfDate);
 
   if (bars.length === 0) return null;

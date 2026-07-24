@@ -16,6 +16,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import { getArticleKeywords } from "@/lib/seo/page-seo";
 import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 import type { HeroVariant } from "@/lib/hero/variants";
+import { loadAutoNews } from "@/lib/kv/forecasts-store";
 import { forecastArticlePath, isForecastArticle } from "@/lib/forecasts/paths";
 import { TradingViewTickers } from "@/components/widgets/TradingViewTickers";
 
@@ -27,10 +28,27 @@ async function getContentBySlug(slug: string): Promise<Article | undefined> {
   return (await resolveArticleBySlug(slug)) ?? (await getForecastBySlug(slug));
 }
 
+export const revalidate = 300;
+
 export async function generateStaticParams() {
-  return [...ORIGINAL_ARTICLES, ...FORECAST_ARTICLES].map((a) => ({
-    slug: a.slug,
-  }));
+  const staticSlugs = [...ORIGINAL_ARTICLES, ...FORECAST_ARTICLES].map(
+    (a) => a.slug
+  );
+  let dynamicSlugs: string[] = [];
+
+  try {
+    const autoNews = await loadAutoNews();
+    dynamicSlugs = (autoNews?.articles ?? [])
+      .filter((a) => a.isOriginal !== false)
+      .filter((a) => !isForecastArticle(a))
+      .map((a) => a.slug);
+  } catch {
+    /* KV unavailable at build time */
+  }
+
+  return Array.from(new Set([...staticSlugs, ...dynamicSlugs])).map(
+    (slug) => ({ slug })
+  );
 }
 
 export async function generateMetadata({

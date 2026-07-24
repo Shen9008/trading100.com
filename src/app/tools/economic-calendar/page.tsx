@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { buildMetadata } from "@/lib/metadata";
-import { JsonLd, breadcrumbJsonLd, breadcrumbs } from "@/components/seo/JsonLd";
+import { JsonLd, breadcrumbJsonLd, breadcrumbs, webApplicationJsonLd } from "@/components/seo/JsonLd";
 import { TOOLS_CALENDAR_KEYWORDS } from "@/lib/seo/page-seo";
 import { PageHeroBanner } from "@/components/layout/PageHeroBanner";
 
@@ -31,6 +31,15 @@ export default function EconomicCalendarPage() {
             { name: "Economic Calendar", path: "/tools/economic-calendar" },
           ])
         )}
+      />
+
+      <JsonLd
+        data={webApplicationJsonLd({
+          name: "Economic Calendar",
+          description:
+            "Upcoming economic events, central bank decisions, NFP, CPI, and high-impact data releases that move forex and stock markets.",
+          url: "/tools/economic-calendar",
+        })}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
